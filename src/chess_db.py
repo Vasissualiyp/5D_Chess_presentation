@@ -17,7 +17,6 @@ class Chessboard_5D:
         """
         Add chessboard at time/multiverse location
         """
-        
 
 class Chessboard_2D:
     """
@@ -36,6 +35,7 @@ class Chessboard_2D:
         self.chessboard_size = n
 
         self.chessboard_tm_pos = chessboard_tm_pos
+        self.setup_chessboard_coords()
         self.pieces_dict = {0: "",
                             1: "kl", # Light King
                             2: "ql", # Light Queen
@@ -83,7 +83,7 @@ class Chessboard_2D:
         """
         Converts piece acronym to value, understandable by class
         """
-        for comparison_string,value in self.pieces_dict.items():
+        for value,comparison_string in self.pieces_dict.items():
             if comparison_string == string:
                 return value
         raise ValueError(f"{string} is not a valid piece.")
@@ -96,6 +96,7 @@ class Chessboard_2D:
         if len(pos) > 2:
             raise ValueError(f"Cannot have position string being more than 2 characters. Example: h8. Provided: {pos}")
         pos_let, pos_num = list(pos)
+        pos_num = int(pos_num)
 
         # Position of letter in English alphabet
         square_loc = ord(pos_let) - ord('a') + 1
@@ -115,6 +116,7 @@ class Chessboard_2D:
         if len(pos_arr) > 2:
             raise ValueError(f"Cannot have position array being more than 2 elements. Example: [2,1]. Provided: {pos_arr}")
         square_x, square_y = list(pos_arr)
+        square_x += 1
 
         # Position of letter in English alphabet
         if 1 <= square_x <= 26:
@@ -123,19 +125,19 @@ class Chessboard_2D:
             raise ValueError(f"x matrix position number must be in the range 1-26. Provided: {square_x}.")
         pos_num = square_y + 1
 
-        if ((square_x > n - 1) or (square_y > n - 1)):
+        if ((square_x > n) or (square_y > n - 1)):
             raise ValueError(f"Square {pos_arr} is outside of the chessbord of size {n}x{n}!")
 
-        return ''.join([pos_let, pos_num])
+        return ''.join([pos_let, str(pos_num)])
 
     def piece_err(self, piece):
         """
         Handle errors with piece names
         """
-        example_string = "Example: kd. Provided: {piece}"
+        example_string = f"Example: kd. Provided: {piece}"
         if len(piece) > 2:
             raise ValueError(f"Cannot have piece string being more than 2 characters. {example_string}")
-        if (piece[1] != 'l') or (piece[1] != 'd'):
+        if (piece[1] != "l") and (piece[1] != "d"):
             raise ValueError(f"Piece must be light or dark. {example_string}")
 
     def add_piece(self, piece, pos):
@@ -168,20 +170,20 @@ class Chessboard_2D:
         if piece_color == 'd':
             return ''.join([piece_name, 'l'])
 
-    def mirror_h(self, pos):
-        """
-        Mirrors the chess square position horizontally (i.e. h8 -> a8)
-        """
-        pos_arr = self.chessform_to_matrix(pos)
-        new_pos_arr = [ self.chessboard_size - pos_arr[0] - 1, pos_arr[1] ]
-        return self.matrix_to_chessform(new_pos_arr)
-
     def mirror_v(self, pos):
         """
         Mirrors the chess square position vertically (i.e. h8 -> h1)
         """
         pos_arr = self.chessform_to_matrix(pos)
         new_pos_arr = [ pos_arr[0], self.chessboard_size - pos_arr[1] - 1 ]
+        return self.matrix_to_chessform(new_pos_arr)
+
+    def mirror_h(self, pos):
+        """
+        Mirrors the chess square position horizontally (i.e. h8 -> a8)
+        """
+        pos_arr = self.chessform_to_matrix(pos)
+        new_pos_arr = [ self.chessboard_size - pos_arr[0] - 1, pos_arr[1] ]
         return self.matrix_to_chessform(new_pos_arr)
 
     def get_piece(self, pos):
@@ -199,6 +201,7 @@ class Chessboard_2D:
         """
         n = self.chessboard_size
 
+        print("Mirroring all the pieces...")
         for i in range(n):
             for j in range(n):
                 square = self.matrix_to_chessform([i,j])
@@ -208,4 +211,64 @@ class Chessboard_2D:
                     piece_mirror = self.light_to_dark_piece(piece)
                     if self.add_piece(piece_mirror, square_mirror):
                         exit(1)
+                if j > 3:
+                    break
 
+    def create_row_of_pieces(self, row_id, piece):
+        """
+        Creates a row of pieces of a single type
+
+        Args:
+            row_id (int): the ID of the row, 0 to n-1
+            piece (str): piece acronym
+        """
+        for i in range(self.chessboard_size):
+            square = self.matrix_to_chessform([i,row_id])
+            self.add_piece(piece, square)
+
+    def add_mirrored_pieces(self, piece, square):
+        """
+        Creates 2 pieces, one at a square noted, and another one at a horizontally mirrored square.
+        """
+        square_mirror = self.mirror_h(square)
+        self.add_piece(piece, square)
+        self.add_piece(piece, square_mirror)
+
+    def default_chess_configuration_setup(self):
+        """
+        Sets up the default 8x8 chessboard.
+        """
+        n = self.chessboard_size
+        if n != 8:
+            raise ValueError(f"Cannot create a default chessboard on a {n}x{n} board")
+
+        self.add_mirrored_pieces('rl', 'a1')
+        self.add_mirrored_pieces('nl', 'b1')
+        self.add_mirrored_pieces('bl', 'c1')
+        self.add_piece('ql','d1')
+        self.add_piece('kl','e1')
+        self.create_row_of_pieces(1,'pl')
+        self.mirror_all_pieces()
+
+    def print_chessboard(self):
+        """
+        Prints out the current chessboard state to the terminal
+        """
+        for i in range(8):
+            for j in range(8):
+                val = int(self.chessboard_matrix[j,self.chessboard_size - i - 1])
+                piece = chess.value_to_piece(val)
+                if val == 0:
+                    if ((i + j) % 2 == 0):
+                        piece = "▪"
+                    else:
+                        piece = "□"
+                val_str = piece.rjust(2)
+                print(val_str, end=" ")
+            print("")
+            print("")
+
+if __name__ == "__main__":
+    chess = Chessboard_2D()
+    chess.default_chess_configuration_setup()
+    chess.print_chessboard()
