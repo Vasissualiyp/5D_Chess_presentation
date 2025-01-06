@@ -1,4 +1,5 @@
 import numpy as np
+import string
 import manim
 
 class Chessboard_5D:
@@ -106,6 +107,36 @@ class Chessboard_2D:
 
         return [square_loc-1, pos_num-1]
 
+    def matrix_to_chessform(self, pos_arr):
+        """
+        Converts chess format of squre to matrix chessboard positional array
+        """
+        n = self.chessboard_size
+        if len(pos_arr) > 2:
+            raise ValueError(f"Cannot have position array being more than 2 elements. Example: [2,1]. Provided: {pos_arr}")
+        square_x, square_y = list(pos_arr)
+
+        # Position of letter in English alphabet
+        if 1 <= square_x <= 26:
+            pos_let = chr(square_x + ord('a') - 1)
+        else:
+            raise ValueError(f"x matrix position number must be in the range 1-26. Provided: {square_x}.")
+        pos_num = square_y + 1
+
+        if ((square_x > n - 1) or (square_y > n - 1)):
+            raise ValueError(f"Square {pos_arr} is outside of the chessbord of size {n}x{n}!")
+
+        return ''.join([pos_let, pos_num])
+
+    def piece_err(self, piece):
+        """
+        Handle errors with piece names
+        """
+        example_string = "Example: kd. Provided: {piece}"
+        if len(piece) > 2:
+            raise ValueError(f"Cannot have piece string being more than 2 characters. {example_string}")
+        if (piece[1] != 'l') or (piece[1] != 'd'):
+            raise ValueError(f"Piece must be light or dark. {example_string}")
 
     def add_piece(self, piece, pos):
         """
@@ -125,4 +156,56 @@ class Chessboard_2D:
             return 1
         else:
             self.chessboard_matrix[square_loc[0], square_loc[1]] = piece_val
+
+    def light_to_dark_piece(self, piece):
+        """
+        Converts light to dark piece and vice versa
+        """
+        self.piece_err(piece)
+        piece_name, piece_color = list(piece)
+        if piece_color == 'l':
+            return ''.join([piece_name, 'd'])
+        if piece_color == 'd':
+            return ''.join([piece_name, 'l'])
+
+    def mirror_h(self, pos):
+        """
+        Mirrors the chess square position horizontally (i.e. h8 -> a8)
+        """
+        pos_arr = self.chessform_to_matrix(pos)
+        new_pos_arr = [ self.chessboard_size - pos_arr[0] - 1, pos_arr[1] ]
+        return self.matrix_to_chessform(new_pos_arr)
+
+    def mirror_v(self, pos):
+        """
+        Mirrors the chess square position vertically (i.e. h8 -> h1)
+        """
+        pos_arr = self.chessform_to_matrix(pos)
+        new_pos_arr = [ pos_arr[0], self.chessboard_size - pos_arr[1] - 1 ]
+        return self.matrix_to_chessform(new_pos_arr)
+
+    def get_piece(self, pos):
+        """
+        Gets the name of the piece in the square, given in chess notation.
+        """
+
+        pos_arr = self.chessform_to_matrix(pos)
+        piece_value = self.chessboard_matrix[pos_arr[0], pos_arr[1]]
+        return self.value_to_piece(piece_value)
+
+    def mirror_all_pieces(self):
+        """
+        Mirrors all pices vertically and switches their color.
+        """
+        n = self.chessboard_size
+
+        for i in range(n):
+            for j in range(n):
+                square = self.matrix_to_chessform([i,j])
+                piece = self.get_piece(square)
+                if piece != "":
+                    square_mirror = self.mirror_v(square)
+                    piece_mirror = self.light_to_dark_piece(piece)
+                    if self.add_piece(piece_mirror, square_mirror):
+                        exit(1)
 
