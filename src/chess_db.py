@@ -202,6 +202,7 @@ class Chessboard_2D:
         n = self.chessboard_size
 
         print("Mirroring all the pieces...")
+        used_squares = []
         for i in range(n):
             for j in range(n):
                 square = self.matrix_to_chessform([i,j])
@@ -209,10 +210,10 @@ class Chessboard_2D:
                 if piece != "":
                     square_mirror = self.mirror_v(square)
                     piece_mirror = self.light_to_dark_piece(piece)
-                    if self.add_piece(piece_mirror, square_mirror):
-                        exit(1)
-                if j > 3:
-                    break
+                    if square_mirror not in used_squares:
+                        if self.add_piece(piece_mirror, square_mirror):
+                            exit(1)
+                    used_squares.append(square)
 
     def create_row_of_pieces(self, row_id, piece):
         """
