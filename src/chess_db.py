@@ -251,23 +251,53 @@ class Chessboard_2D:
         self.create_row_of_pieces(1,'pl')
         self.mirror_all_pieces()
 
-    def print_chessboard(self):
+    def print_chessboard(self, style="regular"):
         """
         Prints out the current chessboard state to the terminal
+
+        Args:
+            style (str): style of the board. Values are: regular (d), full, none
         """
-        for i in range(8):
-            for j in range(8):
+        n = self.chessboard_size
+        black_square = "  "
+        if style == "regular":
+            white_square = "░░"
+        elif style == "full":
+            white_square = "██"
+        else:
+            white_square = "  "
+        # First line
+        print("┌",end="")
+        for i in range(n-1):
+            print("──┬",end="")
+        print("──┐")
+        for i in range(n):
+            print("│",end="")
+            if i == 7:
+                leftsymb = "└"
+                rightsymb = "┘"
+                centsymb = "┴"
+            else:
+                leftsymb = "├"
+                rightsymb = "┤"
+                centsymb = "┼"
+            for j in range(n):
                 val = int(self.chessboard_matrix[j,self.chessboard_size - i - 1])
                 piece = chess.value_to_piece(val)
                 if val == 0:
                     if ((i + j) % 2 == 0):
-                        piece = "▪"
+                        piece = white_square
                     else:
-                        piece = "□"
+                        piece = black_square
                 val_str = piece.rjust(2)
-                print(val_str, end=" ")
+                print(val_str, end="│")
             print("")
+            print(leftsymb,end="")
+            for j in range(n-1):
+                print("──"+centsymb,end="")
+            print("──"+rightsymb,end="")
             print("")
+
 
 if __name__ == "__main__":
     chess = Chessboard_2D()
