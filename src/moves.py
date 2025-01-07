@@ -1,6 +1,6 @@
 import numpy as np
 import itertools
-from chess_db_2d import Chessboard_2D
+from chess_db_2d import Chessboard_2D, ChessUtils_2D
 from chess_db_5d import Chessboard_5D
 
 class Moves():
@@ -13,8 +13,7 @@ class Moves():
         self.tri =  self.generate_perms_with_signs([1, 1, 1, 0])
         self.quad = self.generate_perms_with_signs([1, 1, 1, 1])
         self.knight = self.generate_perms_with_signs([2, 1, 0, 0])
-
-        self.moveset = {
+        self.dr = {
             "r": self.orth, # rook
             "b": self.diag, # bishop
             "u": self.tri,  # unicorn
@@ -26,6 +25,8 @@ class Moves():
             "p": [], # pawn has special moves
             "B": [], # brawn has special moves
         }
+
+        self.utils2d = ChessUtils_2D()
 
     def generate_perms(self, array) -> list:
         """
@@ -53,9 +54,17 @@ class Moves():
         """
 
         x,y,t,m = vec
-        utils = Chessboard_2D()
-        square = utils.matrix_to_chessform([x,y])
+        square = self.utils2d.matrix_to_chessform([x,y])
         return [square, t, m]
+
+    def convert_3list_to_4d_vec(self, list3):
+        """
+        Converts a 3-element list representation to a 4d vector (i.e. ['b3',4,5]->[1,2,4,5]) 
+        """
+
+        square,t,m = list3
+        square_mx = self.utils2d.chessform_to_matrix(square)
+        return [square_mx[0], square_mx[1], t, m]
 
     def get_dr(self, piece_type):
         """
@@ -67,7 +76,7 @@ class Moves():
         Returns:
             list: Moveset for the piece.
         """
-        return self.moveset.get(piece_type, [])
+        return self.dr.get(piece_type, [])
 
     def get_all_movable_spaces(self, check_if_move_possible, piece, pos):
         """
@@ -76,12 +85,26 @@ class Moves():
         Args:
             check_if_move_possible (func): Function that checks if performing a move is possible
             piece (str): name of the piece to be moved
-            pos (list): 3-list that gives a position of the piece to be moved
+            pos (list): 3-list that contains a position of the piece to be moved
 
         Returns:
             moves_list (list): list of 3-lists of all possible moves
         """
         moves_list = []
+        self.utils2d.piece_err(piece)
+        piece_type, piece_color = list(piece)
+        list_dr = self.get_dr(piece_type)
+        pos_4d = self.convert_3list_to_4d_vec(pos)
 
+        for base_dr in list_dr:
+            empty = 2 # This variable tracks if one can move to a next tile in line
+            prev_pos = pos_4d # Start counting from the piece itself
+            while empty==2:
+                new_pos = prev_pos + base_dr
+                new_pos = self.convert_4d_vec_to_3list(new_pos)
+                move_possible = check_if_move_possible(new_pos, piece_color)
+                if move_possible: # 1 to eat enemy piece, 2 for moving through
+                    moves_list.append(new_pos)
+                empty = move_possible # Would stop if enemy piece can be eaten
         return moves_list
 

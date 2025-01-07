@@ -239,7 +239,7 @@ class Chessboard_5D:
         """
         assert kind in ["l", "d"], f"A piece can only be light or dark, you have provided {kind}"
         target_piece = self.get_piece(pos)
-        if target_piece == "NaN": # Cannot move onto a board that doesn't exits
+        if target_piece == "NaN": # Cannot move onto a board that doesn't exist
             return 0
         elif target_piece == "": # Can move through empty spaces
             return 2
