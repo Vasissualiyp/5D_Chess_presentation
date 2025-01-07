@@ -143,7 +143,7 @@ class Chessboard_2D:
         else:
             self.chessboard_matrix[square_loc[0], square_loc[1]] = piece_val
 
-    def move_piece(self, pos1, pos2):
+    def move_piece(self, pos1, pos2, eat_pieces=False):
         """
         Moves a piece from pos1 to pos2 in chess notation.
         """
@@ -153,7 +153,7 @@ class Chessboard_2D:
         if target != "":
             print(f"{piece} at {pos1} eats {target} at {pos2}")
             self.add_piece("", pos2) # Remove the target piece
-        self.add_piece(piece, pos2)
+        self.add_piece(piece, pos2, eat_pieces=eat_pieces)
 
 
     def light_to_dark_piece(self, piece):

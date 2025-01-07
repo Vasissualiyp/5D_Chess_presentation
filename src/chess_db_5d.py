@@ -20,6 +20,36 @@ class Chessboard_5D:
         # 1 for 1st turn to white, 0 for 1st turn to black. Important for multiverse creation directions
         self.first_turn_white = 1
 
+    def default_chess_configuration_setup(self):
+        """
+        Sets up the default 8x8 chessboard.
+        """
+        base_chessboard = Chessboard_2D()
+        base_chessboard.default_chess_configuration_setup()
+        self.chessboards.append(base_chessboard)
+        self.timemult_coords.append([0,0])
+    
+    def print_chessboard(self, chessboard_loc, style="regular"):
+        """
+        Outputs the board state into the terminal based on its time-multiverse position
+        """
+        id = self.get_chessboard_by_tm(chessboard_loc)
+        if id != -1:
+            chessboard = self.chessboards[id]
+            chessboard.print_chessboard(style=style)
+        else:
+            print(f"Couldn't find chessboard at {chessboard_loc}")
+
+    def get_chessboard_by_tm(self, chessboard_loc):
+        """
+        Get the chessboard id by its time-multiverse coordinate.
+        Returns -1 if not present.
+        """
+        for i, element in enumerate(self.timemult_coords):
+            if (element == chessboard_loc):
+                return i
+        return -1
+
     def add_chessboard(self, chessboard_loc, origin_board):
         """
         Add chessboard at time/multiverse location
@@ -91,7 +121,6 @@ class Chessboard_5D:
 
         square1, time1, mult1 = original_pos
         square2, time2, mult2 = final_pos
-        maxmult2 = self.get_max_time_from_multi(mult2)
 
         if (time1 == time2) and (mult1 == mult2): # Normal move - advances timeline if no future boards exist
             self.move_with_evolution(original_pos, square2)
@@ -122,8 +151,6 @@ class Chessboard_5D:
             original_pos (list): original position, i.e. ['a1', 2, 3]
             final_pos (list): final position (before multiverse branching/time moving forward), i.e. ['a1', 2, 3]
         """
-        square1, time1, mult1 = original_pos
-        square2, time2, mult2 = final_pos
         # Evolve original board - remove the piece
         piece = self.move_with_evolution_remove_piece(original_pos)
         # Evolve target board - add the piece
@@ -147,7 +174,6 @@ class Chessboard_5D:
         target_chessboard.add_piece("", square1, eat_pieces=True)
         self.chessboards[-1] = target_chessboard
         return piece
-
 
     def move_with_evolution_add_piece(self, final_pos, piece):
         """
@@ -181,6 +207,15 @@ class Chessboard_5D:
             raise ValueError(f"3rd entry of {list_name} should be an integer. You have: {type(list_5d[2])}")
 
 if __name__ == "__main__":
-    chess = Chessboard_2D()
+    #chess = Chessboard_2D()
+    #chess.default_chess_configuration_setup()
+    #chess.print_chessboard()
+    chess = Chessboard_5D()
     chess.default_chess_configuration_setup()
-    chess.print_chessboard()
+    chess.movie_piece(['e2', 0, 0], ['e4', 0, 0])
+    chess.movie_piece(['e7', 1, 0], ['e5', 0, 0])
+    chess.print_chessboard([0,0])
+    chess.print_chessboard([1,0])
+    chess.print_chessboard([2,0])
+    chess.print_chessboard([1,-1])
+    chess.print_chessboard([1,1])
