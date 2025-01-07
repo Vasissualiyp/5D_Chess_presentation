@@ -50,12 +50,14 @@ class Chessboard_5D:
         else:
             print(f"Couldn't find chessboard at {chessboard_loc}")
 
-    def get_chessboard_by_tm(self, chessboard_loc):
+    def get_chessboard_by_tm(self, chessboard_loc, log=False):
         """
         Get the chessboard id by its time-multiverse coordinate.
         Returns -1 if not present.
         """
+        if log: print(chessboard_loc)
         for i, element in enumerate(self.timemult_coords):
+            if log: print(element)
             if (element == chessboard_loc):
                 return i
         return -1
@@ -281,6 +283,7 @@ class ChessTests():
     """Various tests for 2D/5D chessboard"""
     def __init__(self):
         self.chess2 = Chessboard_2D()
+        self.chess2utils = ChessUtils_2D()
         self.chess5 = Chessboard_5D()
         self.moves = Moves()
 
@@ -306,6 +309,9 @@ class ChessTests():
         """
         n = 1 # How many chessboards to add in positive direction - total is 2n+1
         pos = ['d5', 2*n, 0] # position of the piece
+        pawns_row_chessboard = [ pos[1], pos[2] ]
+        pawns_row_square = pos[0]
+        pawns_row_increment = 1
         _, piece_color = list(piece)
         piece_to_add = "M" + piece_color
         for i in range(-n, n+1):
@@ -313,10 +319,20 @@ class ChessTests():
                 self.chess5.add_empty_chessboard([j,i])
                 print([j,i])
         self.chess5.add_piece(piece, pos)
+        if pawns_row:
+            pawn = self.chess2utils.light_to_dark_piece("p" + piece_color)
+            if piece_color == 'd':
+                pawns_row_increment = -pawns_row_increment
+            row_loc = self.chess2utils.chessform_to_matrix(pawns_row_square)
+            row_id = row_loc[0] + pawns_row_increment + 1
+            target_id = self.chess5.get_chessboard_by_tm(pawns_row_chessboard)
+            print(pawns_row_chessboard)
+            target_chessboard = self.chess5.chessboards[target_id]
+            target_chessboard.create_row_of_pieces(row_id, pawn)
         possible_moves = self.moves.get_all_movable_spaces(self.chess5.check_if_move_possible, piece, pos, log=log)
         for move in possible_moves:
             if log: print(f"Looking at move {move}...")
-            self.chess5.add_piece(piece_to_add, move)
+            self.chess5.add_piece(piece_to_add, move, eat_pieces=True)
         for t in range(0, 2*n + 1):
             self.chess5.print_chessboard([t, -1])
             self.chess5.print_chessboard([t, 0])
@@ -331,4 +347,5 @@ class ChessTests():
 
 if __name__ == "__main__":
     tests = ChessTests()
-    tests.test_movement('kd')
+    log = False
+    tests.test_movement('pd', pawns_row=True, log=log)
