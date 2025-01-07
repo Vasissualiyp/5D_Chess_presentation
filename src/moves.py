@@ -107,6 +107,7 @@ class Moves():
                 move_possible = check_if_move_possible(new_pos, piece_color)
                 if move_possible: # 1 to eat enemy piece, 2 for moving through
                     moves_list.append(new_pos)
+                    if log: print("Attaching this move...")
                 empty = move_possible # Would stop if enemy piece can be eaten
                 prev_pos=self.convert_3list_to_4d_vec(new_pos)
         return moves_list

@@ -299,7 +299,7 @@ class ChessTests():
         self.chess5.print_chessboard([1,1])
         exit(0)
     
-    def test_movement(self, piece, pawns_row=False):
+    def test_movement(self, piece, pawns_row=False, log=False):
         """
         Create empty boards and see if the piece is moving properly.
         Has an option to add a pawn row to check if eating pieces works.
@@ -311,8 +311,9 @@ class ChessTests():
                 self.chess5.add_empty_chessboard([j,i])
                 print([j,i])
         self.chess5.add_piece(piece, pos)
-        possible_moves = self.moves.get_all_movable_spaces(self.chess5.check_if_move_possible, piece, pos)
+        possible_moves = self.moves.get_all_movable_spaces(self.chess5.check_if_move_possible, piece, pos, log=log)
         for move in possible_moves:
+            print(f"Looking at move {move}...")
             self.chess5.add_piece('pl',move)
         for t in range(0, 2*n + 1):
             self.chess5.print_chessboard([t, -1])
@@ -328,4 +329,4 @@ class ChessTests():
 
 if __name__ == "__main__":
     tests = ChessTests()
-    tests.test_movement('rd')
+    tests.test_movement('rd', log=True)

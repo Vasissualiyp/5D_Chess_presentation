@@ -238,7 +238,7 @@ class ChessUtils_2D():
             return 'a0'
         pos_num = square_y + 1
 
-        if ((square_x > n) or (square_y > n - 1)):
+        if ((square_x > n) or (square_y > n - 1) or (square_x < 0) or (square_y < 0)):
             return 'a0'
 
         return ''.join([pos_let, str(pos_num)])
@@ -257,7 +257,7 @@ class ChessUtils_2D():
         # Position of letter in English alphabet
         square_loc = ord(pos_let) - ord('a') + 1
 
-        if square_loc > 26:
+        if (square_loc > 26) or (square_loc < 1):
             return [-1, -1]
         if ((pos_num > n) or (square_loc > n)):
             return [-1, -1]
