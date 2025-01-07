@@ -21,6 +21,8 @@ class Moves():
             "P": self.orth + self.diag, # princess
             "q": self.orth + self.diag + self.tri + self.quad, # queen
             "k": self.orth + self.diag + self.tri + self.quad, # king
+            "R": self.orth + self.diag + self.tri + self.quad, # royal queen
+            "c": self.orth + self.diag + self.tri + self.quad, # common king
             "p": [], # pawn has special moves
             "B": [], # brawn has special moves
         }
@@ -89,25 +91,91 @@ class Moves():
         Returns:
             moves_list (list): list of 3-lists of all possible moves
         """
-        moves_list = []
         self.utils2d.piece_err(piece)
         piece_type, piece_color = list(piece)
         list_dr = self.get_dr(piece_type)
         pos_4d = self.convert_3list_to_4d_vec(pos)
 
+        if piece_type in ['k', 'c']: # Set of moves for king-like pieces (one-space move)
+            return self.get_all_single_moves(check_if_move_possible, piece_color, 
+                                             list_dr, pos_4d, log)
+        elif piece_type in ['n']: # Set of moves for knight-like pieces (jump over)
+            return self.get_all_single_moves(check_if_move_possible, piece_color, 
+                                             list_dr, pos_4d, log)
+        elif piece_type in ['p', 'B']: # Set of moves for pawn-like pieces (special)
+            return []
+        else: # Set of moves for pieces that move in a line, i.e. all other pieces
+            return self.get_all_linear_moves(check_if_move_possible, piece_color, 
+                                             list_dr, pos_4d, log)
+
+    def get_all_linear_moves(self, check_if_move_possible, piece_color, list_dr, pos_4d, log):
+        """
+        Obtains movable spaces for pieces that move in straight lines (rooks, queens, bishops, etc.)
+
+        Args:
+            check_if_move_possible (func): Function that checks if performing a move is possible
+            piece_color (str): color of the piece to be moved
+            list_dr (list): list of dr base vectors for a given piece
+            pos_4d (array): a 4d vector that gives the position of the piece to be moved
+            log (bool): whether to output log into the terminal
+
+        Returns:
+            moves_list (list): list of 3-lists of all possible moves
+        """
+        moves_list = []
         for base_dr in list_dr:
             empty = 2 # This variable tracks if one can move to a next tile in line
             prev_pos = pos_4d # Start counting from the piece itself
             while empty==2:
-                if log: print(prev_pos, base_dr)
-                new_pos = [0,0,0,0]
-                for i in range(len(base_dr)):
-                    new_pos[i] = int(prev_pos[i]) + int(base_dr[i])
-                new_pos = self.convert_4d_vec_to_3list(new_pos)
-                move_possible = check_if_move_possible(new_pos, piece_color)
-                if move_possible: # 1 to eat enemy piece, 2 for moving through
-                    moves_list.append(new_pos)
-                    if log: print("Attaching this move...")
-                empty = move_possible # Would stop if enemy piece can be eaten
-                prev_pos=self.convert_3list_to_4d_vec(new_pos)
+                empty, prev_pos = self.test_single_tile(check_if_move_possible, prev_pos, base_dr, 
+                                                        piece_color, moves_list, log)
         return moves_list
+
+    def get_all_single_moves(self, check_if_move_possible, piece_color, list_dr, pos_4d, log):
+        """
+        Obtains movable spaces for pieces that move in straight lines (rooks, queens, bishops, etc.)
+
+        Args:
+            check_if_move_possible (func): Function that checks if performing a move is possible
+            piece_color (str): color of the piece to be moved
+            list_dr (list): list of dr base vectors for a given piece
+            pos_4d (array): a 4d vector that gives the position of the piece to be moved
+            log (bool): whether to output log into the terminal
+
+        Returns:
+            moves_list (list): list of 3-lists of all possible moves
+        """
+        moves_list = []
+        for base_dr in list_dr:
+            prev_pos = pos_4d # Start counting from the piece itself
+            _, prev_pos = self.test_single_tile(check_if_move_possible, prev_pos, base_dr, 
+                                                piece_color, moves_list, log)
+        return moves_list
+
+    def test_single_tile(self, check_if_move_possible, prev_pos, base_dr, piece_color, moves_list, log=False):
+        """
+        Args:
+            check_if_move_possible (func): Function that checks if performing a move is possible
+            prev_pos (array): previous position in a line, or starting position if not in a line
+            base_dr (tuple): 4-element tuple, which contains the next step for tile position increment
+            piece_color (str): color of the piece to be moved
+            moves_list (list): list of moves found up to this point
+
+        Returns:
+            move_possible (int): whether the move is possible. Values:
+                0 if impossible
+                1 if possible with eating a piece
+                2 if possible without eating a piece
+            prev_pos (array): modified prev_pos value
+        """
+        if log: print(prev_pos, base_dr)
+        new_pos = [0,0,0,0]
+        for i in range(len(base_dr)):
+            new_pos[i] = int(prev_pos[i]) + int(base_dr[i])
+        new_pos = self.convert_4d_vec_to_3list(new_pos)
+        move_possible = check_if_move_possible(new_pos, piece_color)
+        if move_possible: # 1 to eat enemy piece, 2 for moving through
+            moves_list.append(new_pos)
+            if log: print("Attaching this move...")
+        prev_pos=self.convert_3list_to_4d_vec(new_pos)
+        return move_possible, prev_pos
