@@ -1,5 +1,5 @@
 import numpy as np
-from chess_db_2d import Chessboard_2D
+from chess_db_2d import Chessboard_2D, ChessUtils_2D
 import string, manim, copy
 
 class Chessboard_5D:
@@ -65,6 +65,23 @@ class Chessboard_5D:
             self.timemult_coords.append(chessboard_loc)
         else:
             raise ValueError(f"Could not add a chessboard at tm coordinate of {chessboard_loc}: the space is occupied")
+
+    def get_piece(self, pos):
+        """
+        Get piece at given position
+
+        Args:
+            pos (list): 3-list of target space
+
+        Returns:
+            piece (str): piece name acronym or NaN if board doesn't exist
+        """
+        self.movement_list_5d_err(pos, list_name="pos")
+        square, time, mult = pos
+        id = self.get_chessboard_by_tm([time, mult])
+        if id == -1: return "NaN" # Handling a case of non-existent board
+        chessboard = self.chessboards[id]
+        return chessboard.get_piece(square)
 
     def evolve_chessboard(self, chessboard_loc):
         """
@@ -205,6 +222,33 @@ class Chessboard_5D:
             raise ValueError(f"2nd entry of {list_name} should be an integer. You have: {type(list_5d[1])}")
         if type(list_5d[2]) != int:
             raise ValueError(f"3rd entry of {list_name} should be an integer. You have: {type(list_5d[2])}")
+
+    def check_if_move_possible(self, pos, kind):
+        """
+        Checks if movement to specified position is possible
+
+        Args:
+            pos (list): 3-list of target space
+            kind (str): wether the piece we're moving is light or dark
+
+        Returns:
+            int: 
+                0 if impossible
+                1 if possible with eating a piece
+                2 if possible without eating a piece
+        """
+        assert kind in ["l", "d"], f"A piece can only be light or dark, you have provided {kind}"
+        target_piece = self.get_piece(pos)
+        if target_piece == "NaN": # Cannot move onto a board that doesn't exits
+            return 0
+        elif target_piece == "": # Can move through empty spaces
+            return 2
+        _, target_color = list(target_piece)
+        if target_color == kind: # Cannot eat own pieces
+            return 0
+        else: # Can eat enemy pieces
+            return 1
+
 
 if __name__ == "__main__":
     #chess = Chessboard_2D()
