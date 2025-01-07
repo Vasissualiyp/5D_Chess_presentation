@@ -17,8 +17,8 @@ class Chessboard_5D:
         self.max_mult_black = 0
         self.max_mult_white = 0
 
-        # 1 for 1st turn to white, 0 for 1st turn to black. Important for multiverse creation directions
-        self.first_turn_white = 1
+        # 0 for 1st turn to white, 1 for 1st turn to black. Important for multiverse creation directions
+        self.first_turn_black = 0
 
     def default_chess_configuration_setup(self):
         """
@@ -86,7 +86,7 @@ class Chessboard_5D:
         if max(timeline_times) == chessboard_loc[0]: # Time evolution only
             chessboard_loc = [ chessboard_loc[0] + 1, chessboard_loc[1] ]
         else: # Multiverse creation
-            is_white = (chessboard_loc[0] + chessboard_loc[1] + self.first_turn_white) % 2
+            is_white = (chessboard_loc[0] + chessboard_loc[1] + self.first_turn_black) % 2
             if is_white: # 1st turn is white
                 new_mult = self.max_mult_white + 1
             else: # 1st turn is black
