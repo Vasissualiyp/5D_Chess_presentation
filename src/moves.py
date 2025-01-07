@@ -1,7 +1,6 @@
 import numpy as np
 import itertools
-from chess_db_2d import Chessboard_2D, ChessUtils_2D
-from chess_db_5d import Chessboard_5D
+from chess_db_2d import ChessUtils_2D
 
 class Moves():
     """Class containing moves of all chess pieces"""
@@ -28,15 +27,14 @@ class Moves():
 
         self.utils2d = ChessUtils_2D()
 
-    def generate_perms(self, array) -> list:
+    def generate_perms(self, array):
         """
         Generates a list of all possible permutations of an array
         """
         permutations = list(itertools.permutations(array))
         unique_permutations = list(set(permutations))
-        return unique_permutations.sort()
+        return sorted(unique_permutations)  # Return the sorted list
     
-
     def generate_perms_with_signs(self, array) -> list:
         """
         Generates a list of all possible permutations of an array with sign variations
@@ -78,7 +76,7 @@ class Moves():
         """
         return self.dr.get(piece_type, [])
 
-    def get_all_movable_spaces(self, check_if_move_possible, piece, pos):
+    def get_all_movable_spaces(self, check_if_move_possible, piece, pos, log=False):
         """
         Gets a list of all spaces, where a piece can move to
 
@@ -86,6 +84,7 @@ class Moves():
             check_if_move_possible (func): Function that checks if performing a move is possible
             piece (str): name of the piece to be moved
             pos (list): 3-list that contains a position of the piece to be moved
+            log (bool): whether to output log into the terminal
 
         Returns:
             moves_list (list): list of 3-lists of all possible moves
@@ -100,11 +99,14 @@ class Moves():
             empty = 2 # This variable tracks if one can move to a next tile in line
             prev_pos = pos_4d # Start counting from the piece itself
             while empty==2:
-                new_pos = prev_pos + base_dr
+                if log: print(prev_pos, base_dr)
+                new_pos = [0,0,0,0]
+                for i in range(len(base_dr)):
+                    new_pos[i] = int(prev_pos[i]) + int(base_dr[i])
                 new_pos = self.convert_4d_vec_to_3list(new_pos)
                 move_possible = check_if_move_possible(new_pos, piece_color)
                 if move_possible: # 1 to eat enemy piece, 2 for moving through
                     moves_list.append(new_pos)
                 empty = move_possible # Would stop if enemy piece can be eaten
+                prev_pos=self.convert_3list_to_4d_vec(new_pos)
         return moves_list
-

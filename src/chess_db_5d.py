@@ -1,5 +1,6 @@
 import numpy as np
 from chess_db_2d import Chessboard_2D, ChessUtils_2D
+from moves import Moves
 import string, manim, copy
 
 class Chessboard_5D:
@@ -263,6 +264,8 @@ class Chessboard_5D:
                 2 if possible without eating a piece
         """
         assert kind in ["l", "d"], f"A piece can only be light or dark, you have provided {kind}"
+        if pos[0] == "a0": # Cannot move outside of the board
+            return 0
         target_piece = self.get_piece(pos)
         if target_piece == "NaN": # Cannot move onto a board that doesn't exist
             return 0
@@ -279,6 +282,7 @@ class ChessTests():
     def __init__(self):
         self.chess2 = Chessboard_2D()
         self.chess5 = Chessboard_5D()
+        self.moves = Moves()
 
     def pawn_jumping_multiverse(self):
         """
@@ -301,13 +305,19 @@ class ChessTests():
         Has an option to add a pawn row to check if eating pieces works.
         """
         n = 1 # How many chessboards to add in positive direction - total is 2n+1
+        pos = ['d5', 2*n, 0] # position of the piece
         for i in range(-n, n+1):
             for j in range(2*n+1):
                 self.chess5.add_empty_chessboard([j,i])
                 print([j,i])
-        self.chess5.add_piece(piece, ['d5', 2*n, 0])
-        self.chess5.print_chessboard([2*n, 0])
-
+        self.chess5.add_piece(piece, pos)
+        possible_moves = self.moves.get_all_movable_spaces(self.chess5.check_if_move_possible, piece, pos)
+        for move in possible_moves:
+            self.chess5.add_piece('pl',move)
+        for t in range(0, 2*n + 1):
+            self.chess5.print_chessboard([t, -1])
+            self.chess5.print_chessboard([t, 0])
+            self.chess5.print_chessboard([t, 1])
 
     def chessboard2d(self):
         """
@@ -318,4 +328,4 @@ class ChessTests():
 
 if __name__ == "__main__":
     tests = ChessTests()
-    tests.test_movement('qd')
+    tests.test_movement('rd')

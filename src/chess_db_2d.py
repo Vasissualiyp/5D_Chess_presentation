@@ -222,11 +222,12 @@ class ChessUtils_2D():
 
     def matrix_to_chessform(self, pos_arr, chessboard_size=8):
         """
-        Converts chess format of squre to matrix chessboard positional array
+        Converts chess format of squre to matrix chessboard positional array.
+        Returns a0 if outside of the chessboard.
         """
         n = chessboard_size
         if len(pos_arr) > 2:
-            raise ValueError(f"Cannot have position array being more than 2 elements. Example: [2,1]. Provided: {pos_arr}")
+            return 'a0'
         square_x, square_y = list(pos_arr)
         square_x += 1
 
@@ -234,21 +235,22 @@ class ChessUtils_2D():
         if 1 <= square_x <= 26:
             pos_let = chr(square_x + ord('a') - 1)
         else:
-            raise ValueError(f"x matrix position number must be in the range 1-26. Provided: {square_x}.")
+            return 'a0'
         pos_num = square_y + 1
 
         if ((square_x > n) or (square_y > n - 1)):
-            raise ValueError(f"Square {pos_arr} is outside of the chessbord of size {n}x{n}!")
+            return 'a0'
 
         return ''.join([pos_let, str(pos_num)])
 
     def chessform_to_matrix(self, pos, chessboard_size=8):
         """
-        Converts chess format of squre to matrix chessboard positional array
+        Converts chess format of squre to matrix chessboard positional array.
+        Returns [-1, -1] if outside of the chessboard.
         """
         n = chessboard_size
         if len(pos) > 2:
-            raise ValueError(f"Cannot have position string being more than 2 characters. Example: h8. Provided: {pos}")
+            return [-1, -1]
         pos_let, pos_num = list(pos)
         pos_num = int(pos_num)
 
@@ -256,9 +258,9 @@ class ChessUtils_2D():
         square_loc = ord(pos_let) - ord('a') + 1
 
         if square_loc > 26:
-            raise ValueError("More chessboard rows than letters of Latin alphabet!")
+            return [-1, -1]
         if ((pos_num > n) or (square_loc > n)):
-            raise ValueError(f"Square {pos} is outside of the chessbord of size {n}x{n}!")
+            return [-1, -1]
 
         return [square_loc-1, pos_num-1]
 
