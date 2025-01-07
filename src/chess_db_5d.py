@@ -306,6 +306,8 @@ class ChessTests():
         """
         n = 1 # How many chessboards to add in positive direction - total is 2n+1
         pos = ['d5', 2*n, 0] # position of the piece
+        _, piece_color = list(piece)
+        piece_to_add = "M" + piece_color
         for i in range(-n, n+1):
             for j in range(2*n+1):
                 self.chess5.add_empty_chessboard([j,i])
@@ -314,7 +316,7 @@ class ChessTests():
         possible_moves = self.moves.get_all_movable_spaces(self.chess5.check_if_move_possible, piece, pos, log=log)
         for move in possible_moves:
             print(f"Looking at move {move}...")
-            self.chess5.add_piece('pl',move)
+            self.chess5.add_piece(piece_to_add, move)
         for t in range(0, 2*n + 1):
             self.chess5.print_chessboard([t, -1])
             self.chess5.print_chessboard([t, 0])
@@ -329,4 +331,4 @@ class ChessTests():
 
 if __name__ == "__main__":
     tests = ChessTests()
-    tests.test_movement('rd', log=True)
+    tests.test_movement('qd', log=True)

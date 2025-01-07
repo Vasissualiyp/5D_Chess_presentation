@@ -149,12 +149,16 @@ class Chessboard_2D:
         """
         n = self.chessboard_size
         black_square = "  "
+        move_symb_black = " □"
         if style == "regular":
             white_square = "░░"
+            move_symb_white = "░▣"
         elif style == "full":
             white_square = "██"
+            move_symb_white = "█▣"
         else:
             white_square = "  "
+            move_symb_white = "  "
         # First line
         print("┌",end="")
         for i in range(n-1):
@@ -178,6 +182,11 @@ class Chessboard_2D:
                         piece = white_square
                     else:
                         piece = black_square
+                if val > 60:
+                    if ((i + j) % 2 == 0):
+                        piece = move_symb_white
+                    else:
+                        piece = move_symb_black
                 val_str = piece.rjust(2)
                 print(val_str, end="│")
             print("")
@@ -194,6 +203,7 @@ class ChessUtils_2D():
         pass
 
         self.pieces_dict = {0: "",
+                            # ----------------------
                             1: "kl", # Light King
                             2: "ql", # Light Queen
                             3: "bl", # Light Bishop
@@ -206,6 +216,7 @@ class ChessUtils_2D():
                             10:"Pl", # Light Princess
                             11:"cl", # Light Common King
                             12:"Rl", # Light Royal Queen
+                            # ----------------------
                             21:"kd", # Dark King
                             22:"qd", # Dark Queen
                             23:"bd", # Dark Bishop
@@ -218,6 +229,9 @@ class ChessUtils_2D():
                             30:"Pd", # Dark Princess
                             31:"cd", # Dark Common King
                             32:"Rd", # Dark Royal Queen
+                            # ----------------------
+                            60:"Ml", # Movement allowed light
+                            61:"Md", # Movement allowed dark
                            }
 
     def matrix_to_chessform(self, pos_arr, chessboard_size=8):
@@ -300,4 +314,3 @@ class ChessUtils_2D():
             if comparison_string == string:
                 return value
         raise ValueError(f"{string} is not a valid piece.")
-
