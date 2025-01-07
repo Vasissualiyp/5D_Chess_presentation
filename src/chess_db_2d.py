@@ -16,35 +16,10 @@ class Chessboard_2D:
             raise ValueError("More chessboard rows than letters of Latin alphabet!")
         self.chessboard_size = n
         self.origin = origin
+        self.utils = ChessUtils_2D()
 
         self.chessboard_tm_pos = chessboard_tm_pos
         self.setup_chessboard_coords()
-        self.pieces_dict = {0: "",
-                            1: "kl", # Light King
-                            2: "ql", # Light Queen
-                            3: "bl", # Light Bishop
-                            4: "nl", # Light Knight
-                            5: "rl", # Light Rook
-                            6: "pl", # Light Pawn
-                            7: "dl", # Light Dragon
-                            8: "ul", # Light Unicorn
-                            9: "Bl", # Light Brawn
-                            10:"Pl", # Light Princess
-                            11:"cl", # Light Common King
-                            12:"Rl", # Light Royal Queen
-                            21:"kd", # Dark King
-                            22:"qd", # Dark Queen
-                            23:"bd", # Dark Bishop
-                            24:"nd", # Dark Knight
-                            25:"rd", # Dark Rook
-                            26:"pd", # Dark Pawn
-                            27:"dd", # Dark Dragon
-                            28:"ud", # Dark Unicorn
-                            29:"Bd", # Dark Brawn
-                            30:"Pd", # Dark Princess
-                            31:"cd", # Dark Common King
-                            32:"Rd", # Dark Royal Queen
-                           }
 
     def setup_chessboard_coords(self):
         """
@@ -52,76 +27,6 @@ class Chessboard_2D:
         """
         n = self.chessboard_size
         self.chessboard_matrix = np.zeros([n, n])
-
-    def value_to_piece(self, value):
-        """
-        Converts value, understandable by class, to piece acronym
-        """
-        try:
-            return self.pieces_dict[value]
-        except KeyError:
-            raise ValueError(f"Value '{value}' does not correspond to a valid piece.")
-
-    def piece_to_value(self, string):
-        """
-        Converts piece acronym to value, understandable by class
-        """
-        for value,comparison_string in self.pieces_dict.items():
-            if comparison_string == string:
-                return value
-        raise ValueError(f"{string} is not a valid piece.")
-
-    def chessform_to_matrix(self, pos):
-        """
-        Converts chess format of squre to matrix chessboard positional array
-        """
-        n = self.chessboard_size
-        if len(pos) > 2:
-            raise ValueError(f"Cannot have position string being more than 2 characters. Example: h8. Provided: {pos}")
-        pos_let, pos_num = list(pos)
-        pos_num = int(pos_num)
-
-        # Position of letter in English alphabet
-        square_loc = ord(pos_let) - ord('a') + 1
-
-        if square_loc > 26:
-            raise ValueError("More chessboard rows than letters of Latin alphabet!")
-        if ((pos_num > n) or (square_loc > n)):
-            raise ValueError(f"Square {pos} is outside of the chessbord of size {n}x{n}!")
-
-        return [square_loc-1, pos_num-1]
-
-    def matrix_to_chessform(self, pos_arr):
-        """
-        Converts chess format of squre to matrix chessboard positional array
-        """
-        n = self.chessboard_size
-        if len(pos_arr) > 2:
-            raise ValueError(f"Cannot have position array being more than 2 elements. Example: [2,1]. Provided: {pos_arr}")
-        square_x, square_y = list(pos_arr)
-        square_x += 1
-
-        # Position of letter in English alphabet
-        if 1 <= square_x <= 26:
-            pos_let = chr(square_x + ord('a') - 1)
-        else:
-            raise ValueError(f"x matrix position number must be in the range 1-26. Provided: {square_x}.")
-        pos_num = square_y + 1
-
-        if ((square_x > n) or (square_y > n - 1)):
-            raise ValueError(f"Square {pos_arr} is outside of the chessbord of size {n}x{n}!")
-
-        return ''.join([pos_let, str(pos_num)])
-
-    def piece_err(self, piece):
-        """
-        Handle errors with piece names
-        """
-        example_string = f"Example: kd. Provided: {piece}"
-        if len(piece) > 2:
-            raise ValueError(f"Cannot have piece string being more than 2 characters. {example_string}")
-        if (piece[1] != "l") and (piece[1] != "d"):
-            raise ValueError(f"Piece must be light or dark. {example_string}")
 
     def add_piece(self, piece, pos, eat_pieces=False):
         """
@@ -132,11 +37,11 @@ class Chessboard_2D:
             pos (str): position of the piece in chess notation
             eat_pieces (bool): wether to throw an error when trying to move onto another piece. Default: False.
         """
-        piece_val = self.piece_to_value(piece)
-        square_loc = self.chessform_to_matrix(pos)
+        piece_val = self.utils.piece_to_value(piece)
+        square_loc = self.utils.chessform_to_matrix(pos, chessboard_size=self.chessboard_size)
         piece_at_pos  = self.chessboard_matrix[square_loc[0], square_loc[1]]
         if (piece_at_pos != 0) and (not eat_pieces):
-            piece_at_pos_name = self.value_to_piece(piece_at_pos)
+            piece_at_pos_name = self.utils.value_to_piece(piece_at_pos)
             print(f"Could not place {piece} at {pos}.")
             print(f"There is already {piece_at_pos_name} there.")
             return 1
@@ -155,42 +60,30 @@ class Chessboard_2D:
             self.add_piece("", pos2) # Remove the target piece
         self.add_piece(piece, pos2, eat_pieces=eat_pieces)
 
-
-    def light_to_dark_piece(self, piece):
-        """
-        Converts light to dark piece and vice versa
-        """
-        self.piece_err(piece)
-        piece_name, piece_color = list(piece)
-        if piece_color == 'l':
-            return ''.join([piece_name, 'd'])
-        if piece_color == 'd':
-            return ''.join([piece_name, 'l'])
-
     def mirror_v(self, pos):
         """
         Mirrors the chess square position vertically (i.e. h8 -> h1)
         """
-        pos_arr = self.chessform_to_matrix(pos)
+        pos_arr = self.utils.chessform_to_matrix(pos, chessboard_size=self.chessboard_size)
         new_pos_arr = [ pos_arr[0], self.chessboard_size - pos_arr[1] - 1 ]
-        return self.matrix_to_chessform(new_pos_arr)
+        return self.utils.matrix_to_chessform(new_pos_arr, self.chessboard_size)
 
     def mirror_h(self, pos):
         """
         Mirrors the chess square position horizontally (i.e. h8 -> a8)
         """
-        pos_arr = self.chessform_to_matrix(pos)
+        pos_arr = self.utils.chessform_to_matrix(pos, chessboard_size=self.chessboard_size)
         new_pos_arr = [ self.chessboard_size - pos_arr[0] - 1, pos_arr[1] ]
-        return self.matrix_to_chessform(new_pos_arr)
+        return self.utils.matrix_to_chessform(new_pos_arr, self.chessboard_size)
 
     def get_piece(self, pos):
         """
         Gets the name of the piece in the square, given in chess notation.
         """
 
-        pos_arr = self.chessform_to_matrix(pos)
+        pos_arr = self.utils.chessform_to_matrix(pos, chessboard_size=self.chessboard_size)
         piece_value = self.chessboard_matrix[pos_arr[0], pos_arr[1]]
-        return self.value_to_piece(piece_value)
+        return self.utils.value_to_piece(piece_value)
 
     def mirror_all_pieces(self):
         """
@@ -202,14 +95,13 @@ class Chessboard_2D:
         used_squares = []
         for i in range(n):
             for j in range(n):
-                square = self.matrix_to_chessform([i,j])
+                square = self.utils.matrix_to_chessform([i,j], self.chessboard_size)
                 piece = self.get_piece(square)
                 if piece != "":
                     square_mirror = self.mirror_v(square)
-                    piece_mirror = self.light_to_dark_piece(piece)
+                    piece_mirror = self.utils.light_to_dark_piece(piece)
                     if square_mirror not in used_squares:
-                        if self.add_piece(piece_mirror, square_mirror):
-                            exit(1)
+                        if self.add_piece(piece_mirror, square_mirror): exit(1)
                     used_squares.append(square)
 
     def create_row_of_pieces(self, row_id, piece):
@@ -221,7 +113,7 @@ class Chessboard_2D:
             piece (str): piece acronym
         """
         for i in range(self.chessboard_size):
-            square = self.matrix_to_chessform([i,row_id])
+            square = self.utils.matrix_to_chessform([i,row_id], chessboard_size=self.chessboard_size)
             self.add_piece(piece, square)
 
     def add_mirrored_pieces(self, piece, square):
@@ -280,7 +172,7 @@ class Chessboard_2D:
                 centsymb = "┼"
             for j in range(n):
                 val = int(self.chessboard_matrix[j,self.chessboard_size - i - 1])
-                piece = self.value_to_piece(val)
+                piece = self.utils.value_to_piece(val)
                 if val == 0:
                     if ((i + j) % 2 == 0):
                         piece = white_square
@@ -294,4 +186,116 @@ class Chessboard_2D:
                 print("──"+centsymb,end="")
             print("──"+rightsymb,end="")
             print("")
+
+class ChessUtils_2D():
+    """DocString"""
+    def __init__(self):
+        """Create a new instance"""
+        pass
+
+        self.pieces_dict = {0: "",
+                            1: "kl", # Light King
+                            2: "ql", # Light Queen
+                            3: "bl", # Light Bishop
+                            4: "nl", # Light Knight
+                            5: "rl", # Light Rook
+                            6: "pl", # Light Pawn
+                            7: "dl", # Light Dragon
+                            8: "ul", # Light Unicorn
+                            9: "Bl", # Light Brawn
+                            10:"Pl", # Light Princess
+                            11:"cl", # Light Common King
+                            12:"Rl", # Light Royal Queen
+                            21:"kd", # Dark King
+                            22:"qd", # Dark Queen
+                            23:"bd", # Dark Bishop
+                            24:"nd", # Dark Knight
+                            25:"rd", # Dark Rook
+                            26:"pd", # Dark Pawn
+                            27:"dd", # Dark Dragon
+                            28:"ud", # Dark Unicorn
+                            29:"Bd", # Dark Brawn
+                            30:"Pd", # Dark Princess
+                            31:"cd", # Dark Common King
+                            32:"Rd", # Dark Royal Queen
+                           }
+
+    def matrix_to_chessform(self, pos_arr, chessboard_size=8):
+        """
+        Converts chess format of squre to matrix chessboard positional array
+        """
+        n = chessboard_size
+        if len(pos_arr) > 2:
+            raise ValueError(f"Cannot have position array being more than 2 elements. Example: [2,1]. Provided: {pos_arr}")
+        square_x, square_y = list(pos_arr)
+        square_x += 1
+
+        # Position of letter in English alphabet
+        if 1 <= square_x <= 26:
+            pos_let = chr(square_x + ord('a') - 1)
+        else:
+            raise ValueError(f"x matrix position number must be in the range 1-26. Provided: {square_x}.")
+        pos_num = square_y + 1
+
+        if ((square_x > n) or (square_y > n - 1)):
+            raise ValueError(f"Square {pos_arr} is outside of the chessbord of size {n}x{n}!")
+
+        return ''.join([pos_let, str(pos_num)])
+
+    def chessform_to_matrix(self, pos, chessboard_size=8):
+        """
+        Converts chess format of squre to matrix chessboard positional array
+        """
+        n = chessboard_size
+        if len(pos) > 2:
+            raise ValueError(f"Cannot have position string being more than 2 characters. Example: h8. Provided: {pos}")
+        pos_let, pos_num = list(pos)
+        pos_num = int(pos_num)
+
+        # Position of letter in English alphabet
+        square_loc = ord(pos_let) - ord('a') + 1
+
+        if square_loc > 26:
+            raise ValueError("More chessboard rows than letters of Latin alphabet!")
+        if ((pos_num > n) or (square_loc > n)):
+            raise ValueError(f"Square {pos} is outside of the chessbord of size {n}x{n}!")
+
+        return [square_loc-1, pos_num-1]
+
+    def piece_err(self, piece):
+        """
+        Handle errors with piece names
+        """
+        example_string = f"Example: kd. Provided: {piece}"
+        if len(piece) > 2:
+            raise ValueError(f"Cannot have piece string being more than 2 characters. {example_string}")
+        if (piece[1] != "l") and (piece[1] != "d"):
+            raise ValueError(f"Piece must be light or dark. {example_string}")
+
+    def light_to_dark_piece(self, piece):
+        """
+        Converts light to dark piece and vice versa
+        """
+        self.piece_err(piece)
+        piece_name, piece_color = list(piece)
+        if piece_color == 'l': return ''.join([piece_name, 'd'])
+        if piece_color == 'd': return ''.join([piece_name, 'l'])
+
+    def value_to_piece(self, value):
+        """
+        Converts value, understandable by class, to piece acronym
+        """
+        try:
+            return self.pieces_dict[value]
+        except KeyError:
+            raise ValueError(f"Value '{value}' does not correspond to a valid piece.")
+
+    def piece_to_value(self, string):
+        """
+        Converts piece acronym to value, understandable by class
+        """
+        for value,comparison_string in self.pieces_dict.items():
+            if comparison_string == string:
+                return value
+        raise ValueError(f"{string} is not a valid piece.")
 
