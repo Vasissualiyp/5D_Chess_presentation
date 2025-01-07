@@ -28,6 +28,14 @@ class Chessboard_5D:
         base_chessboard.default_chess_configuration_setup()
         self.chessboards.append(base_chessboard)
         self.timemult_coords.append([0,0])
+
+    def add_empty_chessboard(self, chessboard_loc):
+        """
+        Adds an empty chessboard in specified time-multiverse locaiton
+        """
+        base_chessboard = Chessboard_2D()
+        self.chessboards.append(base_chessboard)
+        self.timemult_coords.append(chessboard_loc)
     
     def print_chessboard(self, chessboard_loc, style="regular"):
         """
@@ -35,6 +43,7 @@ class Chessboard_5D:
         """
         id = self.get_chessboard_by_tm(chessboard_loc)
         if id != -1:
+            print(f"Printing chessboard at {chessboard_loc}")
             chessboard = self.chessboards[id]
             chessboard.print_chessboard(style=style)
         else:
@@ -82,6 +91,22 @@ class Chessboard_5D:
         if id == -1: return "NaN" # Handling a case of non-existent board
         chessboard = self.chessboards[id]
         return chessboard.get_piece(square)
+
+    def add_piece(self, piece, pos, eat_pieces=False):
+        """
+        Adds piece to a board
+
+        Args:
+            piece (str): piece acronym
+            pos (3-list): position of the piece in 3-list format
+            eat_pieces (bool): wether to throw an error when trying to move onto another piece. Default: False.
+        """
+        self.movement_list_5d_err(pos, list_name="pos")
+        square, time, mult = pos
+        id = self.get_chessboard_by_tm([time, mult])
+        assert id != -1, f"Chessboard at time-multiverse coordinates {[time, mult]} doesn't exist!"
+        target_chessboard = self.chessboards[id]
+        target_chessboard.add_piece(piece, square, eat_pieces=eat_pieces)
 
     def evolve_chessboard(self, chessboard_loc):
         """
@@ -249,17 +274,48 @@ class Chessboard_5D:
         else: # Can eat enemy pieces
             return 1
 
+class ChessTests():
+    """Various tests for 2D/5D chessboard"""
+    def __init__(self):
+        self.chess2 = Chessboard_2D()
+        self.chess5 = Chessboard_5D()
+
+    def pawn_jumping_multiverse(self):
+        """
+        Test with standard bord, that is supposed to check if the time evolution 
+        and multiverse creation work properly
+        """
+        self.chess5.default_chess_configuration_setup()
+        self.chess5.movie_piece(['e2', 0, 0], ['e4', 0, 0])
+        self.chess5.movie_piece(['e7', 1, 0], ['e5', 0, 0])
+        self.chess5.print_chessboard([0,0])
+        self.chess5.print_chessboard([1,0])
+        self.chess5.print_chessboard([2,0])
+        self.chess5.print_chessboard([1,-1])
+        self.chess5.print_chessboard([1,1])
+        exit(0)
+    
+    def test_movement(self, piece, pawns_row=False):
+        """
+        Create empty boards and see if the piece is moving properly.
+        Has an option to add a pawn row to check if eating pieces works.
+        """
+        n = 1 # How many chessboards to add in positive direction - total is 2n+1
+        for i in range(-n, n+1):
+            for j in range(2*n+1):
+                self.chess5.add_empty_chessboard([j,i])
+                print([j,i])
+        self.chess5.add_piece(piece, ['d5', 2*n, 0])
+        self.chess5.print_chessboard([2*n, 0])
+
+
+    def chessboard2d(self):
+        """
+        Tests if the default chess setup works for 2D chessboard
+        """
+        self.chess2.default_chess_configuration_setup()
+        self.chess2.print_chessboard()
 
 if __name__ == "__main__":
-    #chess = Chessboard_2D()
-    #chess.default_chess_configuration_setup()
-    #chess.print_chessboard()
-    chess = Chessboard_5D()
-    chess.default_chess_configuration_setup()
-    chess.movie_piece(['e2', 0, 0], ['e4', 0, 0])
-    chess.movie_piece(['e7', 1, 0], ['e5', 0, 0])
-    chess.print_chessboard([0,0])
-    chess.print_chessboard([1,0])
-    chess.print_chessboard([2,0])
-    chess.print_chessboard([1,-1])
-    chess.print_chessboard([1,1])
+    tests = ChessTests()
+    tests.test_movement('qd')
