@@ -32,6 +32,7 @@
           buildInputs = with pkgs; [
             pythonEnv
 			watchexec
+			mpv
 			#manim-slides
 			#manim
           ];
