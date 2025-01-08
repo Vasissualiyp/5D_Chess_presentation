@@ -31,6 +31,7 @@
         devShell = pkgs.mkShell {
           buildInputs = with pkgs; [
             pythonEnv
+			watchexec
 			#manim-slides
 			#manim
           ];
