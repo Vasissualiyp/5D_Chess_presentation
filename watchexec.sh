@@ -13,7 +13,7 @@ FPS=$(get_value "frame_rate")
 RES="${HEIGHT}p${FPS}"
 
 watchexec -w src/${PY_NAME}.py \
-    "clear; manim ./src/${PY_NAME}.py ${SCENE_NAME}; \
+    "clear; manim ./src/${PY_NAME}.py ${SCENE_NAME} --disable_caching; \
     hyprctl dispatch workspace 2; \
 	hyprctl keyword animations:enabled 0; \
     pkill mpv; \

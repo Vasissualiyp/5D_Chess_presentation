@@ -40,6 +40,7 @@ class Manim_Chessboard_2D(VGroup):
         self.chessboard = Chessboard_2D(chessboard_tm_pos=tm_loc, n=board_size)
         self.chessutils = ChessUtils_2D()
 
+        self.board_tiles = []
         self.create_prism_board(board_size)
         #for row in range(board_size):
         #    row_squares = []
@@ -102,14 +103,14 @@ class Manim_Chessboard_2D(VGroup):
                 x = (col - board_size/2 + 0.5) * self.square_size
                 y = (row - board_size/2 + 0.5) * self.square_size
                 # The bottom of the prism will be at z=0, top at z=prism_height
-                square_prism.move_to([x, y, 0])
+                square_prism.move_to(np.array([x, y, 0]))
 
-                self.add(square_prism)
+                self.board_tiles.append(square_prism)
 
     def add_spheres_to_squares(self, radius=0.2, log=False):
         """Add spheres to the center of each square."""
         epsilon = 0.05 # A small value to displace the sphere
-        for row_idx, row in enumerate(self.squares):
+        for row_idx, row in enumerate(self.board_tiles):
             row_spheres = []
             for col_idx, square in enumerate(row):
                 chessform_pos = self.chessutils.matrix_to_chessform([col_idx, row_idx])
