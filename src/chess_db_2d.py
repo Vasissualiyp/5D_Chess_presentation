@@ -1,4 +1,5 @@
 import numpy as np
+import os
 
 class Chessboard_2D:
     """
@@ -287,6 +288,25 @@ class ChessUtils_2D():
             raise ValueError(f"Cannot have piece string being more than 2 characters. {example_string}")
         if (piece[1] != "l") and (piece[1] != "d"):
             raise ValueError(f"Piece must be light or dark. {example_string}")
+
+    def get_piece_image(self, piece):
+        """
+        Obtains image path for a piece
+
+        Args:
+            piece (str): piece acronym
+
+        Returns:
+            path (str): full path to the file of the piece
+        """
+        if piece[0] in ['b', 'k', 'n', 'p', 'q', 'r']:
+            filename = "Chess_" + piece + "t60.png"
+        else: # For 5D Chess special pieces
+            filename = "Chess_" + "pd"  + "t60.png"
+        current_directory = os.path.dirname(__file__)
+        parent_directory = os.path.dirname(current_directory)
+        resources_dir = os.path.join(parent_directory, "resources")
+        return os.path.join(resources_dir, filename)
 
     def light_to_dark_piece(self, piece):
         """
