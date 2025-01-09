@@ -2,8 +2,8 @@ from manim import *
 import numpy as np
 from chess_db_2d import Chessboard_2D, ChessUtils_2D
 
-config.pixel_width = 1280
-config.pixel_height = 720
+config.pixel_width = 640
+config.pixel_height = 480
 config.frame_rate = 30
 
 class Manim_Chessboard_2D(VGroup):
@@ -31,32 +31,103 @@ class Manim_Chessboard_2D(VGroup):
 
         self.squares = []
         self.orientation = 0 # 0 for regular, 1 for time-normal, 2 for multiverse-normal
+        self.colors = colors
+        self.board_size = board_size
+        self.square_size = 0.5
+        self.prism_height = 0.1
         self.animation_speed = animation_speed
         self.board_loc=np.array([tm_loc[0]*board_separation, tm_loc[1]*board_separation, 0])
         self.chessboard = Chessboard_2D(chessboard_tm_pos=tm_loc, n=board_size)
         self.chessutils = ChessUtils_2D()
 
-        for row in range(board_size):
-            row_squares = []
-            for col in range(board_size):
-                color_index = (row + col) % 2
-                square = Square(side_length=square_size, fill_color=colors[color_index], fill_opacity=1)
-                sphere = Sphere(radius=0.2)
-                # Position each square:
-                square_pos_x = (col - board_size/2 + 0.5) * square_size
-                square_pos_y = (board_size/2 - row - 0.5) * square_size,
-                square_pos = np.array([
-                    square_pos_x,
-                    square_pos_y,
-                    0
-                ])
-                square.move_to(square_pos)
-                sphere.move_to(square_pos)
-                row_squares.append(square)
-                self.add(square)
-            self.squares.append(row_squares)
+        self.create_prism_board(board_size)
+        #for row in range(board_size):
+        #    row_squares = []
+        #    for col in range(board_size):
+        #        color_index = (row + col) % 2
+        #        square = Square(side_length=square_size, fill_color=colors[color_index], 
+        #                        fill_opacity=1)
+        #        # Position each square:
+        #        square_pos_x = (col - board_size/2 + 0.5) * square_size
+        #        square_pos_y = (board_size/2 - row - 0.5) * square_size
+        #        square_pos = np.array([
+        #            square_pos_x,
+        #            square_pos_y,
+        #            0
+        #        ])
+        #        square.set_z_index(0)
+        #        square.move_to(square_pos)
+        #        row_squares.append(square)
+        #        self.add(square)
+        #    self.squares.append(row_squares)
 
-        self.shift(self.board_loc) # Move the board to its expected location
+        #self.shift(self.board_loc) # Move the board to its expected location
+        # Now call the separate method to add spheres
+        self.spheres = []  # Keep track of all spheres if you want to animate them later
+
+    def create_prism_board(self, board_size):
+        """
+        Brief description of function
+
+        Args:
+            arg1 (type): description
+
+        Returns:
+            return_type: description
+        """
+        # 2) Create cuboids for each chessboard square
+        for row in range(board_size):
+            for col in range(board_size):
+                # Choose color by alternating
+                color_index = (row + col) % 2
+                fill_color = self.colors[color_index]
+
+                # Base shape is a 2D Square
+                base = Square(side_length=self.square_size)
+
+                # Create a Prism from that square
+                # direction=OUT means it extrudes "up" (in +z) from the base
+                square_prism = Prism(
+                    dimensions=(self.square_size, self.square_size, self.prism_height),
+                )
+                square_prism.set_fill(fill_color, opacity=1)
+                square_prism.set_stroke(width=0)
+
+                # By default, a Square lies in the XY plane at z=0,
+                # so the Prism is extruded upward (in z).
+                # We just need to shift it into position:
+                # Let's treat the "board" as lying in the XY plane, so
+                # row -> y dimension (increasing upwards),
+                # col -> x dimension (increasing to the right).
+                x = (col - board_size/2 + 0.5) * self.square_size
+                y = (row - board_size/2 + 0.5) * self.square_size
+                # The bottom of the prism will be at z=0, top at z=prism_height
+                square_prism.move_to([x, y, 0])
+
+                self.add(square_prism)
+
+    def add_spheres_to_squares(self, radius=0.2, log=False):
+        """Add spheres to the center of each square."""
+        epsilon = 0.05 # A small value to displace the sphere
+        for row_idx, row in enumerate(self.squares):
+            row_spheres = []
+            for col_idx, square in enumerate(row):
+                chessform_pos = self.chessutils.matrix_to_chessform([col_idx, row_idx])
+                if log: print(f"Checking piece at location {chessform_pos}...")
+                piece = self.chessboard.get_piece(chessform_pos)
+                if log: print(f"piece is: {piece}")
+                if piece == "":
+                    pass
+                if (piece not in ["Ml", "Md"]):
+                    sphere = Sphere(radius=radius)
+                    # Position the sphere at the same center as the square
+                    sphere_center = square.get_center()
+                    sphere_center[2] = 2 * radius + epsilon
+                    sphere.move_to(square.get_center())
+                    sphere.set_z_index(1)
+                    row_spheres.append(sphere)
+                    self.add(sphere)
+            self.spheres.append(row_spheres)
 
     def rotate_board(self, angle, axis=np.array([0,0,1])):
         """
@@ -162,6 +233,7 @@ class MultipleChessBoards(ThreeDScene):
 
         board1 = Manim_Chessboard_2D(tm_loc=[0,0])
         board1.chessboard.default_chess_configuration_setup()
+        board1.add_spheres_to_squares(radius=0.1)
         board2 = Manim_Chessboard_2D(tm_loc=[1,0])
         board3 = Manim_Chessboard_2D(tm_loc=[1,1])
         #board2.shift(3*RIGHT) # move it right
@@ -169,16 +241,16 @@ class MultipleChessBoards(ThreeDScene):
         self.add(board1)#, board2, board3)
 
         # Create pieces
-        piece1 = ChessPiece(color=RED)
-        piece2 = ChessPiece(color=YELLOW)
+        #piece1 = ChessPiece(color=RED)
+        #piece2 = ChessPiece(color=YELLOW)
 
         # Place pieces on board1
-        piece1.place_at(board1, 0, 0)
-        piece2.place_at(board2, 1, 1)
-        self.add(piece1, piece2)
+        #piece1.place_at(board1, 0, 0)
+        #piece2.place_at(board2, 1, 1)
+        #self.add(piece1, piece2)
 
         # Animate movement
-        self.play(piece1.animate.place_at(board1, 7, 7))  # Move piece1 to another square
+        #self.play(piece1.animate.place_at(board1, 7, 7))  # Move piece1 to another square
         self.play(board1.reorient_board(1))
         self.play(board1.reorient_board(2))
         #self.play(board1.reorient_board(1))
