@@ -1,7 +1,17 @@
 #!/usr/bin/env bash
 SCENE_NAME="MultipleChessBoards"
 PY_NAME="manim_base"
-RES="1080p60"
+PY_LOC="./src/${PY_NAME}.py"
+
+get_value() {
+	# Get value of a certain parameter form the python manim code
+	grep "$1" "$PY_LOC" | awk -F'=' '{print $2}' | sed 's/ //'
+}
+
+HEIGHT=$(get_value "pixel_height")
+FPS=$(get_value "frame_rate")
+RES="${HEIGHT}p${FPS}"
+
 watchexec -w src/${PY_NAME}.py \
     "clear; manim ./src/${PY_NAME}.py ${SCENE_NAME}; \
     hyprctl dispatch workspace 2; \
