@@ -2,14 +2,14 @@ from manim import *
 import numpy as np
 from chess_db_2d import Chessboard_2D, ChessUtils_2D
 
-config.pixel_width = 640
-config.pixel_height = 480
-config.frame_rate = 30
+config.pixel_width = 480
+config.pixel_height = 360
+config.frame_rate = 5
 
 class Manim_Chessboard_2D(VGroup):
     def __init__(self, tm_loc=[0,0], square_size=0.5, 
-                 board_separation=6, colors=[WHITE, GREY], board_size=8, 
-                 animation_speed=0.5, **kwargs):
+                 board_separation=6, colors=[LIGHTER_GRAY, GREY, WHITE, BLACK], 
+                 board_size=8, animation_speed=0.5, **kwargs):
         """
         A single 2D chessboard instance
         Args:
@@ -28,12 +28,13 @@ class Manim_Chessboard_2D(VGroup):
         image.scale(1)
         #image.rotate(PI/4, axis=UP)
 
-
         self.squares = []
         self.orientation = 0 # 0 for regular, 1 for time-normal, 2 for multiverse-normal
-        self.colors = colors
+        self.board_colors = [colors[0], colors[1]]
+        self.mlight = colors[2]
+        self.mdark = colors[3]
         self.board_size = board_size
-        self.square_size = 0.5
+        self.square_size = square_size
         self.prism_height = 0.1
         self.animation_speed = animation_speed
         self.board_loc=np.array([tm_loc[0]*board_separation, tm_loc[1]*board_separation, 0])
@@ -78,7 +79,7 @@ class Manim_Chessboard_2D(VGroup):
             for col in range(n):
                 # Choose color by alternating
                 color_index = (row + col) % 2
-                fill_color = self.colors[color_index]
+                fill_color = self.board_colors[color_index]
 
                 # Create a Prism from that square
                 # direction=OUT means it extrudes "up" (in +z) from the base
@@ -104,9 +105,25 @@ class Manim_Chessboard_2D(VGroup):
                 self.board_tiles.append(square_prism)
         self.add(*self.board_tiles)
 
+    def get_object_color_from_piece(self, piece, 
+                                    dark_color=None, 
+                                    light_color=None):
+        """Gets a manim color based on the piece color"""
+        _, piece_color = list(piece)
+        if dark_color==None:
+            dark_color = self.mdark
+        if light_color==None:
+            light_color = self.mlight
+        if piece_color == 'l':
+            return light_color
+        elif piece_color == 'd':
+            return dark_color
+        else:
+            raise ValueError(f"Not allowed color: {piece_color}. Allowed vaues: l, d.")
+
     def add_spheres_to_squares(self, radius=0.2, log=False):
         """Add spheres to the center of each square."""
-        epsilon = 0.05 # A small value to displace the sphere
+        epsilon = 0.01 # A small value to displace the sphere
         #if log: print(f"The array of tile cuboids has shape: {np.shape(self.square_pos)}")
         for row_idx in range(self.board_size):
             row_spheres = []
@@ -119,13 +136,16 @@ class Manim_Chessboard_2D(VGroup):
                     if log: print(f"Not adding sphere at {chessform_pos}")
                     pass
                 elif (piece not in ["Ml", "Md"]):
+                    piece_type, piece_color = list(piece)
                     square_center = self.square_pos[row_idx, col_idx, :]
                     if log: print(f"Adding {piece} at {chessform_pos}")
                     sphere = Sphere(radius=radius)
                     # Position the sphere at the same center as the square
                     sphere_center = square_center
-                    sphere_center[2] = 2 * radius + epsilon
+                    sphere_center[2] = radius + epsilon
                     sphere.move_to(sphere_center)
+                    sphere_color = self.get_object_color_from_piece(piece)
+                    sphere.set_color(sphere_color)
                     sphere.set_z_index(1)
                     row_spheres.append(sphere)
                     self.add(sphere)
@@ -235,7 +255,7 @@ class MultipleChessBoards(ThreeDScene):
 
         board1 = Manim_Chessboard_2D(tm_loc=[0,0])
         board1.chessboard.default_chess_configuration_setup()
-        board1.add_spheres_to_squares(radius=0.1, log=True)
+        board1.add_spheres_to_squares(radius=0.1)
         #board3 = Manim_Chessboard_2D(tm_loc=[1,1])
         #board2.shift(3*RIGHT) # move it right
         
