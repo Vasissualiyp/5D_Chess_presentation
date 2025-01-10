@@ -41,7 +41,7 @@ class Manim_Chessboard_2D(VGroup):
         self.chessutils = ChessUtils_2D()
 
         self.board_tiles = []
-        self.create_prism_board(board_size)
+        self.create_prism_board()
         #for row in range(board_size):
         #    row_squares = []
         #    for col in range(board_size):
@@ -66,25 +66,19 @@ class Manim_Chessboard_2D(VGroup):
         # Now call the separate method to add spheres
         self.spheres = []  # Keep track of all spheres if you want to animate them later
 
-    def create_prism_board(self, board_size):
+    def create_prism_board(self):
         """
-        Brief description of function
-
-        Args:
-            arg1 (type): description
-
-        Returns:
-            return_type: description
+        Creates a square chessboard from rectangular prisms
         """
-        # 2) Create cuboids for each chessboard square
-        for row in range(board_size):
-            for col in range(board_size):
+        n = self.board_size
+        # An array of positions of each chess grid square, 
+        # i.e. [0,2,1] gives y component of a3 square
+        self.square_pos = np.zeros([n, n, 3])
+        for row in range(n):
+            for col in range(n):
                 # Choose color by alternating
                 color_index = (row + col) % 2
                 fill_color = self.colors[color_index]
-
-                # Base shape is a 2D Square
-                base = Square(side_length=self.square_size)
 
                 # Create a Prism from that square
                 # direction=OUT means it extrudes "up" (in +z) from the base
@@ -100,31 +94,38 @@ class Manim_Chessboard_2D(VGroup):
                 # Let's treat the "board" as lying in the XY plane, so
                 # row -> y dimension (increasing upwards),
                 # col -> x dimension (increasing to the right).
-                x = (col - board_size/2 + 0.5) * self.square_size
-                y = (row - board_size/2 + 0.5) * self.square_size
+                x = (col - n/2 + 0.5) * self.square_size
+                y = (row - n/2 + 0.5) * self.square_size
                 # The bottom of the prism will be at z=0, top at z=prism_height
-                square_prism.move_to(np.array([x, y, 0]))
+                position_vec = np.array([x, y, 0])
+                square_prism.move_to(position_vec)
+                self.square_pos[row, col, :] = position_vec
 
                 self.board_tiles.append(square_prism)
+        self.add(*self.board_tiles)
 
     def add_spheres_to_squares(self, radius=0.2, log=False):
         """Add spheres to the center of each square."""
         epsilon = 0.05 # A small value to displace the sphere
-        for row_idx, row in enumerate(self.board_tiles):
+        #if log: print(f"The array of tile cuboids has shape: {np.shape(self.square_pos)}")
+        for row_idx in range(self.board_size):
             row_spheres = []
-            for col_idx, square in enumerate(row):
+            for col_idx in range(self.board_size):
                 chessform_pos = self.chessutils.matrix_to_chessform([col_idx, row_idx])
                 if log: print(f"Checking piece at location {chessform_pos}...")
                 piece = self.chessboard.get_piece(chessform_pos)
                 if log: print(f"piece is: {piece}")
-                if piece == "":
+                if piece in [ "", "a0" ]:
+                    if log: print(f"Not adding sphere at {chessform_pos}")
                     pass
-                if (piece not in ["Ml", "Md"]):
+                elif (piece not in ["Ml", "Md"]):
+                    square_center = self.square_pos[row_idx, col_idx, :]
+                    if log: print(f"Adding {piece} at {chessform_pos}")
                     sphere = Sphere(radius=radius)
                     # Position the sphere at the same center as the square
-                    sphere_center = square.get_center()
+                    sphere_center = square_center
                     sphere_center[2] = 2 * radius + epsilon
-                    sphere.move_to(square.get_center())
+                    sphere.move_to(sphere_center)
                     sphere.set_z_index(1)
                     row_spheres.append(sphere)
                     self.add(sphere)
@@ -234,9 +235,8 @@ class MultipleChessBoards(ThreeDScene):
 
         board1 = Manim_Chessboard_2D(tm_loc=[0,0])
         board1.chessboard.default_chess_configuration_setup()
-        board1.add_spheres_to_squares(radius=0.1)
-        board2 = Manim_Chessboard_2D(tm_loc=[1,0])
-        board3 = Manim_Chessboard_2D(tm_loc=[1,1])
+        board1.add_spheres_to_squares(radius=0.1, log=True)
+        #board3 = Manim_Chessboard_2D(tm_loc=[1,1])
         #board2.shift(3*RIGHT) # move it right
         
         self.add(board1)#, board2, board3)
