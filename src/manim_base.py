@@ -37,6 +37,7 @@ class Manim_Chessboard_2D(VGroup):
         self.square_size = square_size
         self.prism_height = 0.1
         self.animation_speed = animation_speed
+        self.board_separation = board_separation
         self.board_loc=np.array([tm_loc[0]*board_separation, tm_loc[1]*board_separation, 0])
         self.chessboard = Chessboard_2D(chessboard_tm_pos=tm_loc, n=board_size)
         self.chessutils = ChessUtils_2D()
@@ -122,13 +123,18 @@ class Manim_Chessboard_2D(VGroup):
             raise ValueError(f"Not allowed color: {piece_color}. Allowed vaues: l, d.")
 
     def add_spheres_to_squares(self, radius=0.2, log=False):
-        """Add spheres to the center of each square."""
+        """Add spheres to the center of each square with a piece."""
         epsilon = 0.01 # A small value to displace the sphere
         #if log: print(f"The array of tile cuboids has shape: {np.shape(self.square_pos)}")
-        for row_idx in range(self.board_size):
+        id = 0
+        n = self.board_size
+        # Matrix that gets ID of a sphere from its position on the board
+        self.sphere_ids = np.zeros([n,n]) 
+        for row_idx in range(n):
             row_spheres = []
-            for col_idx in range(self.board_size):
+            for col_idx in range(n):
                 chessform_pos = self.chessutils.matrix_to_chessform([col_idx, row_idx])
+                self.sphere_ids[row_idx, col_idx] = -1
                 if log: print(f"Checking piece at location {chessform_pos}...")
                 piece = self.chessboard.get_piece(chessform_pos)
                 if log: print(f"piece is: {piece}")
@@ -136,7 +142,6 @@ class Manim_Chessboard_2D(VGroup):
                     if log: print(f"Not adding sphere at {chessform_pos}")
                     pass
                 elif (piece not in ["Ml", "Md"]):
-                    piece_type, piece_color = list(piece)
                     square_center = self.square_pos[row_idx, col_idx, :]
                     if log: print(f"Adding {piece} at {chessform_pos}")
                     sphere = Sphere(radius=radius)
@@ -147,9 +152,10 @@ class Manim_Chessboard_2D(VGroup):
                     sphere_color = self.get_object_color_from_piece(piece)
                     sphere.set_color(sphere_color)
                     sphere.set_z_index(1)
-                    row_spheres.append(sphere)
+                    self.spheres.append(sphere)
+                    self.sphere_ids[row_idx, col_idx] = id
+                    id += 1
                     self.add(sphere)
-            self.spheres.append(row_spheres)
 
     def rotate_board(self, angle, axis=np.array([0,0,1])):
         """
@@ -233,21 +239,96 @@ class Manim_Chessboard_2D(VGroup):
         return Rotate(self, angle=angle, axis=axis, 
                       about_point=list(self.board_loc), run_time=self.animation_speed)
 
-class ChessPiece(Dot):
-    def __init__(self, color=BLUE, **kwargs):
-        super().__init__(color=color, **kwargs)
-        self.current_row = None
-        self.current_col = None
+    def get_piece(self, square):
+        """
+        Obtains parameters for the piece at a given square (in chess notation)
 
-    def place_at(self, board, row, col):
+        Args:
+            square (str): location of the square in chess notation
+        
+        Returns:
+            piece (str): the name of the piece
+            sphere (Manim): Manim object, on which one can perform transformations
         """
-        board: Manim_Chessboard_2D instance
-        row, col: Int
+        square_matrix = self.chessutils.chessform_to_matrix(square)
+        id = self.sphere_ids[square_matrix[0], square_matrix[1]]
+        sphere = self.spheres[id]
+        piece = self.chessboard.get_piece(square)
+        if id == -1:
+            print(f"No piece present at {square}")
+            return "", None
+        return piece, sphere
+
+    def get_sphere_id(self, square):
         """
-        target_square = board.squares[row][col]
-        self.move_to(target_square.get_center())
-        self.current_row = row
-        self.current_col = col
+        Obtains id of the sphere located in square (chess notation)
+        in the self.spheres list. If not present, returns -1.
+        """
+        square_matrix = self.chessutils.chessform_to_matrix(square)
+        id = self.sphere_ids[square_matrix[0], square_matrix[1]]
+        return id
+
+
+    def move_piece(self, square_start, square_finish, eat_pieces=False, scene=None):
+        """
+        Moves a piece form start square to finish square (in chess notation).
+        Pass scene to trigger animation.
+        """
+
+        start_matrix = np.array(self.chessutils.chessform_to_matrix(square_start))
+        finish_matrix = np.array(self.chessutils.chessform_to_matrix(square_finish))
+        piece, sphere = self.get_piece(square_start)
+        if piece in ["", "Ml", "Md"]:
+            raise ValueError(f"No piece found at square {square_start}")
+        delta_matrix = finish_matrix - start_matrix
+        forward, right, normal = self.get_directions()
+        delta_vector = delta_matrix[0] * forward + delta_matrix[1] * right
+        piece_f, sphere_f = self.get_piece(square_finish)
+        if piece not in ["", "Ml", "Md"]:
+            if not eat_pieces:
+                raise ValueError(f"Cannot move into {square_finish}: {piece_f} is present there. Try moving with eat_pieces=True.")
+            else:
+                _, piece_color = list(piece)
+                _, piece_color_f = list(piece_f)
+                if piece_color_f == piece_color:
+                    raise ValueError(f"Cannot eat own piece at {square_finish}")
+                else:
+                    self.remove_piece(square_finish)
+        sphere.shift(delta_vector)
+
+    def remove_piece(self, square):
+        """
+        Removes piece at square, given in chess notation
+        """
+        pass
+        return return_value
+
+    def get_directions(self):
+        """
+        Returns directional vectors based on current orientation
+
+        Returns:
+            forward (np.array): forward unit vector (i.e. a1->a2)
+            right (np.array): right unit vector (i.e. a1->b1)
+            normal (np.array): unnit vector, normal to the board
+        """
+        side = self.square_size # sidelength of square
+        time_sep = self.board_separation
+        if self.orientation == 0:
+            forward = np.array([0, side, 0])
+            right = np.array([side, 0, 0])
+            normal = np.array([0, 0, time_sep])
+        elif self.orientation == 1:
+            forward = np.array([0, 0, side])
+            right = np.array([0, side, 0])
+            normal = np.array([-time_sep, 0, 0])
+        elif self.orientation == 1:
+            forward = np.array([0, 0, side])
+            right = np.array([side, 0, 0])
+            normal = np.array([0, -time_sep, 0])
+        else:
+            raise ValueError(f"Unknown orientation: {self.orientation}")
+        return forward, right, normal
 
 class MultipleChessBoards(ThreeDScene):
     def construct(self):
@@ -261,17 +342,6 @@ class MultipleChessBoards(ThreeDScene):
         
         self.add(board1)#, board2, board3)
 
-        # Create pieces
-        #piece1 = ChessPiece(color=RED)
-        #piece2 = ChessPiece(color=YELLOW)
-
-        # Place pieces on board1
-        #piece1.place_at(board1, 0, 0)
-        #piece2.place_at(board2, 1, 1)
-        #self.add(piece1, piece2)
-
-        # Animate movement
-        #self.play(piece1.animate.place_at(board1, 7, 7))  # Move piece1 to another square
         self.play(board1.reorient_board(1))
         self.play(board1.reorient_board(2))
         #self.play(board1.reorient_board(1))
