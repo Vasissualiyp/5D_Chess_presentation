@@ -44,7 +44,7 @@ class Manim_Chessboard_2D(VGroup):
             chesscolors = ChessboardColors()
         else:
             chesscolors = colors
-        self.board_colors = [ chesscolors.square_light, chesscolors.square_light ]
+        self.board_colors = [ chesscolors.square_dark, chesscolors.square_light ]
 
         self.squares = []
         self.orientation = 0 # 0 for regular, 1 for time-normal, 2 for multiverse-normal
