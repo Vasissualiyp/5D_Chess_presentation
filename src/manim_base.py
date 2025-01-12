@@ -6,9 +6,22 @@ config.pixel_width = 480
 config.pixel_height = 360
 config.frame_rate = 5
 
+class ChessboardColors():
+    """Colors of chessboard"""
+    def __init__(self, square_light=LIGHTER_GREY, square_dark=GREY, 
+                 piece_light=WHITE, piece_dark=BLACK, 
+                 move_light=GREEN_B, move_dark=GREEN_E):
+        """Creates an instance of the class with all colors assigned"""
+        self.square_light = square_light
+        self.square_dark = square_dark
+        self.piece_light = piece_light
+        self.piece_dark = piece_dark
+        self.move_light = move_light
+        self.move_dark = move_dark
+
 class Manim_Chessboard_2D(VGroup):
     def __init__(self, tm_loc=[0,0], square_size=0.5, 
-                 board_separation=6, colors=[LIGHTER_GRAY, GREY, WHITE, BLACK], 
+                 board_separation=6, colors=None, 
                  board_size=8, animation_speed=0.5, **kwargs):
         """
         A single 2D chessboard instance
@@ -27,12 +40,16 @@ class Manim_Chessboard_2D(VGroup):
         #self.add(image)
         image.scale(1)
         #image.rotate(PI/4, axis=UP)
+        if colors == None:
+            chesscolors = ChessboardColors()
+        else:
+            chesscolors = colors
+        self.board_colors = [ chesscolors.square_light, chesscolors.square_light ]
 
         self.squares = []
         self.orientation = 0 # 0 for regular, 1 for time-normal, 2 for multiverse-normal
-        self.board_colors = [colors[0], colors[1]]
-        self.mlight = colors[2]
-        self.mdark = colors[3]
+        self.mlight = chesscolors.piece_light
+        self.mdark = chesscolors.piece_dark
         self.board_size = board_size
         self.square_size = square_size
         self.prism_height = 0.1
@@ -41,6 +58,7 @@ class Manim_Chessboard_2D(VGroup):
         self.board_loc=np.array([tm_loc[0]*board_separation, tm_loc[1]*board_separation, 0])
         self.chessboard = Chessboard_2D(chessboard_tm_pos=tm_loc, n=board_size)
         self.chessutils = ChessUtils_2D()
+        self.empty_squares = [ "", " ", "  ", "Ml", "Md" ]
 
         self.board_tiles = []
         self.create_prism_board()
@@ -129,18 +147,16 @@ class Manim_Chessboard_2D(VGroup):
         id = 0
         n = self.board_size
         # Matrix that gets ID of a sphere from its position on the board
-        self.sphere_ids = np.zeros([n,n]) 
+        self.sphere_ids = np.zeros((n,n), dtype=int) 
         for row_idx in range(n):
-            row_spheres = []
             for col_idx in range(n):
                 chessform_pos = self.chessutils.matrix_to_chessform([col_idx, row_idx])
-                self.sphere_ids[row_idx, col_idx] = -1
+                self.sphere_ids[col_idx, row_idx] = -1
                 if log: print(f"Checking piece at location {chessform_pos}...")
                 piece = self.chessboard.get_piece(chessform_pos)
                 if log: print(f"piece is: {piece}")
                 if piece in [ "", "a0" ]:
                     if log: print(f"Not adding sphere at {chessform_pos}")
-                    pass
                 elif (piece not in ["Ml", "Md"]):
                     square_center = self.square_pos[row_idx, col_idx, :]
                     if log: print(f"Adding {piece} at {chessform_pos}")
@@ -153,7 +169,7 @@ class Manim_Chessboard_2D(VGroup):
                     sphere.set_color(sphere_color)
                     sphere.set_z_index(1)
                     self.spheres.append(sphere)
-                    self.sphere_ids[row_idx, col_idx] = id
+                    self.sphere_ids[col_idx, row_idx] = id
                     id += 1
                     self.add(sphere)
 
@@ -248,10 +264,11 @@ class Manim_Chessboard_2D(VGroup):
         
         Returns:
             piece (str): the name of the piece
-            sphere (Manim): Manim object, on which one can perform transformations
+            sphere (Manim): Manim object, on which one can perform transformations.
+                            If piece=="", it returns None.
         """
         square_matrix = self.chessutils.chessform_to_matrix(square)
-        id = self.sphere_ids[square_matrix[0], square_matrix[1]]
+        id = int(self.sphere_ids[square_matrix[0], square_matrix[1]])
         sphere = self.spheres[id]
         piece = self.chessboard.get_piece(square)
         if id == -1:
@@ -268,7 +285,6 @@ class Manim_Chessboard_2D(VGroup):
         id = self.sphere_ids[square_matrix[0], square_matrix[1]]
         return id
 
-
     def move_piece(self, square_start, square_finish, eat_pieces=False, scene=None):
         """
         Moves a piece form start square to finish square (in chess notation).
@@ -277,14 +293,16 @@ class Manim_Chessboard_2D(VGroup):
 
         start_matrix = np.array(self.chessutils.chessform_to_matrix(square_start))
         finish_matrix = np.array(self.chessutils.chessform_to_matrix(square_finish))
+        start_matrix = np.array([start_matrix[1], start_matrix[0]])
+        finish_matrix = np.array([finish_matrix[1], finish_matrix[0]])
         piece, sphere = self.get_piece(square_start)
-        if piece in ["", "Ml", "Md"]:
+        if piece in self.empty_squares:
             raise ValueError(f"No piece found at square {square_start}")
         delta_matrix = finish_matrix - start_matrix
-        forward, right, normal = self.get_directions()
+        forward, right, normal = self.get_board_directions()
         delta_vector = delta_matrix[0] * forward + delta_matrix[1] * right
         piece_f, sphere_f = self.get_piece(square_finish)
-        if piece not in ["", "Ml", "Md"]:
+        if piece_f not in self.empty_squares:
             if not eat_pieces:
                 raise ValueError(f"Cannot move into {square_finish}: {piece_f} is present there. Try moving with eat_pieces=True.")
             else:
@@ -294,16 +312,21 @@ class Manim_Chessboard_2D(VGroup):
                     raise ValueError(f"Cannot eat own piece at {square_finish}")
                 else:
                     self.remove_piece(square_finish)
-        sphere.shift(delta_vector)
+        assert sphere != None, "This part of the code wasn't supposed to be reached if sphere==None"
+        if scene==None:
+            sphere.shift(delta_vector)
+        else:
+            scene.play(ApplyMethod(sphere.shift, delta_vector),run_time=self.animation_speed)
+        self.chessboard.move_piece(square_start, square_finish, eat_pieces=eat_pieces)
 
     def remove_piece(self, square):
         """
         Removes piece at square, given in chess notation
         """
         pass
-        return return_value
+        return 0
 
-    def get_directions(self):
+    def get_board_directions(self):
         """
         Returns directional vectors based on current orientation
 
@@ -336,16 +359,17 @@ class MultipleChessBoards(ThreeDScene):
 
         board1 = Manim_Chessboard_2D(tm_loc=[0,0])
         board1.chessboard.default_chess_configuration_setup()
-        board1.add_spheres_to_squares(radius=0.1)
+        board1.add_spheres_to_squares(radius=0.1, log=True)
         #board3 = Manim_Chessboard_2D(tm_loc=[1,1])
         #board2.shift(3*RIGHT) # move it right
         
         self.add(board1)#, board2, board3)
 
-        self.play(board1.reorient_board(1))
-        self.play(board1.reorient_board(2))
         #self.play(board1.reorient_board(1))
-        self.play(board1.reorient_board(0))
+        #self.play(board1.reorient_board(2))
+        #self.play(board1.reorient_board(0))
+        board1.move_piece('e2','e4',scene=self)
+        board1.move_piece('e7','e5',scene=self)
         #self.play(piece2.animate.shift(UP))               # Or any other standard Manim transform
         #self.play(piece2.animate.place_at(board2, 7, 7))  # Move piece1 to another square
         #self.play(piece2.animate.shift(UP))               # Or any other standard Manim transform
