@@ -293,21 +293,25 @@ class Manim_Chessboard_2D(VGroup):
     def reorient_board(self, final_orientation):
         """
         Reorient the board to regular, multiverse-normal, or time-normal view.
-
+    
         Args:
             final_orientation (int): final orientation after reorientation:
                 0 - regular
                 1 - time-normal
                 2 - multiverse-normal
-
+    
         Returns:
             Rotate: A Manim Rotate animation object
         """
-        axis, angle = self.calculate_rotation_vector(self.orientation, 
-                                                     final_orientation)
+        axis, angle = self.calculate_rotation_vector(self.orientation, final_orientation)
         self.orientation = final_orientation
-        return Rotate(self, angle=angle, axis=axis, 
-                      about_point=list(self.board_loc), run_time=self.animation_speed)
+        return Rotate(
+            self, 
+            angle=angle, 
+            axis=axis, 
+            about_point=list(self.board_loc),  # can be np.array or list
+            run_time=self.animation_speed
+        )
 
     def get_piece(self, square):
         """
@@ -453,7 +457,7 @@ class Manim_Chessboard_2D(VGroup):
             forward = np.array([0, 0, side])
             right = np.array([0, side, 0])
             normal = np.array([-time_sep, 0, 0])
-        elif self.orientation == 1:
+        elif self.orientation == 2:
             forward = np.array([0, 0, side])
             right = np.array([side, 0, 0])
             normal = np.array([0, -time_sep, 0])
@@ -524,6 +528,19 @@ class Manim_Chessboard_5D(VGroup):
         self.manim_chessboards.append(manim_new_chessboard)
         self.add(manim_new_chessboard)
 
+    def reorient_all_boards(self, final_orientation):
+        """
+        Reorient all sub-boards to the specified orientation (0, 1, or 2).
+        Returns an AnimationGroup that can be passed to scene.play(...).
+        """
+        animations = []
+        for chessboard in self.manim_chessboards:
+            anim = chessboard.reorient_board(int(final_orientation))
+            animations.append(anim)
+    
+        # Animate them all together in parallel
+        return AnimationGroup(*animations)
+
     def add_chessboard(self, chessboard_loc, origin_board):
         pass
     def get_piece(self, pos):
@@ -571,6 +588,8 @@ class MultipleChessBoards(ThreeDScene):
         #board2.shift(3*RIGHT) # move it right
         
         self.add(board_5d)#, board2, board3)
+        self.play(board_5d.reorient_all_boards(1))
+        self.play(board_5d.reorient_all_boards(2))
 
         #self.play(board1.reorient_board(1))
         #self.play(board1.reorient_board(2))
