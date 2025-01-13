@@ -99,7 +99,7 @@ class Manim_Chessboard_2D(VGroup):
         self.board_tiles = []
         for row in range(n):
             for col in range(n):
-                idx_1, idx_2 = col, row
+                idx_1, idx_2 = self.get_matrix_indecies(row, col)
                 # Choose color by alternating
                 color_index = (idx_1 + idx_2) % 2
                 fill_idx_2or = self.board_colors[color_index]
@@ -147,7 +147,6 @@ class Manim_Chessboard_2D(VGroup):
     def add_spheres_to_squares(self, radius=0.2):
         """Add spheres to the center of each square with a piece."""
         epsilon = 0.01 # A small value to displace the sphere
-        #if log: print(f"The array of tile cuboids has shape: {np.shape(self.square_pos)}")
         id = 0
         n = self.board_size
         # Matrix that gets ID of a sphere from its position on the board
@@ -156,12 +155,7 @@ class Manim_Chessboard_2D(VGroup):
         # If we're using column-majaor matrix:
         for row_idx in range(n):
             for col_idx in range(n):
-                if self.col_major_matrix:
-                    idx_1 = col_idx
-                    idx_2 = row_idx
-                else: # Row-major
-                    idx_1 = row_idx
-                    idx_2 = col_idx
+                idx_1, idx_2 = self.get_matrix_indecies(row_idx, col_idx)
                 chessform_pos = self.chessutils.matrix_to_chessform([idx_1, idx_2])
                 self.sphere_ids[idx_1, idx_2] = -1
                 if self.log: print(f"Checking piece at location {chessform_pos}...")
@@ -182,8 +176,8 @@ class Manim_Chessboard_2D(VGroup):
                     sphere.set_z_index(1)
                     self.spheres.append(sphere)
                     self.sphere_ids[idx_1, idx_2] = id
-                    print(f"Sphere IDs array:")
-                    print(self.sphere_ids.T)
+                    if self.log: print(f"Sphere IDs array:")
+                    if self.log: print(self.sphere_ids.T)
                     id += 1
                     self.add(sphere)
 
@@ -195,6 +189,16 @@ class Manim_Chessboard_2D(VGroup):
             axis (array): The axis of rotation (default is the Z-axis).
         """
         self.rotate(angle, axis=axis, about_point=self.board_loc)
+
+    def get_matrix_indecies(self, row_idx, col_idx):
+        """
+        Returns potentially reordered matrix indecies based on whether the order is
+        row or column-major.
+        """
+        if self.col_major_matrix:
+            return col_idx, row_idx
+        else: # Row-major
+            return row_idx, col_idx
 
     def calculate_rotation_vector(self, o1, o2):
         """
@@ -297,7 +301,8 @@ class Manim_Chessboard_2D(VGroup):
         in the self.spheres list. If not present, returns -1.
         """
         square_matrix = self.chessutils.chessform_to_matrix(square)
-        id = self.sphere_ids[square_matrix[0], square_matrix[1]]
+        idx_1, idx_2 = self.get_matrix_indecies(square_matrix[1], square_matrix[0])
+        id = self.sphere_ids[idx_1, idx_2]
         return id
 
     def move_piece(self, square_start, square_finish, eat_pieces=False, scene=None):
@@ -310,20 +315,15 @@ class Manim_Chessboard_2D(VGroup):
         finish_matrix = np.array(self.chessutils.chessform_to_matrix(square_finish))
         start_matrix = np.array([start_matrix[1], start_matrix[0]])
         finish_matrix = np.array([finish_matrix[1], finish_matrix[0]])
-        self.chessboard.print_chessboard()
-        print(f"Piece at e2: {self.chessboard.get_piece('e2', self.log)}")
-        print(f"Piece at a2: {self.chessboard.get_piece('a2', self.log)}")
-        print(f"Piece at e4: {self.chessboard.get_piece('e4', self.log)}")
-        print(f"Piece at d7: {self.chessboard.get_piece('d7', self.log)}")
-        print(f"Getting piece at {square_start}")
+        if self.log: self.chessboard.print_chessboard()
         piece, sphere = self.get_piece(square_start)
-        print(f"Got the piece. It is {piece}")
         if piece in self.empty_squares:
             raise ValueError(f"No piece found at square {square_start}")
         delta_matrix = finish_matrix - start_matrix
         forward, right, normal = self.get_board_directions()
         delta_vector = delta_matrix[0] * forward + delta_matrix[1] * right
         piece_f, sphere_f = self.get_piece(square_finish)
+        remove_flag = False
         if piece_f not in self.empty_squares:
             if not eat_pieces:
                 raise ValueError(f"Cannot move into {square_finish}: {piece_f} is present there. Try moving with eat_pieces=True.")
@@ -333,15 +333,16 @@ class Manim_Chessboard_2D(VGroup):
                 if piece_color_f == piece_color:
                     raise ValueError(f"Cannot eat own piece at {square_finish}")
                 else:
-                    self.remove_piece(square_finish)
+                    remove_flag = True
         assert sphere != None, "This part of the code wasn't supposed to be reached if sphere==None"
         if scene==None:
             sphere.shift(delta_vector)
         else:
             scene.play(ApplyMethod(sphere.shift, delta_vector),run_time=self.animation_speed)
+        if remove_flag: self.remove_piece(square_finish)
         self.chessboard.move_piece(square_start, square_finish, eat_pieces=eat_pieces)
-        print(f"Sphere IDs array:")
-        print(self.sphere_ids.T)
+        if self.log: print(f"Sphere IDs array:")
+        if self.log: print(self.sphere_ids.T)
         initial_id = self.sphere_ids[start_matrix[1], start_matrix[0]]
         self.sphere_ids[start_matrix[1], start_matrix[0]] = -1
         self.sphere_ids[finish_matrix[1], finish_matrix[0]] = initial_id
@@ -424,11 +425,22 @@ class Manim_Chessboard_2D(VGroup):
             raise ValueError(f"Unknown orientation: {self.orientation}")
         return forward, right, normal
 
+sample_game_1 = [
+    ["e2", "e4"],  # White: Pawn moves e2 -> e4
+    ["e7", "e5"],  # Black: Pawn moves e7 -> e5
+    ["f2", "f4"],  # White: f2 -> f4 (the actual King's Gambit move)
+    ["e5", "f4"],  # Black: exf4 (pawn takes)
+    ["g1", "f3"],  # White: Knight to f3
+    ["g7", "g5"],  # Black: Pawn to g5 (defending the extra pawn)
+    ["h2", "h4"],  # White: Pawn to h4
+    ["g5", "g4"],  # Black: Pawn pushes g4
+    ["f3", "e5"],  # White: Knight to e5
+]
 class MultipleChessBoards(ThreeDScene):
     def construct(self):
         # Create two chessboards
 
-        log = True
+        log = False
         board1 = Manim_Chessboard_2D(tm_loc=[0,0], log=log)
         board1.chessboard.default_chess_configuration_setup()
         board1.add_spheres_to_squares(radius=0.1)
@@ -440,10 +452,7 @@ class MultipleChessBoards(ThreeDScene):
         #self.play(board1.reorient_board(1))
         #self.play(board1.reorient_board(2))
         #self.play(board1.reorient_board(0))
-        board1.move_piece('e2','e4',scene=self,eat_pieces=True)
-        board1.move_piece('d7','d5',scene=self,eat_pieces=True)
-        board1.move_piece('e4','d5',scene=self,eat_pieces=True)
-        #self.play(piece2.animate.shift(UP))               # Or any other standard Manim transform
-        #self.play(piece2.animate.place_at(board2, 7, 7))  # Move piece1 to another square
-        #self.play(piece2.animate.shift(UP))               # Or any other standard Manim transform
+        for move in sample_game_1:
+            start_sq, end_sq = move
+            board1.move_piece(start_sq, end_sq, scene=self, eat_pieces=True)
         self.wait()

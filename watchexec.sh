@@ -17,7 +17,7 @@ MANIM_COMMAND="manim ./src/${PY_NAME}.py ${SCENE_NAME} --disable_caching"
 
 if [[ $WATCHFLAG -eq 1 ]]; then
     watchexec -w src/${PY_NAME}.py \
-        "clear; ${MANIM_COMMAND} \
+        "clear; ${MANIM_COMMAND} ;\
         hyprctl dispatch workspace 2; \
     	hyprctl keyword animations:enabled 0; \
         pkill mpv; \
