@@ -2,7 +2,7 @@
 SCENE_NAME="MultipleChessBoards"
 PY_NAME="manim_base"
 PY_LOC="./src/${PY_NAME}.py"
-WATCHFLAG=0
+WATCHFLAG=1
 
 get_value() {
 	# Get value of a certain parameter form the python manim code

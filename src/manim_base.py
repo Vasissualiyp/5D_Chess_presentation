@@ -22,7 +22,8 @@ class ChessboardColors():
 class Manim_Chessboard_2D(VGroup):
     def __init__(self, tm_loc=[0,0], square_size=0.5, 
                  board_separation=6, colors=None, 
-                 board_size=8, animation_speed=0.5, **kwargs):
+                 board_size=8, animation_speed=0.5, 
+                 log=False, **kwargs):
         """
         A single 2D chessboard instance
         Args:
@@ -59,8 +60,9 @@ class Manim_Chessboard_2D(VGroup):
         self.chessboard = Chessboard_2D(chessboard_tm_pos=tm_loc, n=board_size)
         self.chessutils = ChessUtils_2D()
         self.empty_squares = [ "", " ", "  ", "Ml", "Md" ]
+        self.log = log
+        self.col_major_matrix = 1
 
-        self.board_tiles = []
         self.create_prism_board()
         #for row in range(board_size):
         #    row_squares = []
@@ -94,32 +96,34 @@ class Manim_Chessboard_2D(VGroup):
         # An array of positions of each chess grid square, 
         # i.e. [0,2,1] gives y component of a3 square
         self.square_pos = np.zeros([n, n, 3])
+        self.board_tiles = []
         for row in range(n):
             for col in range(n):
+                idx_1, idx_2 = col, row
                 # Choose color by alternating
-                color_index = (row + col) % 2
-                fill_color = self.board_colors[color_index]
+                color_index = (idx_1 + idx_2) % 2
+                fill_idx_2or = self.board_colors[color_index]
 
                 # Create a Prism from that square
                 # direction=OUT means it extrudes "up" (in +z) from the base
                 square_prism = Prism(
                     dimensions=(self.square_size, self.square_size, self.prism_height),
                 )
-                square_prism.set_fill(fill_color, opacity=1)
+                square_prism.set_fill(fill_idx_2or, opacity=1)
                 square_prism.set_stroke(width=0)
 
                 # By default, a Square lies in the XY plane at z=0,
                 # so the Prism is extruded upward (in z).
                 # We just need to shift it into position:
                 # Let's treat the "board" as lying in the XY plane, so
-                # row -> y dimension (increasing upwards),
-                # col -> x dimension (increasing to the right).
-                x = (col - n/2 + 0.5) * self.square_size
-                y = (row - n/2 + 0.5) * self.square_size
+                # idx_1 -> y dimension (increasing upwards),
+                # idx_2 -> x dimension (increasing to the right).
+                x = (idx_1 - n/2 + 0.5) * self.square_size
+                y = (idx_2 - n/2 + 0.5) * self.square_size
                 # The bottom of the prism will be at z=0, top at z=prism_height
                 position_vec = np.array([x, y, 0])
                 square_prism.move_to(position_vec)
-                self.square_pos[row, col, :] = position_vec
+                self.square_pos[idx_1, idx_2, :] = position_vec
 
                 self.board_tiles.append(square_prism)
         self.add(*self.board_tiles)
@@ -140,7 +144,7 @@ class Manim_Chessboard_2D(VGroup):
         else:
             raise ValueError(f"Not allowed color: {piece_color}. Allowed vaues: l, d.")
 
-    def add_spheres_to_squares(self, radius=0.2, log=False):
+    def add_spheres_to_squares(self, radius=0.2):
         """Add spheres to the center of each square with a piece."""
         epsilon = 0.01 # A small value to displace the sphere
         #if log: print(f"The array of tile cuboids has shape: {np.shape(self.square_pos)}")
@@ -148,18 +152,26 @@ class Manim_Chessboard_2D(VGroup):
         n = self.board_size
         # Matrix that gets ID of a sphere from its position on the board
         self.sphere_ids = np.zeros((n,n), dtype=int) 
+
+        # If we're using column-majaor matrix:
         for row_idx in range(n):
             for col_idx in range(n):
-                chessform_pos = self.chessutils.matrix_to_chessform([col_idx, row_idx])
-                self.sphere_ids[col_idx, row_idx] = -1
-                if log: print(f"Checking piece at location {chessform_pos}...")
+                if self.col_major_matrix:
+                    idx_1 = col_idx
+                    idx_2 = row_idx
+                else: # Row-major
+                    idx_1 = row_idx
+                    idx_2 = col_idx
+                chessform_pos = self.chessutils.matrix_to_chessform([idx_1, idx_2])
+                self.sphere_ids[idx_1, idx_2] = -1
+                if self.log: print(f"Checking piece at location {chessform_pos}...")
                 piece = self.chessboard.get_piece(chessform_pos)
-                if log: print(f"piece is: {piece}")
+                if self.log: print(f"piece is: {piece}")
                 if piece in [ "", "a0" ]:
-                    if log: print(f"Not adding sphere at {chessform_pos}")
+                    if self.log: print(f"Not adding sphere at {chessform_pos}")
                 elif (piece not in ["Ml", "Md"]):
-                    square_center = self.square_pos[row_idx, col_idx, :]
-                    if log: print(f"Adding {piece} at {chessform_pos}")
+                    square_center = self.square_pos[idx_1, idx_2, :]
+                    if self.log: print(f"Adding {piece} at {chessform_pos}")
                     sphere = Sphere(radius=radius)
                     # Position the sphere at the same center as the square
                     sphere_center = square_center
@@ -169,7 +181,9 @@ class Manim_Chessboard_2D(VGroup):
                     sphere.set_color(sphere_color)
                     sphere.set_z_index(1)
                     self.spheres.append(sphere)
-                    self.sphere_ids[col_idx, row_idx] = id
+                    self.sphere_ids[idx_1, idx_2] = id
+                    print(f"Sphere IDs array:")
+                    print(self.sphere_ids.T)
                     id += 1
                     self.add(sphere)
 
@@ -268,9 +282,10 @@ class Manim_Chessboard_2D(VGroup):
                             If piece=="", it returns None.
         """
         square_matrix = self.chessutils.chessform_to_matrix(square)
+        if self.log: print(f"Matrix notation for square {square}: {square_matrix}")
         id = int(self.sphere_ids[square_matrix[0], square_matrix[1]])
         sphere = self.spheres[id]
-        piece = self.chessboard.get_piece(square)
+        piece = self.chessboard.get_piece(square, self.log)
         if id == -1:
             print(f"No piece present at {square}")
             return "", None
@@ -295,7 +310,14 @@ class Manim_Chessboard_2D(VGroup):
         finish_matrix = np.array(self.chessutils.chessform_to_matrix(square_finish))
         start_matrix = np.array([start_matrix[1], start_matrix[0]])
         finish_matrix = np.array([finish_matrix[1], finish_matrix[0]])
+        self.chessboard.print_chessboard()
+        print(f"Piece at e2: {self.chessboard.get_piece('e2', self.log)}")
+        print(f"Piece at a2: {self.chessboard.get_piece('a2', self.log)}")
+        print(f"Piece at e4: {self.chessboard.get_piece('e4', self.log)}")
+        print(f"Piece at d7: {self.chessboard.get_piece('d7', self.log)}")
+        print(f"Getting piece at {square_start}")
         piece, sphere = self.get_piece(square_start)
+        print(f"Got the piece. It is {piece}")
         if piece in self.empty_squares:
             raise ValueError(f"No piece found at square {square_start}")
         delta_matrix = finish_matrix - start_matrix
@@ -318,13 +340,62 @@ class Manim_Chessboard_2D(VGroup):
         else:
             scene.play(ApplyMethod(sphere.shift, delta_vector),run_time=self.animation_speed)
         self.chessboard.move_piece(square_start, square_finish, eat_pieces=eat_pieces)
+        print(f"Sphere IDs array:")
+        print(self.sphere_ids.T)
+        initial_id = self.sphere_ids[start_matrix[1], start_matrix[0]]
+        self.sphere_ids[start_matrix[1], start_matrix[0]] = -1
+        self.sphere_ids[finish_matrix[1], finish_matrix[0]] = initial_id
 
-    def remove_piece(self, square):
+    def remove_piece(self, square, scene=None):
         """
-        Removes piece at square, given in chess notation
+        Remove the piece and its sphere at the given square.
+
+        Args:
+            square (str): The chess notation (e.g., 'a2', 'e4', etc.) of the piece to remove.
+            scene (Scene): If provided, animate the removal in this scene. Otherwise, remove instantly.
         """
-        pass
-        return 0
+        # 1) Lookup piece & sphere
+        piece, sphere = self.get_piece(square)
+        if piece == "" or sphere is None:
+            print(f"No piece to remove at {square}")
+            return
+
+        # 2) Animate removing the sphere if a scene is provided
+        if scene is not None:
+            scene.play(FadeOut(sphere), run_time=self.animation_speed)
+        # If you don't want a fade-out animation, you could do:
+        # scene.play(sphere.animate.scale(0.0).fade(1.0), ...)
+        # or any other creative effect.
+
+        # 3) Remove sphere from the scene or group 
+        #    (e.g., if your board is a VGroup, you might do self.remove(sphere) as well)
+        if sphere in self.submobjects:
+            self.remove(sphere)
+
+        # 4) Remove the sphere from the self.spheres list
+        #    First we need the index (id)
+        square_matrix = self.chessutils.chessform_to_matrix(square)
+        removed_id = int(self.sphere_ids[square_matrix[0], square_matrix[1]])
+
+        # Make sure we found a valid id
+        if removed_id == -1:
+            print(f"Something is off; sphere_ids already shows no piece at {square}.")
+            return
+
+        # Actually pop the sphere out of the self.spheres list
+        removed_sphere = self.spheres.pop(removed_id)
+
+        # Confirm we removed the correct object
+        assert removed_sphere == sphere, "Mismatch between popped sphere and the expected sphere."
+
+        # 5) Mark this square as empty
+        self.sphere_ids[square_matrix[0], square_matrix[1]] = -1
+
+        # 6) Decrement all sphere IDs greater than removed_id
+        #    Because the list is now shorter, those IDs must shift by -1
+        #    so that they still point to the correct sphere object.
+        mask = self.sphere_ids > removed_id
+        self.sphere_ids[mask] -= 1
 
     def get_board_directions(self):
         """
@@ -357,9 +428,10 @@ class MultipleChessBoards(ThreeDScene):
     def construct(self):
         # Create two chessboards
 
-        board1 = Manim_Chessboard_2D(tm_loc=[0,0])
+        log = True
+        board1 = Manim_Chessboard_2D(tm_loc=[0,0], log=log)
         board1.chessboard.default_chess_configuration_setup()
-        board1.add_spheres_to_squares(radius=0.1, log=True)
+        board1.add_spheres_to_squares(radius=0.1)
         #board3 = Manim_Chessboard_2D(tm_loc=[1,1])
         #board2.shift(3*RIGHT) # move it right
         
@@ -368,8 +440,9 @@ class MultipleChessBoards(ThreeDScene):
         #self.play(board1.reorient_board(1))
         #self.play(board1.reorient_board(2))
         #self.play(board1.reorient_board(0))
-        board1.move_piece('e2','e4',scene=self)
-        board1.move_piece('e7','e5',scene=self)
+        board1.move_piece('e2','e4',scene=self,eat_pieces=True)
+        board1.move_piece('d7','d5',scene=self,eat_pieces=True)
+        board1.move_piece('e4','d5',scene=self,eat_pieces=True)
         #self.play(piece2.animate.shift(UP))               # Or any other standard Manim transform
         #self.play(piece2.animate.place_at(board2, 7, 7))  # Move piece1 to another square
         #self.play(piece2.animate.shift(UP))               # Or any other standard Manim transform

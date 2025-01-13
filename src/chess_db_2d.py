@@ -77,13 +77,14 @@ class Chessboard_2D:
         new_pos_arr = [ self.chessboard_size - pos_arr[0] - 1, pos_arr[1] ]
         return self.utils.matrix_to_chessform(new_pos_arr, self.chessboard_size)
 
-    def get_piece(self, pos):
+    def get_piece(self, pos, log=False):
         """
         Gets the name of the piece in the square, given in chess notation.
         """
 
         pos_arr = self.utils.chessform_to_matrix(pos, chessboard_size=self.chessboard_size)
         piece_value = self.chessboard_matrix[pos_arr[0], pos_arr[1]]
+        if log: print(f"matrix notation for square {pos_arr}: {piece_value}")
         return self.utils.value_to_piece(piece_value)
 
     def mirror_all_pieces(self):
