@@ -123,8 +123,8 @@ class Manim_Chessboard_2D(VGroup):
                 # Let's treat the "board" as lying in the XY plane, so
                 # idx_1 -> y dimension (increasing upwards),
                 # idx_2 -> x dimension (increasing to the right).
-                x = (idx_1 - n/2 + 0.5) * self.square_size
-                y = (idx_2 - n/2 + 0.5) * self.square_size
+                x = (idx_1 - n/2 + 0.5) * self.square_size + self.board_loc[0]
+                y = (idx_2 - n/2 + 0.5) * self.square_size + self.board_loc[1]
                 # The bottom of the prism will be at z=0, top at z=prism_height
                 position_vec = np.array([x, y, 0])
                 square_prism.move_to(position_vec)
@@ -476,6 +476,8 @@ class Manim_Chessboard_5D(VGroup):
             board_size (int): number of squares per board dimension
             animation_speed (float): speed of each animation in sec
         """
+        super().__init__(**kwargs)
+
         self.manim_chessboards = []
         self.board_size = board_size
         self.board_separation = board_separation
@@ -506,6 +508,7 @@ class Manim_Chessboard_5D(VGroup):
                                                    animation_speed=self.animation_speed)
         manim_new_chessboard.add_spheres_to_squares(radius=self.sphere_radius)
         self.manim_chessboards.append(manim_new_chessboard)
+        self.add(manim_new_chessboard)
 
     def add_empty_chessboard(self, chessboard_loc):
         """
@@ -519,6 +522,7 @@ class Manim_Chessboard_5D(VGroup):
                                                    chessboard=target_chessboard, 
                                                    animation_speed=self.animation_speed)
         self.manim_chessboards.append(manim_new_chessboard)
+        self.add(manim_new_chessboard)
 
     def add_chessboard(self, chessboard_loc, origin_board):
         pass
@@ -559,13 +563,14 @@ class MultipleChessBoards(ThreeDScene):
         board_5d = Manim_Chessboard_5D(log=log)
         board_5d.default_chess_configuration_setup()
         board1 = board_5d.manim_chessboards[0]
+        board_5d.add_empty_chessboard([1,0])
         #board1 = Manim_Chessboard_2D(tm_loc=[0,0], log=log)
         #board1.chessboard.default_chess_configuration_setup()
         #board1.add_spheres_to_squares(radius=0.1)
         #board3 = Manim_Chessboard_2D(tm_loc=[1,1])
         #board2.shift(3*RIGHT) # move it right
         
-        self.add(board1)#, board2, board3)
+        self.add(board_5d)#, board2, board3)
 
         #self.play(board1.reorient_board(1))
         #self.play(board1.reorient_board(2))
