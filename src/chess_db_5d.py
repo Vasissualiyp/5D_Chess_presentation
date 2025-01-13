@@ -36,7 +36,7 @@ class Chessboard_5D:
         """
         Adds an empty chessboard in specified time-multiverse locaiton
         """
-        base_chessboard = Chessboard_2D()
+        base_chessboard = Chessboard_2D(chessboard_tm_pos=chessboard_loc)
         self.chessboards.append(base_chessboard)
         self.timemult_coords.append(chessboard_loc)
     

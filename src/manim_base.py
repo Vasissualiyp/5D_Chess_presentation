@@ -48,6 +48,7 @@ class Manim_Chessboard_2D(VGroup):
         else:
             chesscolors = colors
         self.board_colors = [ chesscolors.square_dark, chesscolors.square_light ]
+        self.board_colors_moves = [ chesscolors.move_dark, chesscolors.move_light ]
 
         self.squares = []
         self.orientation = 0 # 0 for regular, 1 for time-normal, 2 for multiverse-normal
@@ -67,6 +68,8 @@ class Manim_Chessboard_2D(VGroup):
         self.empty_squares = [ "", " ", "  ", "Ml", "Md" ]
         self.log = log
         self.col_major_matrix = 1
+        self.recolor_list = []
+        self.board_opacity = 1
 
         self.create_prism_board()
         #for row in range(board_size):
@@ -133,16 +136,38 @@ class Manim_Chessboard_2D(VGroup):
                 self.board_tiles.append(square_prism)
         self.add(*self.board_tiles)
 
-    def recolor_board(self, color_rule=None):
+    def recolor_from_list(self, idx_1, idx_2):
+        """
+        Determines which squares to recolor based on self.recolor_list values
+
+        Args:
+            idx_1 (int): 1st index of a square
+            idx_2 (int): 2nd index of a square
+
+        Returns:
+            Manim_Color: a new color for the square
+        """
+
+        square = self.chessutils.matrix_to_chessform([idx_1, idx_2])
+        if square in self.recolor_list:
+            return self.board_colors_moves[(idx_1 + idx_2) % 2]
+        else:
+            return self.board_colors[(idx_1 + idx_2) % 2]
+
+    def recolor_board(self, color_rule=None, scene=None):
         """
         Recolors every square prism on the board.
 
         Args:
-            color_rule: A callable that takes (row, col) or (idx_1, idx_2)
-                        and returns a valid Manim color. If None, just invert
-                        the black/white pattern, for example.
+            color_rule(idx_1, idx_2) (function): 
+                A callable that takes (row, col) or (idx_1, idx_2)
+                and returns a valid Manim color. If None, just invert
+                the black/white pattern, for example.
+            scene (Manim_scene):
+                If passed, will animate the recoloring
         """
         n = self.board_size
+        animations = []
 
         # If no custom color rule is provided, here's a simple default that flips black/white:
         # (Just an example; you can define your own logic.)
@@ -161,7 +186,13 @@ class Manim_Chessboard_2D(VGroup):
 
                 # Apply the rule
                 new_color = color_rule(idx_1, idx_2)
-                prism_tile.set_fill(new_color, opacity=1)
+                if scene == None:
+                    prism_tile.set_fill(new_color, opacity=self.board_opacity)
+                else:
+                    anim = prism_tile.animate.set_fill(new_color, opacity=self.board_opacity)
+                    animations.append(anim)
+        if scene is not None and animations:
+            scene.play(*animations,run_time=self.animation_speed)
 
     def get_object_color_from_piece(self, piece, 
                                     dark_color=None, 
@@ -520,6 +551,8 @@ class Manim_Chessboard_5D(VGroup):
         """
         self.chess5.add_empty_chessboard(chessboard_loc)
         target_chessboard = self.chess5.chessboards[-1]
+        if self.log: print(f"List of chessboards: {self.chess5.chessboards}")
+        if self.log: print(f"Target_chessboard's location: {target_chessboard.chessboard_tm_pos}")
         manim_new_chessboard = Manim_Chessboard_2D(tm_loc=chessboard_loc, 
                                                    square_size=self.square_size, 
                                                    board_separation=self.board_separation, 
@@ -540,6 +573,27 @@ class Manim_Chessboard_5D(VGroup):
     
         # Animate them all together in parallel
         return AnimationGroup(*animations)
+
+    def show_moves(self, pos, scene=None):
+        """
+        Show moves of a piece, located at the provided position.
+        Can also provide scene to animate the squares lighting up.
+        """
+        possible_moves = self.chess5.get_list_of_possible_moves(pos)
+        if self.log: print(f"Possible moves: {possible_moves}")
+        if self.log: print(f"Manim chessboards: {self.chess5.chessboards}")
+        for chessboard in self.chess5.chessboards:
+            chessboard_loc = chessboard.chessboard_tm_pos
+            if self.log: print(f"Location of chessboard: {chessboard_loc}")
+            filtered_moves = [ move[0] for move in possible_moves 
+                              if move[1] == chessboard_loc[0] 
+                              and move[2] == chessboard_loc[1] ]
+            chessboard_id = self.chess5.get_chessboard_by_tm(chessboard_loc)
+            assert chessboard_id != -1, f"Failed to retireve chessboard from {chessboard_loc}"
+            manim_chessboard = self.manim_chessboards[chessboard_id]
+            manim_chessboard.recolor_list = filtered_moves
+            manim_chessboard.recolor_board(manim_chessboard.recolor_from_list,scene=scene)
+            
 
     def add_chessboard(self, chessboard_loc, origin_board):
         pass
@@ -576,11 +630,12 @@ class MultipleChessBoards(ThreeDScene):
     def construct(self):
         # Create two chessboards
 
-        log = False
+        log = True
         board_5d = Manim_Chessboard_5D(log=log)
         board_5d.default_chess_configuration_setup()
         board1 = board_5d.manim_chessboards[0]
-        board_5d.add_empty_chessboard([1,0])
+        board_5d.add_empty_chessboard([0,1])
+        board_5d.add_empty_chessboard([0,-1])
         #board1 = Manim_Chessboard_2D(tm_loc=[0,0], log=log)
         #board1.chessboard.default_chess_configuration_setup()
         #board1.add_spheres_to_squares(radius=0.1)
@@ -588,6 +643,7 @@ class MultipleChessBoards(ThreeDScene):
         #board2.shift(3*RIGHT) # move it right
         
         self.add(board_5d)#, board2, board3)
+        board_5d.show_moves(['b1',0,0])
         self.play(board_5d.reorient_all_boards(1))
         self.play(board_5d.reorient_all_boards(2))
 
@@ -601,4 +657,5 @@ class MultipleChessBoards(ThreeDScene):
         for move in sample_game_1:
             start_sq, end_sq = move
             board1.move_piece(start_sq, end_sq, scene=self, eat_pieces=True)
+        board_5d.show_moves(['e5',0,0])
         self.wait()
