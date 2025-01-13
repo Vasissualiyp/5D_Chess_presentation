@@ -61,7 +61,6 @@ class Moves():
                signed_perms.append(tuple(sign * component for sign, component in zip(signs, move)))
         return sorted(set(signed_perms))  # Remove duplicates
 
-
     def generate_pawn_perms_with_signs(self, array) -> list:
         """
         Generates a list of all possible permutations of an array with sign variations

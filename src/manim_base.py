@@ -1,6 +1,7 @@
 from manim import *
 import numpy as np
 from chess_db_2d import Chessboard_2D, ChessUtils_2D
+from chess_db_5d import Chessboard_5D
 
 config.pixel_width = 480
 config.pixel_height = 360
@@ -22,6 +23,7 @@ class ChessboardColors():
 class Manim_Chessboard_2D(VGroup):
     def __init__(self, tm_loc=[0,0], square_size=0.5, 
                  board_separation=6, colors=None, 
+                 chessboard=None,
                  board_size=8, animation_speed=0.5, 
                  log=False, **kwargs):
         """
@@ -57,7 +59,10 @@ class Manim_Chessboard_2D(VGroup):
         self.animation_speed = animation_speed
         self.board_separation = board_separation
         self.board_loc=np.array([tm_loc[0]*board_separation, tm_loc[1]*board_separation, 0])
-        self.chessboard = Chessboard_2D(chessboard_tm_pos=tm_loc, n=board_size)
+        if chessboard==None:
+            self.chessboard = Chessboard_2D(chessboard_tm_pos=tm_loc, n=board_size)
+        else:
+            self.chessboard = chessboard
         self.chessutils = ChessUtils_2D()
         self.empty_squares = [ "", " ", "  ", "Ml", "Md" ]
         self.log = log
@@ -102,14 +107,14 @@ class Manim_Chessboard_2D(VGroup):
                 idx_1, idx_2 = self.get_matrix_indecies(row, col)
                 # Choose color by alternating
                 color_index = (idx_1 + idx_2) % 2
-                fill_idx_2or = self.board_colors[color_index]
+                fill_color = self.board_colors[color_index]
 
                 # Create a Prism from that square
                 # direction=OUT means it extrudes "up" (in +z) from the base
                 square_prism = Prism(
                     dimensions=(self.square_size, self.square_size, self.prism_height),
                 )
-                square_prism.set_fill(fill_idx_2or, opacity=1)
+                square_prism.set_fill(fill_color, opacity=1)
                 square_prism.set_stroke(width=0)
 
                 # By default, a Square lies in the XY plane at z=0,
@@ -127,6 +132,36 @@ class Manim_Chessboard_2D(VGroup):
 
                 self.board_tiles.append(square_prism)
         self.add(*self.board_tiles)
+
+    def recolor_board(self, color_rule=None):
+        """
+        Recolors every square prism on the board.
+
+        Args:
+            color_rule: A callable that takes (row, col) or (idx_1, idx_2)
+                        and returns a valid Manim color. If None, just invert
+                        the black/white pattern, for example.
+        """
+        n = self.board_size
+
+        # If no custom color rule is provided, here's a simple default that flips black/white:
+        # (Just an example; you can define your own logic.)
+        if color_rule is None:
+            def color_rule(idx_1, idx_2):
+                return self.board_colors[(idx_1 + idx_2) % 2]
+
+        for row in range(n):
+            for col in range(n):
+                # Convert (row, col) into the same indexing you used to place the squares
+                idx_1, idx_2 = self.get_matrix_indecies(row, col)
+
+                # figure out which tile from your board_tiles list corresponds to (idx_1, idx_2)
+                tile_index = row * n + col  # or row * n + col, if that’s how you appended them
+                prism_tile = self.board_tiles[tile_index]
+
+                # Apply the rule
+                new_color = color_rule(idx_1, idx_2)
+                prism_tile.set_fill(new_color, opacity=1)
 
     def get_object_color_from_piece(self, piece, 
                                     dark_color=None, 
@@ -426,6 +461,84 @@ class Manim_Chessboard_2D(VGroup):
             raise ValueError(f"Unknown orientation: {self.orientation}")
         return forward, right, normal
 
+class Manim_Chessboard_5D(VGroup):
+    def __init__(self, square_size=0.5, 
+                 board_separation=6, colors=None, 
+                 board_size=8, animation_speed=0.5, 
+                 log=False, **kwargs):
+        """
+        A 5D chessboard instance
+        Args:
+            tm_loc (array): a location of chessboard in time-multiverse coordinates
+            square_size (float): size of individual squares
+            board_separation (float): distance between the centers of the boards in 5D
+            colors (array): colors of the chessboard
+            board_size (int): number of squares per board dimension
+            animation_speed (float): speed of each animation in sec
+        """
+        self.manim_chessboards = []
+        self.board_size = board_size
+        self.board_separation = board_separation
+        self.colors = colors
+        self.animation_speed = animation_speed
+        self.square_size = square_size
+        self.sphere_radius = 0.1
+        self.log = log
+
+        # 0 for 1st turn to white, 1 for 1st turn to black. Important for multiverse creation directions
+        self.first_turn_black = 0
+
+        self.chess2utils = ChessUtils_2D()
+        self.chess5 = Chessboard_5D(chessboard_size=self.board_size,
+                                    first_turn_black=self.first_turn_black,
+                                    log=self.log)
+
+    def default_chess_configuration_setup(self):
+        """
+        Sets up the default 8x8 chessboard.
+        """
+        self.chess5.default_chess_configuration_setup()
+        target_chessboard = self.chess5.chessboards[0]
+        manim_new_chessboard = Manim_Chessboard_2D(tm_loc=[0,0], 
+                                                   square_size=self.square_size, 
+                                                   board_separation=self.board_separation, 
+                                                   chessboard=target_chessboard, 
+                                                   animation_speed=self.animation_speed)
+        manim_new_chessboard.add_spheres_to_squares(radius=self.sphere_radius)
+        self.manim_chessboards.append(manim_new_chessboard)
+
+    def add_empty_chessboard(self, chessboard_loc):
+        """
+        Adds an empty chessboard in specified time-multiverse locaiton
+        """
+        self.chess5.add_empty_chessboard(chessboard_loc)
+        target_chessboard = self.chess5.chessboards[-1]
+        manim_new_chessboard = Manim_Chessboard_2D(tm_loc=chessboard_loc, 
+                                                   square_size=self.square_size, 
+                                                   board_separation=self.board_separation, 
+                                                   chessboard=target_chessboard, 
+                                                   animation_speed=self.animation_speed)
+        self.manim_chessboards.append(manim_new_chessboard)
+
+    def add_chessboard(self, chessboard_loc, origin_board):
+        pass
+    def get_piece(self, pos):
+        pass
+    def add_piece(self, piece, pos, eat_pieces=False):
+        pass
+    def evolve_chessboard(self, chessboard_loc):
+        pass
+    def movie_piece(self, original_pos, final_pos):
+        pass
+    def move_with_evolution(self, original_pos, square2):
+        pass
+    def move_with_evolution_2_boards(self, original_pos, final_pos):
+        pass
+    def move_with_evolution_remove_piece(self, original_pos):
+        pass
+    def move_with_evolution_add_piece(self, final_pos, piece):
+        pass
+
 sample_game_1 = [
     ["e2", "e4"],  # White: Pawn moves e2 -> e4
     ["e7", "e5"],  # Black: Pawn moves e7 -> e5
@@ -437,14 +550,18 @@ sample_game_1 = [
     ["g5", "g4"],  # Black: Pawn pushes g4
     ["f3", "e5"],  # White: Knight to e5
 ]
+
 class MultipleChessBoards(ThreeDScene):
     def construct(self):
         # Create two chessboards
 
         log = False
-        board1 = Manim_Chessboard_2D(tm_loc=[0,0], log=log)
-        board1.chessboard.default_chess_configuration_setup()
-        board1.add_spheres_to_squares(radius=0.1)
+        board_5d = Manim_Chessboard_5D(log=log)
+        board_5d.default_chess_configuration_setup()
+        board1 = board_5d.manim_chessboards[0]
+        #board1 = Manim_Chessboard_2D(tm_loc=[0,0], log=log)
+        #board1.chessboard.default_chess_configuration_setup()
+        #board1.add_spheres_to_squares(radius=0.1)
         #board3 = Manim_Chessboard_2D(tm_loc=[1,1])
         #board2.shift(3*RIGHT) # move it right
         
@@ -453,6 +570,10 @@ class MultipleChessBoards(ThreeDScene):
         #self.play(board1.reorient_board(1))
         #self.play(board1.reorient_board(2))
         #self.play(board1.reorient_board(0))
+        polar_angle = 0
+        azimuthal_angle = 50
+        self.set_camera_orientation(phi=azimuthal_angle*DEGREES,theta=(polar_angle-90)*DEGREES)
+        self.begin_ambient_camera_rotation(rate=0.1)
         for move in sample_game_1:
             start_sq, end_sq = move
             board1.move_piece(start_sq, end_sq, scene=self, eat_pieces=True)

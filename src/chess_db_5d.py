@@ -7,7 +7,7 @@ class Chessboard_5D:
     """
     A class that contains all info about 5D chessboards and pieces
     """
-    def __init__(self, chessboard_size=8, log=False):
+    def __init__(self, chessboard_size=8, first_turn_black=0, log=False):
         """
         Create a new instance of class
         """
@@ -21,7 +21,7 @@ class Chessboard_5D:
         self.log = log
 
         # 0 for 1st turn to white, 1 for 1st turn to black. Important for multiverse creation directions
-        self.first_turn_black = 0
+        self.first_turn_black = first_turn_black
 
     def default_chess_configuration_setup(self):
         """
@@ -281,7 +281,23 @@ class Chessboard_5D:
         else: # Can eat enemy pieces
             return 1
 
-    def get_possible_moves(self, pos):
+    def get_list_of_possible_moves(self, pos):
+        """
+        Finds possible moves for a piece on the predefined square
+        and returns a Chessboard_5D object containing that info
+
+        Args:
+            pos (list): 3-list of target space
+
+        Returns:
+            list of all possible moves
+        """
+        possible_moves = self.moves.get_all_movable_spaces(self.check_if_move_possible, 
+                                                           self.get_piece(pos), pos, 
+                                                           log=self.log)
+        return possible_moves
+
+    def get_board_of_possible_moves(self, pos):
         """
         Finds possible moves for a piece on the predefined square
         and returns a Chessboard_5D object containing that info
@@ -295,7 +311,7 @@ class Chessboard_5D:
         piece = self.get_piece(pos)
         _, piece_color = list(piece)
         piece_to_add = "M" + piece_color
-        possible_moves = self.moves.get_all_movable_spaces(self.check_if_move_possible, piece, pos, log=self.log)
+        possible_moves = self.get_list_of_possible_moves(pos)
         self_copy = copy.deepcopy(self)
         for move in possible_moves:
             if log: print(f"Looking at move {move}...")
@@ -351,7 +367,7 @@ class ChessTests():
             print(pawns_row_chessboard)
             target_chessboard = self.chess5.chessboards[target_id]
             target_chessboard.create_row_of_pieces(row_id, pawn)
-        self.moves_board = self.chess5.get_possible_moves(pos)
+        self.moves_board = self.chess5.get_board_of_possible_moves(pos)
         for t in range(0, 2*n + 1):
             self.moves_board.print_chessboard([t, -1])
             self.moves_board.print_chessboard([t, 0])
