@@ -7,7 +7,7 @@ class Chessboard_5D:
     """
     A class that contains all info about 5D chessboards and pieces
     """
-    def __init__(self, chessboard_size = 8):
+    def __init__(self, chessboard_size=8, log=False):
         """
         Create a new instance of class
         """
@@ -17,6 +17,8 @@ class Chessboard_5D:
         self.present = 0
         self.max_mult_black = 0
         self.max_mult_white = 0
+        self.moves = Moves()
+        self.log = log
 
         # 0 for 1st turn to white, 1 for 1st turn to black. Important for multiverse creation directions
         self.first_turn_black = 0
@@ -279,6 +281,27 @@ class Chessboard_5D:
         else: # Can eat enemy pieces
             return 1
 
+    def get_possible_moves(self, pos):
+        """
+        Finds possible moves for a piece on the predefined square
+        and returns a Chessboard_5D object containing that info
+
+        Args:
+            pos (list): 3-list of target space
+
+        Returns:
+            Chessboard_5D: a 5D chessboard object, containing possible moves
+        """
+        piece = self.get_piece(pos)
+        _, piece_color = list(piece)
+        piece_to_add = "M" + piece_color
+        possible_moves = self.moves.get_all_movable_spaces(self.check_if_move_possible, piece, pos, log=self.log)
+        self_copy = copy.deepcopy(self)
+        for move in possible_moves:
+            if log: print(f"Looking at move {move}...")
+            self_copy.add_piece(piece_to_add, move, eat_pieces=True)
+        return self_copy
+
 class ChessTests():
     """Various tests for 2D/5D chessboard"""
     def __init__(self):
@@ -312,13 +335,12 @@ class ChessTests():
         pawns_row_chessboard = [ pos[1], pos[2] ]
         pawns_row_square = pos[0]
         pawns_row_increment = 1
-        _, piece_color = list(piece)
-        piece_to_add = "M" + piece_color
         for i in range(-n, n+1):
             for j in range(2*n+1):
                 self.chess5.add_empty_chessboard([j,i])
                 print([j,i])
         self.chess5.add_piece(piece, pos)
+        _, piece_color = list(piece)
         if pawns_row:
             pawn = self.chess2utils.light_to_dark_piece("p" + piece_color)
             if piece_color == 'd':
@@ -329,14 +351,11 @@ class ChessTests():
             print(pawns_row_chessboard)
             target_chessboard = self.chess5.chessboards[target_id]
             target_chessboard.create_row_of_pieces(row_id, pawn)
-        possible_moves = self.moves.get_all_movable_spaces(self.chess5.check_if_move_possible, piece, pos, log=log)
-        for move in possible_moves:
-            if log: print(f"Looking at move {move}...")
-            self.chess5.add_piece(piece_to_add, move, eat_pieces=True)
+        self.moves_board = self.chess5.get_possible_moves(pos)
         for t in range(0, 2*n + 1):
-            self.chess5.print_chessboard([t, -1])
-            self.chess5.print_chessboard([t, 0])
-            self.chess5.print_chessboard([t, 1])
+            self.moves_board.print_chessboard([t, -1])
+            self.moves_board.print_chessboard([t, 0])
+            self.moves_board.print_chessboard([t, 1])
 
     def chessboard2d(self):
         """
