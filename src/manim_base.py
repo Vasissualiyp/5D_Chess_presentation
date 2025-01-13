@@ -220,12 +220,13 @@ class Manim_Chessboard_2D(VGroup):
         # Angles below are for combined double-rotation
         axis_sum = 1 / np.sqrt(3)
         angle_sum = 2 * np.pi / 3
+        axis_triag = np.array([ axis_sum, axis_sum, axis_sum ])
         if o1==o2: 
             axis = x_axis
             angle = 0.0
         elif o1==0:
             if o2==1:
-                axis = np.array([ axis_sum, axis_sum, axis_sum ])
+                axis = axis_triag
                 angle = angle_sum
             elif o2==2:
                 axis = x_axis
@@ -234,7 +235,7 @@ class Manim_Chessboard_2D(VGroup):
                 raise ValueError(f"Cannot have o2 value of {o2}. Only 1,2 values are allowed.")
         elif o1==1:
             if o2==0:
-                axis = np.array([ axis_sum, axis_sum, axis_sum ])
+                axis = axis_triag
                 angle = -angle_sum
             elif o2==2:
                 axis = z_axis
