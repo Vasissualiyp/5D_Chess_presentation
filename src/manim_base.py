@@ -52,6 +52,8 @@ class Manim_Chessboard_2D(VGroup):
 
         self.squares = []
         self.orientation = 0 # 0 for regular, 1 for time-normal, 2 for multiverse-normal
+        self.epsilon = 0.01 # A small value to displace the sphere
+
         self.mlight = chesscolors.piece_light
         self.mdark = chesscolors.piece_dark
         self.board_size = board_size
@@ -212,7 +214,6 @@ class Manim_Chessboard_2D(VGroup):
 
     def add_spheres_to_squares(self, radius=0.2):
         """Add spheres to the center of each square with a piece."""
-        epsilon = 0.01 # A small value to displace the sphere
         id = 0
         n = self.board_size
         # Matrix that gets ID of a sphere from its position on the board
@@ -230,22 +231,37 @@ class Manim_Chessboard_2D(VGroup):
                 if piece in [ "", "a0" ]:
                     if self.log: print(f"Not adding sphere at {chessform_pos}")
                 elif (piece not in ["Ml", "Md"]):
-                    square_center = self.square_pos[idx_1, idx_2, :]
                     if self.log: print(f"Adding {piece} at {chessform_pos}")
-                    sphere = Sphere(radius=radius)
-                    # Position the sphere at the same center as the square
-                    sphere_center = square_center
-                    sphere_center[2] = radius + epsilon
-                    sphere.move_to(sphere_center)
-                    sphere_color = self.get_object_color_from_piece(piece)
-                    sphere.set_color(sphere_color)
-                    sphere.set_z_index(1)
-                    self.spheres.append(sphere)
-                    self.sphere_ids[idx_1, idx_2] = id
-                    if self.log: print(f"Sphere IDs array:")
-                    if self.log: print(self.sphere_ids.T)
-                    id += 1
-                    self.add(sphere)
+                    id = self.add_sphere_to_square(idx_1, idx_2, radius, piece, id)
+
+    def add_sphere_to_square(self, idx_1, idx_2, radius, piece, id):
+            """
+            Adds a sphere to a specific square
+    
+            Args:
+                idx_1 (int): 1st index of a square
+                idx_2 (int): 2nd index of a square
+                radius (float): radius of the sphere to be added
+                piece (str): the name of the piece
+                id (int): largest id
+            """
+            #id = max(np.max(self.sphere_ids), -1)
+            square_center = self.square_pos[idx_1, idx_2, :]
+            sphere = Sphere(radius=radius)
+            # Position the sphere at the same center as the square
+            sphere_center = square_center
+            sphere_center[2] = radius + self.epsilon
+            sphere.move_to(sphere_center)
+            sphere_color = self.get_object_color_from_piece(piece)
+            sphere.set_color(sphere_color)
+            sphere.set_z_index(1)
+            self.spheres.append(sphere)
+            self.sphere_ids[idx_1, idx_2] = id
+            if self.log: print(f"Sphere IDs array:")
+            if self.log: print(self.sphere_ids.T)
+            id += 1
+            self.add(sphere)
+            return id
 
     def rotate_board(self, angle, axis=np.array([0,0,1])):
         """
@@ -593,11 +609,8 @@ class Manim_Chessboard_5D(VGroup):
             manim_chessboard = self.manim_chessboards[chessboard_id]
             manim_chessboard.recolor_list = filtered_moves
             manim_chessboard.recolor_board(manim_chessboard.recolor_from_list,scene=scene)
-            
 
     def add_chessboard(self, chessboard_loc, origin_board):
-        pass
-    def get_piece(self, pos):
         pass
     def add_piece(self, piece, pos, eat_pieces=False):
         pass
@@ -612,6 +625,12 @@ class Manim_Chessboard_5D(VGroup):
     def move_with_evolution_remove_piece(self, original_pos):
         pass
     def move_with_evolution_add_piece(self, final_pos, piece):
+        pass
+
+class CameraSettings_5DChessBoard():
+    """Moving and setting up the camera for 5D Chessboard"""
+    def __init__(self, scene):
+        """Creates camera with default view """
         pass
 
 sample_game_1 = [
@@ -636,20 +655,12 @@ class MultipleChessBoards(ThreeDScene):
         board1 = board_5d.manim_chessboards[0]
         board_5d.add_empty_chessboard([0,1])
         board_5d.add_empty_chessboard([0,-1])
-        #board1 = Manim_Chessboard_2D(tm_loc=[0,0], log=log)
-        #board1.chessboard.default_chess_configuration_setup()
-        #board1.add_spheres_to_squares(radius=0.1)
-        #board3 = Manim_Chessboard_2D(tm_loc=[1,1])
-        #board2.shift(3*RIGHT) # move it right
         
         self.add(board_5d)#, board2, board3)
         board_5d.show_moves(['b1',0,0])
         self.play(board_5d.reorient_all_boards(1))
         self.play(board_5d.reorient_all_boards(2))
 
-        #self.play(board1.reorient_board(1))
-        #self.play(board1.reorient_board(2))
-        #self.play(board1.reorient_board(0))
         polar_angle = 0
         azimuthal_angle = 50
         self.set_camera_orientation(phi=azimuthal_angle*DEGREES,theta=(polar_angle-90)*DEGREES)
