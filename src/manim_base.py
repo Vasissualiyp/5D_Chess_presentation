@@ -22,80 +22,73 @@ class ChessboardColors():
 
 class Manim_Chessboard_2D(VGroup):
     def __init__(self, tm_loc=[0,0], square_size=0.5, 
-                 board_separation=6, colors=None, 
+                 board_separation=[6, 6], colors=None, 
                  chessboard=None,
                  board_size=8, animation_speed=0.5, 
+                 camera_center=[0,0],
                  log=False, **kwargs):
         """
         A single 2D chessboard instance
         Args:
             tm_loc (array): a location of chessboard in time-multiverse coordinates
             square_size (float): size of individual squares
-            board_separation (float): distance between the centers of the boards in 5D
+            board_separation (array): distance between the centers of the boards in 5D, 
+                has time and multiverse components
             colors (array): colors of the chessboard
+            chessboard (Chessboard_2D): a dataset, containing 2D chessboard class
             board_size (int): number of squares per board dimension
+            camera_center (array): a location of camera center in time-multiverse coordinates
             animation_speed (float): speed of each animation in sec
         """
+        # Needed for animations?
         super().__init__(**kwargs)
-        #tm_loc[0]-=1
 
-        image = ImageMobject("/home/vasilii/research/anim/5DChess/resources/Chess_bdt60.png")
-        #self.add(image)
-        image.scale(1)
+        #image = ImageMobject("/home/vasilii/research/anim/5DChess/resources/Chess_bdt60.png")
+        ##self.add(image)
+        #image.scale(1)
         #image.rotate(PI/4, axis=UP)
+
+        # Colors
         if colors == None:
             chesscolors = ChessboardColors()
         else:
             chesscolors = colors
         self.board_colors = [ chesscolors.square_dark, chesscolors.square_light ]
         self.board_colors_moves = [ chesscolors.move_dark, chesscolors.move_light ]
-
-        self.squares = []
-        self.orientation = 0 # 0 for regular, 1 for time-normal, 2 for multiverse-normal
-        self.epsilon = 0.01 # A small value to displace the sphere
-
         self.mlight = chesscolors.piece_light
         self.mdark = chesscolors.piece_dark
+
+        # Board geometry
         self.board_size = board_size
         self.square_size = square_size
         self.prism_height = 0.1
-        self.animation_speed = animation_speed
-        self.board_separation = board_separation
-        self.board_loc=np.array([tm_loc[0]*board_separation, tm_loc[1]*board_separation, 0])
+        self.orientation = 0 # 0 for regular, 1 for time-normal, 2 for multiverse-normal
+
+        # Chessboard database and utils class
         if chessboard==None:
             self.chessboard = Chessboard_2D(chessboard_tm_pos=tm_loc, n=board_size)
         else:
             self.chessboard = chessboard
         self.chessutils = ChessUtils_2D()
+
+        # Other parameters
+        self.epsilon = 0.01 # A small value to displace the sphere
         self.empty_squares = [ "", " ", "  ", "Ml", "Md" ]
         self.log = log
         self.col_major_matrix = 1
         self.recolor_list = []
+
+        # Animations and visuals
+        self.camera_center = camera_center
+        self.animation_speed = animation_speed
         self.board_opacity = 1
 
-        self.create_prism_board()
-        #for row in range(board_size):
-        #    row_squares = []
-        #    for col in range(board_size):
-        #        color_index = (row + col) % 2
-        #        square = Square(side_length=square_size, fill_color=colors[color_index], 
-        #                        fill_opacity=1)
-        #        # Position each square:
-        #        square_pos_x = (col - board_size/2 + 0.5) * square_size
-        #        square_pos_y = (board_size/2 - row - 0.5) * square_size
-        #        square_pos = np.array([
-        #            square_pos_x,
-        #            square_pos_y,
-        #            0
-        #        ])
-        #        square.set_z_index(0)
-        #        square.move_to(square_pos)
-        #        row_squares.append(square)
-        #        self.add(square)
-        #    self.squares.append(row_squares)
+        # Board properties relative to other boards
+        self.tm_loc = tm_loc
+        self.board_separation = board_separation
+        self.board_loc=self.get_updated_board_pos()
 
-        #self.shift(self.board_loc) # Move the board to its expected location
-        # Now call the separate method to add spheres
+        self.create_prism_board()
         self.spheres = []  # Keep track of all spheres if you want to animate them later
 
     def create_prism_board(self):
@@ -125,9 +118,6 @@ class Manim_Chessboard_2D(VGroup):
                 # By default, a Square lies in the XY plane at z=0,
                 # so the Prism is extruded upward (in z).
                 # We just need to shift it into position:
-                # Let's treat the "board" as lying in the XY plane, so
-                # idx_1 -> y dimension (increasing upwards),
-                # idx_2 -> x dimension (increasing to the right).
                 x = (idx_1 - n/2 + 0.5) * self.square_size + self.board_loc[0]
                 y = (idx_2 - n/2 + 0.5) * self.square_size + self.board_loc[1]
                 # The bottom of the prism will be at z=0, top at z=prism_height
@@ -195,6 +185,57 @@ class Manim_Chessboard_2D(VGroup):
                     animations.append(anim)
         if scene is not None and animations:
             scene.play(*animations,run_time=self.animation_speed)
+
+    def move_board_to_new_loc(self, new_loc):
+        """
+        Move board to new position in 3D schene
+
+        Args:
+            new_loc (array): a 3D array that gives new position
+        Returns:
+            self.animate: A Manim animation object
+        """
+        self.board_loc = new_loc
+        return self.animate.move_to(new_loc).set_run_time(self.animation_speed)
+
+    def change_camera_center(self, camera_center):
+        """
+        Move board to new position in 3D schene, based on camera center position
+
+        Args:
+            camera_center (array): a location of camera center in time-multiverse coordinates
+        Returns:
+            self.animate: A Manim animation object
+        """
+        self.camera_center = camera_center
+        new_board_loc=self.get_updated_board_pos()
+        return self.move_board_to_new_loc(new_board_loc)
+
+    def change_board_separation(self, board_separation):
+        """
+        Move board to new position in 3D schene, based on new board separation array
+
+        Args:
+            board_separation (array): distance between the centers of the boards in 5D, 
+                has time and multiverse components
+        Returns:
+            self.animate: A Manim animation object
+        """
+        self.board_separation = board_separation
+        new_board_loc=self.get_updated_board_pos()
+        return self.move_board_to_new_loc(new_board_loc)
+
+    def get_updated_board_pos(self):
+        """
+        Obtain updated board location vector in the 3D scene
+
+        Returns:
+            array: new location vector
+        """
+        time_sep, mult_sep = self.board_separation
+        new_board_loc=np.array([(self.tm_loc[0] - self.camera_center[0])*time_sep, 
+                                (self.tm_loc[1] - self.camera_center[1])*mult_sep, 0])
+        return new_board_loc
 
     def get_object_color_from_piece(self, piece, 
                                     dark_color=None, 
@@ -492,29 +533,28 @@ class Manim_Chessboard_2D(VGroup):
         Returns:
             forward (np.array): forward unit vector (i.e. a1->a2)
             right (np.array): right unit vector (i.e. a1->b1)
-            normal (np.array): unnit vector, normal to the board
+            normal (np.array): unit vector, normal to the board (|n|=1)
         """
         side = self.square_size # sidelength of square
-        time_sep = self.board_separation
         if self.orientation == 0:
             forward = np.array([0, side, 0])
             right = np.array([side, 0, 0])
-            normal = np.array([0, 0, time_sep])
+            normal = np.array([0, 0, 1])
         elif self.orientation == 1:
             forward = np.array([0, 0, side])
             right = np.array([0, side, 0])
-            normal = np.array([-time_sep, 0, 0])
+            normal = np.array([-1, 0, 0])
         elif self.orientation == 2:
             forward = np.array([0, 0, side])
             right = np.array([side, 0, 0])
-            normal = np.array([0, -time_sep, 0])
+            normal = np.array([0, -1, 0])
         else:
             raise ValueError(f"Unknown orientation: {self.orientation}")
         return forward, right, normal
 
 class Manim_Chessboard_5D(VGroup):
     def __init__(self, square_size=0.5, 
-                 board_separation=6, colors=None, 
+                 board_separation=[6, 6], colors=None, 
                  board_size=8, animation_speed=0.5, 
                  log=False, **kwargs):
         """
@@ -522,7 +562,8 @@ class Manim_Chessboard_5D(VGroup):
         Args:
             tm_loc (array): a location of chessboard in time-multiverse coordinates
             square_size (float): size of individual squares
-            board_separation (float): distance between the centers of the boards in 5D
+            board_separation (array): distance between the centers of the boards in 5D, 
+                has time and multiverse components
             colors (array): colors of the chessboard
             board_size (int): number of squares per board dimension
             animation_speed (float): speed of each animation in sec
@@ -537,6 +578,7 @@ class Manim_Chessboard_5D(VGroup):
         self.square_size = square_size
         self.sphere_radius = 0.1
         self.log = log
+        self.camera_center = [0, 0]
 
         # 0 for 1st turn to white, 1 for 1st turn to black. Important for multiverse creation directions
         self.first_turn_black = 0
@@ -585,6 +627,37 @@ class Manim_Chessboard_5D(VGroup):
         animations = []
         for chessboard in self.manim_chessboards:
             anim = chessboard.reorient_board(int(final_orientation))
+            animations.append(anim)
+    
+        # Animate them all together in parallel
+        return AnimationGroup(*animations)
+
+    def change_camera_center(self, camera_center):
+        """
+        Move all boards to new positions in 3D schene, based on camera center position
+
+        Args:
+            camera_center (array): a location of camera center in time-multiverse coordinates
+        """
+        animations = []
+        for chessboard in self.manim_chessboards:
+            anim = chessboard.change_camera_center(camera_center)
+            animations.append(anim)
+    
+        # Animate them all together in parallel
+        return AnimationGroup(*animations)
+
+    def change_board_separation(self, board_separation):
+        """
+        Move all board to new positions in 3D schene, based on new board separation array
+
+        Args:
+            board_separation (array): distance between the centers of the boards in 5D, 
+                has time and multiverse components
+        """
+        animations = []
+        for chessboard in self.manim_chessboards:
+            anim = chessboard.change_board_separation(board_separation)
             animations.append(anim)
     
         # Animate them all together in parallel
@@ -660,6 +733,8 @@ class MultipleChessBoards(ThreeDScene):
         board_5d.show_moves(['b1',0,0])
         self.play(board_5d.reorient_all_boards(1))
         self.play(board_5d.reorient_all_boards(2))
+        self.play(board_5d.change_board_separation([3,3]))
+        self.play(board_5d.change_camera_center([0,1]))
 
         polar_angle = 0
         azimuthal_angle = 50
