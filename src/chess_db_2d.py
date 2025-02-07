@@ -204,8 +204,19 @@ class ChessUtils_2D():
     """DocString"""
     def __init__(self):
         """Create a new instance"""
-        pass
 
+        self.img_type = "svg"
+        self.pieces_scales_dict = {
+                                   # ----------------------
+                                   "k": 1.6, # Light King
+                                   "q": 1.5, # Light Queen
+                                   "b": 1.4, # Light Bishop
+                                   "n": 1.4, # Light Knight
+                                   "r": 1.1, # Light Rook
+                                   "p": 0.9, # Light Pawn
+                                   "d": 1.0, # Light Dragon
+                                   "u": 1.0, # Light Unicorn
+                                  }
         self.pieces_dict = {0: "",
                             # ----------------------
                             1: "kl", # Light King
@@ -300,16 +311,39 @@ class ChessUtils_2D():
             piece (str): piece acronym
 
         Returns:
-            path (str): full path to the file of the piece
+            str: full path to the file of the piece
+            float: scale factor for the piece image size 
         """
-        if piece[0] in ['b', 'k', 'n', 'p', 'q', 'r']:
-            filename = "Chess_" + piece + "t60.png"
+        if self.img_type == "svg":
+            postfix = "v60.svg"
+        elif self.img_type == "png":
+            postfix = "t60.png"
+        else:
+            raise ValueError(f"Unknown image type: {self.img_type}")
+
+        # Treatment of identical pieces
+        if piece[0] == 'R': # Royal queen
+            piece_img_str = 'q' + piece[1]
+        elif piece[0] == 'c': # Common king
+            piece_img_str = 'k' + piece[1]
+        elif piece[0] == 'B': # Brawn
+            piece_img_str = 'p' + piece[1]
+        elif piece[0] == 'P': # Princess
+            piece_img_str = 'q' + piece[1]
+        else:
+            piece_img_str = piece
+
+        if piece_img_str[0] in ['b', 'k', 'n', 'p', 'q', 'r']:
+            filename = "Chess_" + piece_img_str + postfix
         else: # For 5D Chess special pieces
-            filename = "Chess_" + "pd"  + "t60.png"
+            filename = "Chess_" + "p" + piece_img_str[1] + postfix
+
+        scaling = self.pieces_scales_dict[piece_img_str[0]]
+
         current_directory = os.path.dirname(__file__)
         parent_directory = os.path.dirname(current_directory)
         resources_dir = os.path.join(parent_directory, "resources")
-        return os.path.join(resources_dir, filename)
+        return os.path.join(resources_dir, filename), scaling
 
     def light_to_dark_piece(self, piece):
         """

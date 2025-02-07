@@ -69,7 +69,7 @@ class Manim_Chessboard_2D(VGroup):
         self.chessutils = ChessUtils_2D()
 
         # Other parameters
-        self.epsilon = 0.01 # A small value to displace the sphere
+        self.delta = 0.01 # A small value to displace the sphere
         self.empty_squares = [ "", " ", "  ", "Ml", "Md" ]
         self.log = log
         self.col_major_matrix = 1
@@ -299,6 +299,7 @@ class Manim_Chessboard_2D(VGroup):
         """Add spheres to the center of each square with a piece."""
         id = 0
         n = self.board_size
+        self.pieces = [] # deepseek
         # Matrix that gets ID of a sphere from its position on the board
         self.sphere_ids = np.zeros((n,n), dtype=int) 
 
@@ -316,6 +317,96 @@ class Manim_Chessboard_2D(VGroup):
                 elif (piece not in ["Ml", "Md"]):
                     if self.log: print(f"Adding {piece} at {chessform_pos}")
                     id = self.add_sphere_to_square(idx_1, idx_2, radius, piece, id)
+                    #id = self.add_piece_to_square_chatgpt(idx_1, idx_2, piece, id)
+                    #id = self.add_piece_to_square_deepseek(idx_1, idx_2, piece, id)
+
+    def add_piece_to_square_chatgpt(self, idx_1, idx_2, piece, id, scale_factor=0.5):
+        """
+        Adds a chess piece image to a specific square in the 3D scene.
+        
+        Args:
+            idx_1 (int): 1st index of a square.
+            idx_2 (int): 2nd index of a square.
+            piece (str): the name of the chess piece.
+            id (int): current largest id.
+            scale_factor (float): scaling factor for the image (optional).
+        """
+        # Retrieve the center position of the designated square.
+        square_center = self.square_pos[idx_1, idx_2, :]
+
+        # Obtain the file path or image data for the chess piece.
+        image_path = self.chessutils.get_piece_image(piece)
+
+        # Create an ImageMobject which, under the OpenGL renderer, is a 3D object.
+        piece_image = ImageMobject(image_path)
+        
+        # Scale the image to fit within the square.
+        piece_image.scale(scale_factor)
+        
+        # Position the image: center it at the square and offset in z-direction.
+        piece_image.move_to(square_center)
+        piece_image.shift(UP * self.delta)  # Adjust vertical offset as needed
+        
+        # Ensure proper depth ordering.
+        piece_image.set_z_index(1)
+        
+        # (Optional) Append the image to a list for future reference.
+        if not hasattr(self, "piece_images"):
+            self.piece_images = []
+        self.piece_images.append(piece_image)
+        self.image_ids[idx_1, idx_2] = id
+        
+        if self.log:
+            print("Image IDs array:")
+            print(self.image_ids.T)
+        
+        id += 1
+        self.add(piece_image)
+        return id
+
+    def add_piece_to_square_deepseek(self, idx_1, idx_2, piece, id):
+        """
+        Adds a 3D piece image to a specific square
+
+        Args:
+            idx_1 (int): 1st index of a square
+            idx_2 (int): 2nd index of a square
+            piece (str): the name of the piece
+            id (int): largest id
+        """
+        square_center = self.square_pos[idx_1, idx_2, :]
+        piece_image = self.chessutils.get_piece_image(piece)  # Get image path
+        
+        # Create a 3D surface with piece texture
+        piece_surface = Surface(
+            lambda u, v: np.array([u, v, 0]),
+            u_range=[-0.5, 0.5],
+            v_range=[-0.5, 0.5],
+            fill_opacity=1,
+            stroke_width=0,
+        )
+        piece_surface.set_texture(piece_image)
+        
+        # Scale to match square size (adjust scale factor as needed)
+        piece_surface.scale(self.square_size * 0.9)  # Slightly smaller than square
+        
+        # Position piece above the board
+        piece_position = square_center.copy()
+        piece_position[2] = self.delta  # Slightly above board surface
+        piece_surface.move_to(piece_position)
+        
+        # Add to scene and tracking lists
+        piece_surface.set_z_index(1)
+        self.pieces.append(piece_surface)  # Rename from spheres to pieces
+        self.sphere_ids[idx_1, idx_2] = id
+        
+        if self.log: 
+            print(f"Piece IDs array:")
+            print(self.sphere_ids.T)
+        
+        id += 1
+        self.add(piece_surface)
+        return id
 
     def add_sphere_to_square(self, idx_1, idx_2, radius, piece, id):
             """
@@ -328,16 +419,28 @@ class Manim_Chessboard_2D(VGroup):
                 piece (str): the name of the piece
                 id (int): largest id
             """
+            piece_mesh = "svg"
+
             #id = max(np.max(self.sphere_ids), -1)
             square_center = self.square_pos[idx_1, idx_2, :]
-            sphere = Sphere(radius=radius)
             # Position the sphere at the same center as the square
             sphere_center = square_center
-            sphere_center[2] = radius + self.epsilon
+
+            if piece_mesh == "sphere":
+                sphere = Sphere(radius=radius)
+                sphere_center[2] = radius + self.delta
+            elif piece_mesh == "svg":
+                img_path_svg, img_scale = self.chessutils.get_piece_image(piece)
+                sphere = SVGMobject(img_path_svg)
+                sphere.set(width=self.square_size * 0.5 * img_scale)
+                sphere_center[2] = self.square_size*0.1 + self.delta
+            else:
+                raise ValueError(f"Unknown piece_mesh: {piece_mesh}")
             sphere.move_to(sphere_center)
             sphere_color = self.get_object_color_from_piece(piece)
-            sphere.set_color(sphere_color)
-            sphere.set_z_index(1)
+            if piece_mesh == "sphere":
+                sphere.set_color(sphere_color)
+            sphere.set_z_index(100000)
             self.spheres.append(sphere)
             self.sphere_ids[idx_1, idx_2] = id
             if self.log: print(f"Sphere IDs array:")
@@ -369,6 +472,20 @@ class Manim_Chessboard_2D(VGroup):
             print(f"No piece present at {square}")
             return "", None
         return piece, sphere
+
+    def get_piece_image(self, square):
+        """
+        Obtains image for the piece at a given square (in chess notation)
+
+        Args:
+            square (str): location of the square in chess notation
+        
+        Returns:
+            str: full path to the file of the piece
+            float: scale factor for the piece image size 
+        """
+        piece_name = self.get_piece(square)
+        return self.chessutils.get_piece_image(piece_name)
 
     def get_sphere_id(self, square):
         """
