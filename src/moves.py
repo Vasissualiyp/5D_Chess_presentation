@@ -2,6 +2,7 @@ import numpy as np
 import itertools
 from chess_db_2d import ChessUtils_2D
 
+
 class Moves():
     """Class containing moves of all chess pieces"""
     def __init__(self):

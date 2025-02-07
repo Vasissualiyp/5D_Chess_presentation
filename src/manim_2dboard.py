@@ -1,0 +1,563 @@
+from manim import *
+import numpy as np
+from chess_db_2d import Chessboard_2D, ChessUtils_2D
+
+
+class ChessboardColors():
+    """Colors of chessboard"""
+    def __init__(self, square_light=LIGHTER_GREY, square_dark=GREY, 
+                 piece_light=WHITE, piece_dark=BLACK, 
+                 move_light=GREEN_B, move_dark=GREEN_E):
+        """Creates an instance of the class with all colors assigned"""
+        self.square_light = square_light
+        self.square_dark = square_dark
+        self.piece_light = piece_light
+        self.piece_dark = piece_dark
+        self.move_light = move_light
+        self.move_dark = move_dark
+
+
+class Manim_Chessboard_2D(VGroup):
+    def __init__(self, tm_loc=[0,0], square_size=0.5, 
+                 board_separation=[6, 6], colors=None, 
+                 chessboard=None,
+                 board_size=8, animation_speed=0.5, 
+                 camera_center=[0,0],
+                 log=False, **kwargs):
+        """
+        A single 2D chessboard instance
+        Args:
+            tm_loc (array): a location of chessboard in time-multiverse coordinates
+            square_size (float): size of individual squares
+            board_separation (array): distance between the centers of the boards in 5D, 
+                has time and multiverse components
+            colors (array): colors of the chessboard
+            chessboard (Chessboard_2D): a dataset, containing 2D chessboard class
+            board_size (int): number of squares per board dimension
+            camera_center (array): a location of camera center in time-multiverse coordinates
+            animation_speed (float): speed of each animation in sec
+        """
+        # Needed for animations?
+        super().__init__(**kwargs)
+
+        #image = ImageMobject("/home/vasilii/research/anim/5DChess/resources/Chess_bdt60.png")
+        ##self.add(image)
+        #image.scale(1)
+        #image.rotate(PI/4, axis=UP)
+
+        # Colors
+        if colors == None:
+            chesscolors = ChessboardColors()
+        else:
+            chesscolors = colors
+        self.board_colors = [ chesscolors.square_dark, chesscolors.square_light ]
+        self.board_colors_moves = [ chesscolors.move_dark, chesscolors.move_light ]
+        self.mlight = chesscolors.piece_light
+        self.mdark = chesscolors.piece_dark
+
+        # Board geometry
+        self.board_size = board_size
+        self.square_size = square_size
+        self.prism_height = 0.1
+        self.orientation = 0 # 0 for regular, 1 for time-normal, 2 for multiverse-normal
+
+        # Chessboard database and utils class
+        if chessboard==None:
+            self.chessboard = Chessboard_2D(chessboard_tm_pos=tm_loc, n=board_size)
+        else:
+            self.chessboard = chessboard
+        self.chessutils = ChessUtils_2D()
+
+        # Other parameters
+        self.epsilon = 0.01 # A small value to displace the sphere
+        self.empty_squares = [ "", " ", "  ", "Ml", "Md" ]
+        self.log = log
+        self.col_major_matrix = 1
+        self.recolor_list = []
+
+        # Animations and visuals
+        self.camera_center = camera_center
+        self.animation_speed = animation_speed
+        self.board_opacity = 1
+
+        # Board properties relative to other boards
+        self.tm_loc = tm_loc
+        self.board_separation = board_separation
+        self.board_loc=self.get_updated_board_pos()
+
+        self.create_prism_board()
+        self.spheres = []  # Keep track of all spheres if you want to animate them later
+
+    def create_prism_board(self):
+        """
+        Creates a square chessboard from rectangular prisms
+        """
+        n = self.board_size
+        # An array of positions of each chess grid square, 
+        # i.e. [0,2,1] gives y component of a3 square
+        self.square_pos = np.zeros([n, n, 3])
+        self.board_tiles = []
+        for row in range(n):
+            for col in range(n):
+                idx_1, idx_2 = self.get_matrix_indecies(row, col)
+                # Choose color by alternating
+                color_index = (idx_1 + idx_2) % 2
+                fill_color = self.board_colors[color_index]
+
+                # Create a Prism from that square
+                # direction=OUT means it extrudes "up" (in +z) from the base
+                square_prism = Prism(
+                    dimensions=(self.square_size, self.square_size, self.prism_height),
+                )
+                square_prism.set_fill(fill_color, opacity=1)
+                square_prism.set_stroke(width=0)
+
+                # By default, a Square lies in the XY plane at z=0,
+                # so the Prism is extruded upward (in z).
+                # We just need to shift it into position:
+                x = (idx_1 - n/2 + 0.5) * self.square_size + self.board_loc[0]
+                y = (idx_2 - n/2 + 0.5) * self.square_size + self.board_loc[1]
+                # The bottom of the prism will be at z=0, top at z=prism_height
+                position_vec = np.array([x, y, 0])
+                square_prism.move_to(position_vec)
+                self.square_pos[idx_1, idx_2, :] = position_vec
+
+                self.board_tiles.append(square_prism)
+        self.add(*self.board_tiles)
+
+    # Board 3D scene manipulation: movement
+
+    def rotate_board(self, angle, axis=np.array([0,0,1])): # Currently useless
+        """
+        Rotates the entire board by a specified angle around a given axis in 3D.
+        Args:
+            angle (float): The angle to rotate in radians.
+            axis (array): The axis of rotation (default is the Z-axis).
+        """
+        self.rotate(angle, axis=axis, about_point=self.board_loc)
+
+    def reorient_board(self, final_orientation):
+        """
+        Reorient the board to regular, multiverse-normal, or time-normal view.
+    
+        Args:
+            final_orientation (int): final orientation after reorientation:
+                0 - regular
+                1 - time-normal
+                2 - multiverse-normal
+    
+        Returns:
+            Rotate: A Manim Rotate animation object
+        """
+        axis, angle = self.calculate_rotation_vector(self.orientation, final_orientation)
+        self.orientation = final_orientation
+        return Rotate(
+            self, 
+            angle=angle, 
+            axis=axis, 
+            about_point=list(self.board_loc),  # can be np.array or list
+            run_time=self.animation_speed
+        )
+
+    # Board 3D scene manipulation: rotation
+
+    def move_board_to_new_loc(self, new_loc):
+        """
+        Move board to new position in 3D schene
+
+        Args:
+            new_loc (array): a 3D array that gives new position
+        Returns:
+            self.animate: A Manim animation object
+        """
+        self.board_loc = new_loc
+        return self.animate.move_to(new_loc).set_run_time(self.animation_speed)
+
+    def change_camera_center(self, camera_center):
+        """
+        Move board to new position in 3D schene, based on camera center position
+
+        Args:
+            camera_center (array): a location of camera center in time-multiverse coordinates
+        Returns:
+            self.animate: A Manim animation object
+        """
+        self.camera_center = camera_center
+        new_board_loc=self.get_updated_board_pos()
+        return self.move_board_to_new_loc(new_board_loc)
+
+    def change_board_separation(self, board_separation):
+        """
+        Move board to new position in 3D schene, based on new board separation array
+
+        Args:
+            board_separation (array): distance between the centers of the boards in 5D, 
+                has time and multiverse components
+        Returns:
+            self.animate: A Manim animation object
+        """
+        self.board_separation = board_separation
+        new_board_loc=self.get_updated_board_pos()
+        return self.move_board_to_new_loc(new_board_loc)
+
+    # Piece manimulation
+
+    def move_piece(self, square_start, square_finish, eat_pieces=False, scene=None):
+        """
+        Moves a piece form start square to finish square (in chess notation).
+        Pass scene to trigger animation.
+        """
+
+        start_matrix = np.array(self.chessutils.chessform_to_matrix(square_start))
+        finish_matrix = np.array(self.chessutils.chessform_to_matrix(square_finish))
+        start_matrix = np.array([start_matrix[1], start_matrix[0]])
+        finish_matrix = np.array([finish_matrix[1], finish_matrix[0]])
+        if self.log: self.chessboard.print_chessboard()
+        piece, sphere = self.get_piece(square_start)
+        if piece in self.empty_squares:
+            raise ValueError(f"No piece found at square {square_start}")
+        delta_matrix = finish_matrix - start_matrix
+        forward, right, normal = self.get_board_directions()
+        delta_vector = delta_matrix[0] * forward + delta_matrix[1] * right
+        piece_f, sphere_f = self.get_piece(square_finish)
+        remove_flag = False
+        if piece_f not in self.empty_squares:
+            if not eat_pieces:
+                raise ValueError(f"Cannot move into {square_finish}: {piece_f} is present there. Try moving with eat_pieces=True.")
+            else:
+                _, piece_color = list(piece)
+                _, piece_color_f = list(piece_f)
+                if piece_color_f == piece_color:
+                    raise ValueError(f"Cannot eat own piece at {square_finish}")
+                else:
+                    remove_flag = True
+        assert sphere != None, "This part of the code wasn't supposed to be reached if sphere==None"
+        if scene==None:
+            sphere.shift(delta_vector)
+        else:
+            scene.play(ApplyMethod(sphere.shift, delta_vector),run_time=self.animation_speed)
+        if remove_flag: self.remove_piece(square_finish)
+        self.chessboard.move_piece(square_start, square_finish, eat_pieces=eat_pieces)
+        if self.log: print(f"Sphere IDs array:")
+        if self.log: print(self.sphere_ids.T)
+        initial_id = self.sphere_ids[start_matrix[1], start_matrix[0]]
+        self.sphere_ids[start_matrix[1], start_matrix[0]] = -1
+        self.sphere_ids[finish_matrix[1], finish_matrix[0]] = initial_id
+
+    def remove_piece(self, square, scene=None):
+        """
+        Remove the piece and its sphere at the given square.
+
+        Args:
+            square (str): The chess notation (e.g., 'a2', 'e4', etc.) of the piece to remove.
+            scene (Scene): If provided, animate the removal in this scene. Otherwise, remove instantly.
+        """
+        # 1) Lookup piece & sphere
+        piece, sphere = self.get_piece(square)
+        if piece == "" or sphere is None:
+            print(f"No piece to remove at {square}")
+            return
+
+        # 2) Animate removing the sphere if a scene is provided
+        if scene is not None:
+            scene.play(FadeOut(sphere), run_time=self.animation_speed)
+        # If you don't want a fade-out animation, you could do:
+        # scene.play(sphere.animate.scale(0.0).fade(1.0), ...)
+        # or any other creative effect.
+
+        # 3) Remove sphere from the scene or group 
+        #    (e.g., if your board is a VGroup, you might do self.remove(sphere) as well)
+        if sphere in self.submobjects:
+            self.remove(sphere)
+
+        # 4) Remove the sphere from the self.spheres list
+        #    First we need the index (id)
+        square_matrix = self.chessutils.chessform_to_matrix(square)
+        removed_id = int(self.sphere_ids[square_matrix[0], square_matrix[1]])
+
+        # Make sure we found a valid id
+        if removed_id == -1:
+            print(f"Something is off; sphere_ids already shows no piece at {square}.")
+            return
+
+        # Actually pop the sphere out of the self.spheres list
+        removed_sphere = self.spheres.pop(removed_id)
+
+        # Confirm we removed the correct object
+        assert removed_sphere == sphere, "Mismatch between popped sphere and the expected sphere."
+
+        # 5) Mark this square as empty
+        self.sphere_ids[square_matrix[0], square_matrix[1]] = -1
+
+        # 6) Decrement all sphere IDs greater than removed_id
+        #    Because the list is now shorter, those IDs must shift by -1
+        #    so that they still point to the correct sphere object.
+        mask = self.sphere_ids > removed_id
+        self.sphere_ids[mask] -= 1
+
+    def add_spheres_to_squares(self, radius=0.2):
+        """Add spheres to the center of each square with a piece."""
+        id = 0
+        n = self.board_size
+        # Matrix that gets ID of a sphere from its position on the board
+        self.sphere_ids = np.zeros((n,n), dtype=int) 
+
+        # If we're using column-majaor matrix:
+        for row_idx in range(n):
+            for col_idx in range(n):
+                idx_1, idx_2 = self.get_matrix_indecies(row_idx, col_idx)
+                chessform_pos = self.chessutils.matrix_to_chessform([idx_1, idx_2])
+                self.sphere_ids[idx_1, idx_2] = -1
+                if self.log: print(f"Checking piece at location {chessform_pos}...")
+                piece = self.chessboard.get_piece(chessform_pos)
+                if self.log: print(f"piece is: {piece}")
+                if piece in [ "", "a0" ]:
+                    if self.log: print(f"Not adding sphere at {chessform_pos}")
+                elif (piece not in ["Ml", "Md"]):
+                    if self.log: print(f"Adding {piece} at {chessform_pos}")
+                    id = self.add_sphere_to_square(idx_1, idx_2, radius, piece, id)
+
+    def add_sphere_to_square(self, idx_1, idx_2, radius, piece, id):
+            """
+            Adds a sphere to a specific square
+    
+            Args:
+                idx_1 (int): 1st index of a square
+                idx_2 (int): 2nd index of a square
+                radius (float): radius of the sphere to be added
+                piece (str): the name of the piece
+                id (int): largest id
+            """
+            #id = max(np.max(self.sphere_ids), -1)
+            square_center = self.square_pos[idx_1, idx_2, :]
+            sphere = Sphere(radius=radius)
+            # Position the sphere at the same center as the square
+            sphere_center = square_center
+            sphere_center[2] = radius + self.epsilon
+            sphere.move_to(sphere_center)
+            sphere_color = self.get_object_color_from_piece(piece)
+            sphere.set_color(sphere_color)
+            sphere.set_z_index(1)
+            self.spheres.append(sphere)
+            self.sphere_ids[idx_1, idx_2] = id
+            if self.log: print(f"Sphere IDs array:")
+            if self.log: print(self.sphere_ids.T)
+            id += 1
+            self.add(sphere)
+            return id
+
+    # Obtaining data about objects
+
+    def get_piece(self, square):
+        """
+        Obtains parameters for the piece at a given square (in chess notation)
+
+        Args:
+            square (str): location of the square in chess notation
+        
+        Returns:
+            piece (str): the name of the piece
+            sphere (Manim): Manim object, on which one can perform transformations.
+                            If piece=="", it returns None.
+        """
+        square_matrix = self.chessutils.chessform_to_matrix(square)
+        if self.log: print(f"Matrix notation for square {square}: {square_matrix}")
+        id = int(self.sphere_ids[square_matrix[0], square_matrix[1]])
+        sphere = self.spheres[id]
+        piece = self.chessboard.get_piece(square, self.log)
+        if id == -1:
+            print(f"No piece present at {square}")
+            return "", None
+        return piece, sphere
+
+    def get_sphere_id(self, square):
+        """
+        Obtains id of the sphere located in square (chess notation)
+        in the self.spheres list. If not present, returns -1.
+        """
+        square_matrix = self.chessutils.chessform_to_matrix(square)
+        idx_1, idx_2 = self.get_matrix_indecies(square_matrix[1], square_matrix[0])
+        id = self.sphere_ids[idx_1, idx_2]
+        return id
+
+    def get_matrix_indecies(self, row_idx, col_idx):
+        """
+        Returns potentially reordered matrix indecies based on whether the order is
+        row or column-major.
+        """
+        if self.col_major_matrix:
+            return col_idx, row_idx
+        else: # Row-major
+            return row_idx, col_idx
+
+    # Coloring
+
+    def recolor_from_list(self, idx_1, idx_2):
+        """
+        Determines which squares to recolor based on self.recolor_list values
+
+        Args:
+            idx_1 (int): 1st index of a square
+            idx_2 (int): 2nd index of a square
+
+        Returns:
+            Manim_Color: a new color for the square
+        """
+
+        square = self.chessutils.matrix_to_chessform([idx_1, idx_2])
+        if square in self.recolor_list:
+            return self.board_colors_moves[(idx_1 + idx_2) % 2]
+        else:
+            return self.board_colors[(idx_1 + idx_2) % 2]
+
+    def recolor_board(self, color_rule=None, scene=None):
+        """
+        Recolors every square prism on the board.
+
+        Args:
+            color_rule(idx_1, idx_2) (function): 
+                A callable that takes (row, col) or (idx_1, idx_2)
+                and returns a valid Manim color. If None, just invert
+                the black/white pattern, for example.
+            scene (Manim_scene):
+                If passed, will animate the recoloring
+        """
+        n = self.board_size
+        animations = []
+
+        # If no custom color rule is provided, here's a simple default that flips black/white:
+        # (Just an example; you can define your own logic.)
+        if color_rule is None:
+            def color_rule(idx_1, idx_2):
+                return self.board_colors[(idx_1 + idx_2) % 2]
+
+        for row in range(n):
+            for col in range(n):
+                # Convert (row, col) into the same indexing you used to place the squares
+                idx_1, idx_2 = self.get_matrix_indecies(row, col)
+
+                # figure out which tile from your board_tiles list corresponds to (idx_1, idx_2)
+                tile_index = row * n + col  # or row * n + col, if that’s how you appended them
+                prism_tile = self.board_tiles[tile_index]
+
+                # Apply the rule
+                new_color = color_rule(idx_1, idx_2)
+                if scene == None:
+                    prism_tile.set_fill(new_color, opacity=self.board_opacity)
+                else:
+                    anim = prism_tile.animate.set_fill(new_color, opacity=self.board_opacity)
+                    animations.append(anim)
+        if scene is not None and animations:
+            scene.play(*animations,run_time=self.animation_speed)
+
+    def get_object_color_from_piece(self, piece, 
+                                    dark_color=None, 
+                                    light_color=None):
+        """Gets a manim color based on the piece color"""
+        _, piece_color = list(piece)
+        if dark_color==None:
+            dark_color = self.mdark
+        if light_color==None:
+            light_color = self.mlight
+        if piece_color == 'l':
+            return light_color
+        elif piece_color == 'd':
+            return dark_color
+        else:
+            raise ValueError(f"Not allowed color: {piece_color}. Allowed vaues: l, d.")
+
+    # Utility functions
+
+    def get_board_directions(self):
+        """
+        Returns directional vectors based on current orientation
+
+        Returns:
+            forward (np.array): forward unit vector (i.e. a1->a2)
+            right (np.array): right unit vector (i.e. a1->b1)
+            normal (np.array): unit vector, normal to the board (|n|=1)
+        """
+        side = self.square_size # sidelength of square
+        if self.orientation == 0:
+            forward = np.array([0, side, 0])
+            right = np.array([side, 0, 0])
+            normal = np.array([0, 0, 1])
+        elif self.orientation == 1:
+            forward = np.array([0, 0, side])
+            right = np.array([0, side, 0])
+            normal = np.array([-1, 0, 0])
+        elif self.orientation == 2:
+            forward = np.array([0, 0, side])
+            right = np.array([side, 0, 0])
+            normal = np.array([0, -1, 0])
+        else:
+            raise ValueError(f"Unknown orientation: {self.orientation}")
+        return forward, right, normal
+
+    def calculate_rotation_vector(self, o1, o2):
+        """
+        Calculates the axis and angle of rotation from orientation o1 to orientation o2
+
+        Args:
+            o1, o2 (int): orientation before/after reorientation:
+                0 - regular
+                1 - time-normal
+                2 - multiverse-normal
+
+        Returns:
+            axis (np.array): axis of rotation
+            angle (float): angle of rotation
+        """
+        x_axis=np.array([1.0,0.0,0.0])
+        y_axis=np.array([0.0,1.0,0.0])
+        z_axis=np.array([0.0,0.0,1.0])
+        # Angles below are for combined double-rotation
+        axis_sum = 1 / np.sqrt(3)
+        angle_sum = 2 * np.pi / 3
+        axis_triag = np.array([ axis_sum, axis_sum, axis_sum ])
+        if o1==o2: 
+            axis = x_axis
+            angle = 0.0
+        elif o1==0:
+            if o2==1:
+                axis = axis_triag
+                angle = angle_sum
+            elif o2==2:
+                axis = x_axis
+                angle = np.pi / 2
+            else:
+                raise ValueError(f"Cannot have o2 value of {o2}. Only 1,2 values are allowed.")
+        elif o1==1:
+            if o2==0:
+                axis = axis_triag
+                angle = -angle_sum
+            elif o2==2:
+                axis = z_axis
+                angle = -np.pi / 2
+            else:
+                raise ValueError(f"Cannot have o2 value of {o2}. Only 0,2 values are allowed.")
+        elif o1==2:
+            if o2==0:
+                axis = x_axis
+                angle = -np.pi / 2
+            elif o2==1:
+                axis = z_axis
+                angle = np.pi / 2
+            else:
+                raise ValueError(f"Cannot have o2 value of {o2}. Only 0,1 values are allowed.")
+        else:
+            raise ValueError(f"Cannot have o1 value of {o1}. Only 0,1,2 values are allowed.")
+        return axis, angle
+
+    def get_updated_board_pos(self):
+        """
+        Obtain updated board location vector in the 3D scene
+
+        Returns:
+            array: new location vector
+        """
+        time_sep, mult_sep = self.board_separation
+        new_board_loc=np.array([(self.tm_loc[0] - self.camera_center[0])*time_sep, 
+                                (self.tm_loc[1] - self.camera_center[1])*mult_sep, 0])
+        return new_board_loc
+

@@ -1,6 +1,7 @@
 import numpy as np
 import os
 
+
 class Chessboard_2D:
     """
     A class that contains all info about a single 2D chessboard
@@ -197,6 +198,7 @@ class Chessboard_2D:
                 print("──"+centsymb,end="")
             print("──"+rightsymb,end="")
             print("")
+
 
 class ChessUtils_2D():
     """DocString"""

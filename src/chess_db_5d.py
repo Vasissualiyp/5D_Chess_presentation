@@ -3,6 +3,7 @@ from chess_db_2d import Chessboard_2D, ChessUtils_2D
 from moves import Moves
 import string, manim, copy
 
+
 class Chessboard_5D:
     """
     A class that contains all info about 5D chessboards and pieces
@@ -318,6 +319,7 @@ class Chessboard_5D:
             self_copy.add_piece(piece_to_add, move, eat_pieces=True)
         return self_copy
 
+
 class ChessTests():
     """Various tests for 2D/5D chessboard"""
     def __init__(self):
@@ -380,7 +382,9 @@ class ChessTests():
         self.chess2.default_chess_configuration_setup()
         self.chess2.print_chessboard()
 
+
 if __name__ == "__main__":
     tests = ChessTests()
     log = False
     tests.test_movement('pd', pawns_row=True, log=log)
+
