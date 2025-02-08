@@ -23,6 +23,8 @@
           scipy
 		  manim
 		  manim-slides
+		  #pyqt5
+		  pyqt5-multimedia
           #jupyterlab  # Include JupyterLab in pythonEnv
           ipykernel   # Include ipykernel to register kernels
         ]);
@@ -33,7 +35,10 @@
             pythonEnv
 			watchexec
 			mpv
-			#manim-slides
+            qt5.qtbase  # Add Qt libraries - for manim-slides
+            qt5.qtwayland # Needed to make python display plots on wayland
+            libsForQt5.qt5.qtmultimedia
+			manim-slides
 			#manim
           ];
         };
