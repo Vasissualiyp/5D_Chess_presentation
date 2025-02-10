@@ -47,11 +47,11 @@ def show_piece_moves_slide(self, board_5d, piece, pos='d4', tm_loc=[0,0]):
         tm_loc (list): position of host chessboard for the piece of interest
     """
     self.next_slide()
-    board1_id = board_5d.chess5.get_chessboard_by_tm(tm_loc)
-    board1 = board_5d.manim_chessboards[board1_id]
-    board1.recolor_board()
-    board1.remove_all_pieces()
-    board1.add_piece(piece, pos)
+    board2d_id = board_5d.chess5.get_chessboard_by_tm(tm_loc)
+    board2d = board_5d.manim_chessboards[board2d_id]
+    board2d.recolor_board()
+    board2d.remove_all_pieces()
+    board2d.add_piece(piece, pos)
     board_5d.show_moves([pos,tm_loc[0],tm_loc[1]])
 
 

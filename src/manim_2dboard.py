@@ -118,20 +118,14 @@ class Manim_Chessboard_2D(VGroup):
                 fill_color = self.board_colors[color_index]
 
                 # Create a Prism from that square
-                # direction=OUT means it extrudes "up" (in +z) from the base
                 square_prism = Prism(
                     dimensions=(self.square_size, self.square_size, self.prism_height),
                 )
                 square_prism.set_fill(fill_color, opacity=1)
                 square_prism.set_stroke(width=0)
 
-                # By default, a Square lies in the XY plane at z=0,
-                # so the Prism is extruded upward (in z).
-                # We just need to shift it into position:
-                x = (idx_1 - n/2 + 0.5) * self.square_size + self.board_loc[0]
-                y = (idx_2 - n/2 + 0.5) * self.square_size + self.board_loc[1]
-                # The bottom of the prism will be at z=0, top at z=prism_height
-                position_vec = np.array([x, y, 0])
+                square = self.chessutils.matrix_to_chessform([idx_1, idx_2])
+                position_vec = self.get_square_pos_in_3d(square)
                 square_prism.move_to(position_vec)
                 self.square_pos[idx_1, idx_2, :] = position_vec
 
@@ -711,4 +705,24 @@ class Manim_Chessboard_2D(VGroup):
         new_board_loc=np.array([(self.tm_loc[0] - self.camera_center[0])*time_sep, 
                                 (self.tm_loc[1] - self.camera_center[1])*mult_sep, 0])
         return new_board_loc
+
+    def get_square_pos_in_3d(self, square):
+        """
+        Gets np array of 3D coordinates for position of a given square for use in Manim
+        """
+        n = self.board_size
+        board_center = self.board_loc
+        forward, right, normal = self.get_board_directions()
+
+        col, row = self.chessutils.chessform_to_matrix(square)
+        idx_1, idx_2 = self.get_matrix_indecies(row, col)
+
+        # x/y position from the center of the board
+        x_from_c = (idx_1 - n/2 + 0.5) * self.square_size
+        y_from_c = (idx_2 - n/2 + 0.5) * self.square_size
+
+        # Displacement vector from the board center
+        dx_vec = np.array([ x_from_c * i for i in right   ])
+        dy_vec = np.array([ y_from_c * i for i in forward ])
+        return self.board_loc + dx_vec + dy_vec
 
