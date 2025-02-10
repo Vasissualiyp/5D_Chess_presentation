@@ -33,13 +33,18 @@ class Manim_Chessboard_5D(VGroup):
         self.manim_chessboards = []
         self.board_size = board_size
         self.board_separation = board_separation
-        self.colors = colors
         self.animation_speed = animation_speed
         self.square_size = square_size
         self.sphere_radius = 0.1
         self.log = log
         self.scene = scene
         self.camera_center = [0, 0]
+        self.vec_arrows = []
+
+        if colors is not None:
+            self.colors = colors
+        else:
+            self.colors = ChessboardColors()
 
         # 0 for 1st turn to white, 1 for 1st turn to black. Important for multiverse creation directions
         self.first_turn_black = 0
@@ -144,6 +149,71 @@ class Manim_Chessboard_5D(VGroup):
             manim_chessboard = self.manim_chessboards[chessboard_id]
             manim_chessboard.recolor_list = filtered_moves
             manim_chessboard.recolor_board(manim_chessboard.recolor_from_list, special_squares=[pos[0]])
+
+    def draw_vector_between_positions(self, pos1, pos2):
+        """
+        Draws vector between 2 3-list positions
+
+        Args:
+            pos1 (list): position of the start of the vector
+            pos2 (list): position of the end of the vector
+
+        Returns:
+            Arrow: Manim vector arrow object to plot
+        """
+        square1 = pos1[0]
+        tm_loc1 = [ pos1[1], pos1[2] ]
+        square2 = pos2[0]
+        tm_loc2 = [ pos2[1], pos2[2] ]
+
+        id1 = self.chess5.get_chessboard_by_tm(tm_loc1)
+        id2 = self.chess5.get_chessboard_by_tm(tm_loc2)
+        z_index = self.manim_chessboards[id1].arrows_z_index
+
+        vec_start = self.manim_chessboards[id1].get_square_pos_in_3d(square1)
+        vec_end   = self.manim_chessboards[id2].get_square_pos_in_3d(square2)
+
+        vec_arrow = Arrow(start=vec_start, end=vec_end, buff=0, 
+                          max_tip_length_to_length_ratio=0.2)
+        vec_arrow.color = self.colors.chosen_piece
+        vec_arrow.set_z_index(z_index)
+        return vec_arrow
+
+    def draw_all_movement_vectors(self, pos, normals_only=False):
+        """
+        Draws all arrows of vectors of movement for a piece at a particular position
+
+        Args:
+            pos1 (list): position of the start of the vector
+            normals_only (bool): whether to output a vector with the magnitude of 
+                square size (False, default) or unit magnitude (True)
+        """
+        possible_moves = self.chess5.get_list_of_possible_moves(pos, normals_only)
+        animations = []
+        for move in possible_moves:
+            vec_arrow = self.draw_vector_between_positions(pos, move)
+            self.vec_arrows.append(vec_arrow)
+            anim = FadeIn(vec_arrow, run_time = self.animation_speed)
+            animations.append(anim)
+        if self.scene is not None:
+            self.scene.play(*animations)
+        else:
+            raise TypeError(f"Cannot play animation when scene is None")
+
+    def remove_all_movement_vectors(self):
+        """
+        Removes all arrows of vectors of movement
+        """
+        animations = []
+        for vec_arrow in self.vec_arrows:
+            anim = FadeOut(vec_arrow, run_time = self.animation_speed)
+            animations.append(anim)
+
+        if self.scene is not None:
+            self.scene.play(*animations)
+        else:
+            raise TypeError(f"Cannot play animation when scene is None")
+
 
     def add_chessboard(self, chessboard_loc, origin_board):
         pass

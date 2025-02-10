@@ -77,11 +77,13 @@ class Presentation1(ThreeDSlide):
 
         self.add(board_5d)#, board2, board3)
 
-        show_piece_moves_slide(self, board_5d, 'rl')
-        show_piece_moves_slide(self, board_5d, 'bl')
-        show_piece_moves_slide(self, board_5d, 'nl')
+        #show_piece_moves_slide(self, board_5d, 'rl')
         show_piece_moves_slide(self, board_5d, 'ql')
+        board_5d.draw_all_movement_vectors(['d4', 0, 0], False)
+        #show_piece_moves_slide(self, board_5d, 'nl')
+        #show_piece_moves_slide(self, board_5d, 'ql')
         self.next_slide()
+        board_5d.remove_all_movement_vectors()
 
         #for move in sample_game_1:
         #    start_sq, end_sq = move

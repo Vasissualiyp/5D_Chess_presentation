@@ -95,6 +95,9 @@ class Manim_Chessboard_2D(VGroup):
         self.tm_loc = tm_loc
         self.board_separation = board_separation
         self.board_loc=self.get_updated_board_pos()
+        self.board_z_index  = tm_loc[1] * 3
+        self.arrows_z_index = self.board_z_index + 1
+        self.pieces_z_index = self.board_z_index + 2
 
         self.create_prism_board()
         self.spheres = []  # Keep track of all spheres if you want to animate them later
@@ -323,6 +326,7 @@ class Manim_Chessboard_2D(VGroup):
             sphere_center += sphere_center_delta_vec
 
             sphere.move_to(sphere_center)
+            sphere.set_z_index(self.pieces_z_index)
             sphere_color = self.get_object_color_from_piece(piece)
             if piece_mesh == "sphere":
                 sphere.set_color(sphere_color)
