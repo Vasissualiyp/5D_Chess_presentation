@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 
-SLIDES_FILE="./min_example.py"
+SLIDES_FILE="./src/presentation1.py"
 PRESENTATION_NAME="Presentation1"
 HTML_NAME="slides.html"
 
-manim -pql $SLIDES_FILE $PRESENTATION_NAME
-#manim-slides convert $PRESENTATION_NAME $HTML_NAME --open
+manim -ql $SLIDES_FILE $PRESENTATION_NAME
+manim-slides convert $PRESENTATION_NAME $HTML_NAME #--open

@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 SCENE_NAME="MultipleChessBoards"
-PY_NAME="manim_base"
+PY_NAME="manim_5dboard"
 PY_LOC="./src/${PY_NAME}.py"
 WATCHFLAG=1
 

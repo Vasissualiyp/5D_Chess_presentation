@@ -23,6 +23,7 @@ class Manim_Chessboard_2D(VGroup):
                  chessboard=None,
                  board_size=8, animation_speed=0.5, 
                  camera_center=[0,0],
+                 scene=None,
                  log=False, **kwargs):
         """
         A single 2D chessboard instance
@@ -35,6 +36,7 @@ class Manim_Chessboard_2D(VGroup):
             chessboard (Chessboard_2D): a dataset, containing 2D chessboard class
             board_size (int): number of squares per board dimension
             camera_center (array): a location of camera center in time-multiverse coordinates
+            scene (Scene): A scene in which the animations should be happening
             animation_speed (float): speed of each animation in sec
         """
         # Needed for animations?
@@ -76,8 +78,10 @@ class Manim_Chessboard_2D(VGroup):
         self.recolor_list = []
 
         # Animations and visuals
+        self.scene = scene
         self.camera_center = camera_center
         self.animation_speed = animation_speed
+        self.appearance_anim = "Scale"
         self.board_opacity = 1
 
         # Board properties relative to other boards
@@ -92,6 +96,8 @@ class Manim_Chessboard_2D(VGroup):
         """
         Creates a square chessboard from rectangular prisms
         """
+        appearance_anim = self.appearance_anim
+        scene = self.scene
         n = self.board_size
         # An array of positions of each chess grid square, 
         # i.e. [0,2,1] gives y component of a3 square
@@ -123,7 +129,28 @@ class Manim_Chessboard_2D(VGroup):
                 self.square_pos[idx_1, idx_2, :] = position_vec
 
                 self.board_tiles.append(square_prism)
-        self.add(*self.board_tiles)
+        if scene is None:
+            self.add(*self.board_tiles)
+        else:
+            if appearance_anim == "FadeIn": scene.play(FadeIn(*self.board_tiles), run_time=self.animation_speed)
+            elif appearance_anim == "Scale": self.blowup_anim(self.board_tiles)
+            else: raise ValueError(f"Unknown appearance animation: {appearance_anim}")
+
+    def blowup_anim(self, targets_list, anim_speed=None):
+        """
+        Performs blow-up animation for Mojbects in list
+
+        Args:
+            targets_list (list): list of objects, targets for animation
+            anim_speed (float): speed of each animation in sec
+        """
+        if anim_speed is None:
+            anim_speed = self.animation_speed
+        for tile in targets_list:
+            tile.scale(0.01)
+        self.scene.play(FadeIn(*targets_list), run_time=0.1)
+        self.scene.play(*(tile.animate.scale(100) for tile in targets_list),
+                   run_time=anim_speed)
 
     # Board 3D scene manipulation: movement
 
@@ -317,100 +344,16 @@ class Manim_Chessboard_2D(VGroup):
                 elif (piece not in ["Ml", "Md"]):
                     if self.log: print(f"Adding {piece} at {chessform_pos}")
                     id = self.add_sphere_to_square(idx_1, idx_2, radius, piece, id)
-                    #id = self.add_piece_to_square_chatgpt(idx_1, idx_2, piece, id)
-                    #id = self.add_piece_to_square_deepseek(idx_1, idx_2, piece, id)
 
-    def add_piece_to_square_chatgpt(self, idx_1, idx_2, piece, id, scale_factor=0.5):
-        """
-        Adds a chess piece image to a specific square in the 3D scene.
-        
-        Args:
-            idx_1 (int): 1st index of a square.
-            idx_2 (int): 2nd index of a square.
-            piece (str): the name of the chess piece.
-            id (int): current largest id.
-            scale_factor (float): scaling factor for the image (optional).
-        """
-        # Retrieve the center position of the designated square.
-        square_center = self.square_pos[idx_1, idx_2, :]
-
-        # Obtain the file path or image data for the chess piece.
-        image_path = self.chessutils.get_piece_image(piece)
-
-        # Create an ImageMobject which, under the OpenGL renderer, is a 3D object.
-        piece_image = ImageMobject(image_path)
-        
-        # Scale the image to fit within the square.
-        piece_image.scale(scale_factor)
-        
-        # Position the image: center it at the square and offset in z-direction.
-        piece_image.move_to(square_center)
-        piece_image.shift(UP * self.delta)  # Adjust vertical offset as needed
-        
-        # Ensure proper depth ordering.
-        piece_image.set_z_index(1)
-        
-        # (Optional) Append the image to a list for future reference.
-        if not hasattr(self, "piece_images"):
-            self.piece_images = []
-        self.piece_images.append(piece_image)
-        self.image_ids[idx_1, idx_2] = id
-        
-        if self.log:
-            print("Image IDs array:")
-            print(self.image_ids.T)
-        
-        id += 1
-        self.add(piece_image)
-        return id
-
-    def add_piece_to_square_deepseek(self, idx_1, idx_2, piece, id):
-        """
-        Adds a 3D piece image to a specific square
-
-        Args:
-            idx_1 (int): 1st index of a square
-            idx_2 (int): 2nd index of a square
-            piece (str): the name of the piece
-            id (int): largest id
-        """
-        square_center = self.square_pos[idx_1, idx_2, :]
-        piece_image = self.chessutils.get_piece_image(piece)  # Get image path
-        
-        # Create a 3D surface with piece texture
-        piece_surface = Surface(
-            lambda u, v: np.array([u, v, 0]),
-            u_range=[-0.5, 0.5],
-            v_range=[-0.5, 0.5],
-            fill_opacity=1,
-            stroke_width=0,
-        )
-        piece_surface.set_texture(piece_image)
-        
-        # Scale to match square size (adjust scale factor as needed)
-        piece_surface.scale(self.square_size * 0.9)  # Slightly smaller than square
-        
-        # Position piece above the board
-        piece_position = square_center.copy()
-        piece_position[2] = self.delta  # Slightly above board surface
-        piece_surface.move_to(piece_position)
-        
-        # Add to scene and tracking lists
-        piece_surface.set_z_index(1)
-        self.pieces.append(piece_surface)  # Rename from spheres to pieces
-        self.sphere_ids[idx_1, idx_2] = id
-        
-        if self.log: 
-            print(f"Piece IDs array:")
-            print(self.sphere_ids.T)
-        
-        id += 1
-        self.add(piece_surface)
-        return id
+        if self.scene is None:
+            for sphere in self.spheres:
+                self.add(sphere)
+        else:
+            self.blowup_anim(self.spheres)
 
     def add_sphere_to_square(self, idx_1, idx_2, radius, piece, id):
             """
-            Adds a sphere to a specific square
+            Adds a sphere or a piece svg to a specific square
     
             Args:
                 idx_1 (int): 1st index of a square
@@ -446,7 +389,6 @@ class Manim_Chessboard_2D(VGroup):
             if self.log: print(f"Sphere IDs array:")
             if self.log: print(self.sphere_ids.T)
             id += 1
-            self.add(sphere)
             return id
 
     # Obtaining data about objects

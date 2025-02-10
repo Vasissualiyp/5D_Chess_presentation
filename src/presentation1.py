@@ -1,5 +1,6 @@
 from manim import *
-from manim_slides import Slide
+from manim_slides import Slide, ThreeDSlide
+from manim_5dboard import Manim_Chessboard_5D
 
 def IntroSlide(self):
     title = Text("5D Chess with Multivere Time Travel\nBlack Board Talk").scale(0.8)
@@ -35,7 +36,7 @@ def AddMyAxes(self, origin, arrow_sizes):
     return arrow_h, arrow_v
 
 
-class Presentation1(Slide):
+class Presentation1(ThreeDSlide):
     def construct(self):
         ###################
         ###### INTRO ######
@@ -45,8 +46,16 @@ class Presentation1(Slide):
         ######################
         ###### 2D MOVES ######
         ######################
-        self.next_slide()
         x_axis, y_axis = AddMyAxes(self, [-6, -3], [10, 6])
+        log = True
+        board_5d = Manim_Chessboard_5D(scene=self, log=log)
+        board_5d.default_chess_configuration_setup()
+        board1 = board_5d.manim_chessboards[0]
+
+        self.add(board_5d)#, board2, board3)
+        board_5d.show_moves(['b1',0,0])
+
         self.next_slide()
-        IntroSlide(self)w
+        IntroSlide(self)
+
 

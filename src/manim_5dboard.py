@@ -3,15 +3,17 @@ import numpy as np
 from chess_db_2d import Chessboard_2D, ChessUtils_2D
 from chess_db_5d import Chessboard_5D
 from manim_2dboard import Manim_Chessboard_2D, ChessboardColors
+from manim_slides import Slide, ThreeDSlide
 
 config.pixel_width = 480
 config.pixel_height = 360
-config.frame_rate = 5
+config.frame_rate = 30
 
 class Manim_Chessboard_5D(VGroup):
     def __init__(self, square_size=0.5, 
                  board_separation=[6, 6], colors=None, 
                  board_size=8, animation_speed=0.5, 
+                 scene=None,
                  log=False, **kwargs):
         """
         A 5D chessboard instance
@@ -23,6 +25,8 @@ class Manim_Chessboard_5D(VGroup):
             colors (array): colors of the chessboard
             board_size (int): number of squares per board dimension
             animation_speed (float): speed of each animation in sec
+            scene (Scene): A scene in which the animations should be happening
+            log (bool): Whether to enable logging
         """
         super().__init__(**kwargs)
 
@@ -34,6 +38,7 @@ class Manim_Chessboard_5D(VGroup):
         self.square_size = square_size
         self.sphere_radius = 0.1
         self.log = log
+        self.scene = scene
         self.camera_center = [0, 0]
 
         # 0 for 1st turn to white, 1 for 1st turn to black. Important for multiverse creation directions
@@ -54,6 +59,7 @@ class Manim_Chessboard_5D(VGroup):
                                                    square_size=self.square_size, 
                                                    board_separation=self.board_separation, 
                                                    chessboard=target_chessboard, 
+                                                   scene=self.scene,
                                                    animation_speed=self.animation_speed)
         manim_new_chessboard.add_spheres_to_squares(radius=self.sphere_radius)
         self.manim_chessboards.append(manim_new_chessboard)
@@ -71,6 +77,7 @@ class Manim_Chessboard_5D(VGroup):
                                                    square_size=self.square_size, 
                                                    board_separation=self.board_separation, 
                                                    chessboard=target_chessboard, 
+                                                   scene=self.scene,
                                                    animation_speed=self.animation_speed)
         self.manim_chessboards.append(manim_new_chessboard)
         self.add(manim_new_chessboard)
@@ -177,7 +184,7 @@ sample_game_1 = [
 ]
 
 
-class MultipleChessBoards(ThreeDScene):
+class MultipleChessBoards(ThreeDSlide):
     def construct(self):
         # Create two chessboards
 
@@ -187,11 +194,14 @@ class MultipleChessBoards(ThreeDScene):
         board1 = board_5d.manim_chessboards[0]
         board_5d.add_empty_chessboard([0,1])
         board_5d.add_empty_chessboard([0,-1])
+        self.next_slide()
         
         self.add(board_5d)#, board2, board3)
         board_5d.show_moves(['b1',0,0])
         self.play(board_5d.reorient_all_boards(1))
+        self.next_slide()
         self.play(board_5d.reorient_all_boards(2))
+        self.next_slide()
         self.play(board_5d.change_board_separation([3,3]))
         self.play(board_5d.change_camera_center([0,1]))
 
