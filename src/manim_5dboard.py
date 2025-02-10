@@ -144,7 +144,7 @@ class Manim_Chessboard_5D(VGroup):
             assert chessboard_id != -1, f"Failed to retireve chessboard from {chessboard_loc}"
             manim_chessboard = self.manim_chessboards[chessboard_id]
             manim_chessboard.recolor_list = filtered_moves
-            manim_chessboard.recolor_board(manim_chessboard.recolor_from_list)
+            manim_chessboard.recolor_board(manim_chessboard.recolor_from_list, special_squares=[pos[0]])
 
     def add_chessboard(self, chessboard_loc, origin_board):
         pass

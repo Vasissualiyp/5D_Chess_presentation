@@ -9,7 +9,8 @@ class ChessboardColors():
     """Colors of chessboard"""
     def __init__(self, square_light=LIGHTER_GREY, square_dark=GREY, 
                  piece_light=WHITE, piece_dark=BLACK, 
-                 move_light=GREEN_B, move_dark=GREEN_E):
+                 move_light=GREEN_B, move_dark=GREEN_E,
+                 chosen_piece=TEAL_C):
         """Creates an instance of the class with all colors assigned"""
         self.square_light = square_light
         self.square_dark = square_dark
@@ -17,6 +18,7 @@ class ChessboardColors():
         self.piece_dark = piece_dark
         self.move_light = move_light
         self.move_dark = move_dark
+        self.chosen_piece = chosen_piece
 
 
 class Manim_Chessboard_2D(VGroup):
@@ -58,6 +60,7 @@ class Manim_Chessboard_2D(VGroup):
         self.board_colors_moves = [ chesscolors.move_dark, chesscolors.move_light ]
         self.mlight = chesscolors.piece_light
         self.mdark = chesscolors.piece_dark
+        self.special_color = chesscolors.chosen_piece
 
         # Board geometry
         self.board_size = board_size
@@ -494,13 +497,14 @@ class Manim_Chessboard_2D(VGroup):
 
     # Coloring
 
-    def recolor_from_list(self, idx_1, idx_2):
+    def recolor_from_list(self, idx_1, idx_2, special_squares=[]):
         """
         Determines which squares to recolor based on self.recolor_list values
 
         Args:
             idx_1 (int): 1st index of a square
             idx_2 (int): 2nd index of a square
+            special_squares (list): special squares to color different color
 
         Returns:
             Manim_Color: a new color for the square
@@ -509,15 +513,17 @@ class Manim_Chessboard_2D(VGroup):
         square = self.chessutils.matrix_to_chessform([idx_1, idx_2])
         if square in self.recolor_list:
             return self.board_colors_moves[(idx_1 + idx_2) % 2]
+        elif square in special_squares:
+            return self.special_color
         else:
             return self.board_colors[(idx_1 + idx_2) % 2]
 
-    def recolor_board(self, color_rule=None):
+    def recolor_board(self, color_rule=None, special_squares=[]):
         """
         Recolors every square prism on the board.
 
         Args:
-            color_rule(idx_1, idx_2) (function): 
+            color_rule(idx_1, idx_2, special_squares) (function): 
                 A callable that takes (row, col) or (idx_1, idx_2)
                 and returns a valid Manim color. If None, just invert
                 the black/white pattern, for example.
@@ -528,7 +534,7 @@ class Manim_Chessboard_2D(VGroup):
         # If no custom color rule is provided, here's a simple default that flips black/white:
         # (Just an example; you can define your own logic.)
         if color_rule is None:
-            def color_rule(idx_1, idx_2):
+            def color_rule(idx_1, idx_2, special_squares=[]):
                 return self.board_colors[(idx_1 + idx_2) % 2]
 
         for row in range(n):
@@ -541,7 +547,7 @@ class Manim_Chessboard_2D(VGroup):
                 prism_tile = self.board_tiles[tile_index]
 
                 # Apply the rule
-                new_color = color_rule(idx_1, idx_2)
+                new_color = color_rule(idx_1, idx_2, special_squares=special_squares)
                 if self.scene == None:
                     prism_tile.set_fill(new_color, opacity=self.board_opacity)
                 else:
