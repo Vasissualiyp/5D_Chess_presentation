@@ -35,7 +35,7 @@ def AddMyAxes(self, origin, arrow_sizes):
     self.add(arrow_v, arrow_h)
     return arrow_h, arrow_v
 
-def show_piece_moves_slide(self, board_5d, piece, pos='d4'):
+def show_piece_moves_slide(self, board_5d, piece, pos='d4', tm_loc=[0,0]):
     """
     Shows moves of a pice
 
@@ -44,13 +44,15 @@ def show_piece_moves_slide(self, board_5d, piece, pos='d4'):
         board_5d (Manim_Chessboard_5D): a 5D board where to place the piece
         piece (str): piece acronym
         pos (str): position of the piece in chess notation
+        tm_loc (list): position of host chessboard for the piece of interest
     """
     self.next_slide()
-    board1 = board_5d.manim_chessboards[0]
+    board1_id = board_5d.chess5.get_chessboard_by_tm(tm_loc)
+    board1 = board_5d.manim_chessboards[board1_id]
     board1.recolor_board()
     board1.remove_all_pieces()
     board1.add_piece(piece, pos)
-    board_5d.show_moves([pos,0,0])
+    board_5d.show_moves([pos,tm_loc[0],tm_loc[1]])
 
 
 class Presentation1(ThreeDSlide):
@@ -63,7 +65,11 @@ class Presentation1(ThreeDSlide):
         ######################
         ###### 2D MOVES ######
         ######################
-        x_axis, y_axis = AddMyAxes(self, [-4.5, -4.5], [9.5, 9.5])
+        axes_origin = [-4.5, -4.5]
+        axes_extensions = 9.5
+
+        x_axis, y_axis = AddMyAxes(self, axes_origin, 
+                                   [axes_extensions, axes_extensions])
         log = True
         board_5d = Manim_Chessboard_5D(scene=self, log=log)
         board_5d.default_chess_configuration_setup()
