@@ -1,6 +1,8 @@
 from manim import *
 import numpy as np
 from chess_db_2d import Chessboard_2D, ChessUtils_2D
+from typing import Optional
+from manim_slides import ThreeDSlide
 
 
 class ChessboardColors():
@@ -23,7 +25,7 @@ class Manim_Chessboard_2D(VGroup):
                  chessboard=None,
                  board_size=8, animation_speed=0.5, 
                  camera_center=[0,0],
-                 scene=None,
+                 scene: Optional[ThreeDSlide] = None,
                  log=False, **kwargs):
         """
         A single 2D chessboard instance
@@ -81,7 +83,9 @@ class Manim_Chessboard_2D(VGroup):
         self.scene = scene
         self.camera_center = camera_center
         self.animation_speed = animation_speed
-        self.appearance_anim = "Scale"
+        self.appearance_anim = "Scale" # Scale or FadeIn
+        self.disappearance_anim = "Scale" # Scale or FadeOut
+        self.recolor_animation_speed = self.animation_speed / 5
         self.board_opacity = 1
 
         # Board properties relative to other boards
@@ -135,22 +139,6 @@ class Manim_Chessboard_2D(VGroup):
             if appearance_anim == "FadeIn": scene.play(FadeIn(*self.board_tiles), run_time=self.animation_speed)
             elif appearance_anim == "Scale": self.blowup_anim(self.board_tiles)
             else: raise ValueError(f"Unknown appearance animation: {appearance_anim}")
-
-    def blowup_anim(self, targets_list, anim_speed=None):
-        """
-        Performs blow-up animation for Mojbects in list
-
-        Args:
-            targets_list (list): list of objects, targets for animation
-            anim_speed (float): speed of each animation in sec
-        """
-        if anim_speed is None:
-            anim_speed = self.animation_speed
-        for tile in targets_list:
-            tile.scale(0.01)
-        self.scene.play(FadeIn(*targets_list), run_time=0.1)
-        self.scene.play(*(tile.animate.scale(100) for tile in targets_list),
-                   run_time=anim_speed)
 
     # Board 3D scene manipulation: movement
 
@@ -229,7 +217,7 @@ class Manim_Chessboard_2D(VGroup):
 
     # Piece manimulation
 
-    def move_piece(self, square_start, square_finish, eat_pieces=False, scene=None):
+    def move_piece(self, square_start, square_finish, eat_pieces=False):
         """
         Moves a piece form start square to finish square (in chess notation).
         Pass scene to trigger animation.
@@ -259,11 +247,16 @@ class Manim_Chessboard_2D(VGroup):
                 else:
                     remove_flag = True
         assert sphere != None, "This part of the code wasn't supposed to be reached if sphere==None"
-        if scene==None:
+
+        if remove_flag: move_speed = self.animation_speed/2
+        else: move_speed = self.animation_speed
+
+        if remove_flag: 
+            self.remove_piece(square_finish)
+        if self.scene==None:
             sphere.shift(delta_vector)
         else:
-            scene.play(ApplyMethod(sphere.shift, delta_vector),run_time=self.animation_speed)
-        if remove_flag: self.remove_piece(square_finish)
+            self.scene.play(ApplyMethod(sphere.shift, delta_vector),run_time=move_speed)
         self.chessboard.move_piece(square_start, square_finish, eat_pieces=eat_pieces)
         if self.log: print(f"Sphere IDs array:")
         if self.log: print(self.sphere_ids.T)
@@ -271,23 +264,28 @@ class Manim_Chessboard_2D(VGroup):
         self.sphere_ids[start_matrix[1], start_matrix[0]] = -1
         self.sphere_ids[finish_matrix[1], finish_matrix[0]] = initial_id
 
-    def remove_piece(self, square, scene=None):
+    def remove_piece(self, square, animation_speed=None):
         """
         Remove the piece and its sphere at the given square.
 
         Args:
             square (str): The chess notation (e.g., 'a2', 'e4', etc.) of the piece to remove.
-            scene (Scene): If provided, animate the removal in this scene. Otherwise, remove instantly.
+            animation_speed (float): speed of each animation in sec
         """
-        # 1) Lookup piece & sphere
+        if animation_speed == None:
+            animation_speed = self.animation_speed/2
         piece, sphere = self.get_piece(square)
         if piece == "" or sphere is None:
             print(f"No piece to remove at {square}")
             return
 
         # 2) Animate removing the sphere if a scene is provided
-        if scene is not None:
-            scene.play(FadeOut(sphere), run_time=self.animation_speed)
+        if self.scene is not None:
+            if self.disappearance_anim == "Scale":
+                self.collapse_anim([sphere], anim_speed=animation_speed)
+            elif self.disappearance_anim == "FadeIn":
+                self.scene.play(FadeOut(sphere), run_time=animation_speed)
+            else: raise ValueError(f"Unknown appearance animation: {self.disappearance_anim}")
         # If you don't want a fade-out animation, you could do:
         # scene.play(sphere.animate.scale(0.0).fade(1.0), ...)
         # or any other creative effect.
@@ -317,8 +315,6 @@ class Manim_Chessboard_2D(VGroup):
         self.sphere_ids[square_matrix[0], square_matrix[1]] = -1
 
         # 6) Decrement all sphere IDs greater than removed_id
-        #    Because the list is now shorter, those IDs must shift by -1
-        #    so that they still point to the correct sphere object.
         mask = self.sphere_ids > removed_id
         self.sphere_ids[mask] -= 1
 
@@ -469,7 +465,7 @@ class Manim_Chessboard_2D(VGroup):
         else:
             return self.board_colors[(idx_1 + idx_2) % 2]
 
-    def recolor_board(self, color_rule=None, scene=None):
+    def recolor_board(self, color_rule=None):
         """
         Recolors every square prism on the board.
 
@@ -478,8 +474,6 @@ class Manim_Chessboard_2D(VGroup):
                 A callable that takes (row, col) or (idx_1, idx_2)
                 and returns a valid Manim color. If None, just invert
                 the black/white pattern, for example.
-            scene (Manim_scene):
-                If passed, will animate the recoloring
         """
         n = self.board_size
         animations = []
@@ -501,13 +495,13 @@ class Manim_Chessboard_2D(VGroup):
 
                 # Apply the rule
                 new_color = color_rule(idx_1, idx_2)
-                if scene == None:
+                if self.scene == None:
                     prism_tile.set_fill(new_color, opacity=self.board_opacity)
                 else:
                     anim = prism_tile.animate.set_fill(new_color, opacity=self.board_opacity)
                     animations.append(anim)
-        if scene is not None and animations:
-            scene.play(*animations,run_time=self.animation_speed)
+        if self.scene is not None and animations:
+            self.scene.play(*animations,run_time=self.recolor_animation_speed)
 
     def get_object_color_from_piece(self, piece, 
                                     dark_color=None, 
@@ -524,6 +518,44 @@ class Manim_Chessboard_2D(VGroup):
             return dark_color
         else:
             raise ValueError(f"Not allowed color: {piece_color}. Allowed vaues: l, d.")
+
+    # Animations
+
+    def blowup_anim(self, targets_list, anim_speed=None):
+        """
+        Performs blow-up animation for Mojbects in list
+
+        Args:
+            targets_list (list): list of objects, targets for animation
+            anim_speed (float): speed of each animation in sec
+        """
+        if anim_speed is None:
+            anim_speed = self.animation_speed
+        for tile in targets_list:
+            tile.scale(0.01)
+        if self.scene is not None:
+            self.scene.play(FadeIn(*targets_list), run_time=0.1)
+            self.scene.play(*(tile.animate.scale(100) for tile in targets_list),
+                       run_time=anim_speed)
+        else:
+            raise TypeError(f"Cannot deploy animation for scene of type None")
+
+    def collapse_anim(self, targets_list, anim_speed=None):
+        """
+        Performs inverse-blow-up animation for Mojbects in list
+
+        Args:
+            targets_list (list): list of objects, targets for animation
+            anim_speed (float): speed of each animation in sec
+        """
+        if anim_speed is None:
+            anim_speed = self.animation_speed
+        if self.scene is not None:
+            self.scene.play(*(tile.animate.scale(0.01) for tile in targets_list),
+                       run_time=anim_speed)
+            self.scene.play(FadeOut(*targets_list), run_time=0.1)
+        else:
+            raise TypeError(f"Cannot deploy animation for scene of type None")
 
     # Utility functions
 

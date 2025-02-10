@@ -57,9 +57,9 @@ class Presentation1(ThreeDSlide):
         self.next_slide()
         for move in sample_game_1:
             start_sq, end_sq = move
-            board1.move_piece(start_sq, end_sq, scene=self, eat_pieces=True)
+            board1.move_piece(start_sq, end_sq, eat_pieces=True)
         board_5d.show_moves(['g4',0,0])
-        board1.move_piece('b1', 'a3', scene=self, eat_pieces=True)
+        board1.move_piece('b1', 'a3', eat_pieces=True)
         #IntroSlide(self)
 
 

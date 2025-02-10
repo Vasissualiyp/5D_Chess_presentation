@@ -3,7 +3,7 @@ import numpy as np
 from chess_db_2d import Chessboard_2D, ChessUtils_2D
 from chess_db_5d import Chessboard_5D
 from manim_2dboard import Manim_Chessboard_2D, ChessboardColors
-from manim_slides import Slide, ThreeDSlide
+from manim_slides import ThreeDSlide
 
 config.pixel_width = 480
 config.pixel_height = 360
@@ -144,7 +144,7 @@ class Manim_Chessboard_5D(VGroup):
             assert chessboard_id != -1, f"Failed to retireve chessboard from {chessboard_loc}"
             manim_chessboard = self.manim_chessboards[chessboard_id]
             manim_chessboard.recolor_list = filtered_moves
-            manim_chessboard.recolor_board(manim_chessboard.recolor_from_list,scene=scene)
+            manim_chessboard.recolor_board(manim_chessboard.recolor_from_list)
 
     def add_chessboard(self, chessboard_loc, origin_board):
         pass
@@ -212,6 +212,6 @@ class MultipleChessBoards(ThreeDSlide):
         self.begin_ambient_camera_rotation(rate=0.1)
         for move in sample_game_1:
             start_sq, end_sq = move
-            board1.move_piece(start_sq, end_sq, scene=self, eat_pieces=True)
+            board1.move_piece(start_sq, end_sq, eat_pieces=True)
         board_5d.show_moves(['e5',0,0])
         self.wait()
