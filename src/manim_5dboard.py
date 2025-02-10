@@ -126,12 +126,11 @@ class Manim_Chessboard_5D(VGroup):
         # Animate them all together in parallel
         return AnimationGroup(*animations)
 
-    def show_moves(self, pos, scene=None):
+    def show_moves(self, pos, force_single_moves=False):
         """
         Show moves of a piece, located at the provided position.
-        Can also provide scene to animate the squares lighting up.
         """
-        possible_moves = self.chess5.get_list_of_possible_moves(pos)
+        possible_moves = self.chess5.get_list_of_possible_moves(pos, force_single_moves)
         if self.log: print(f"Possible moves: {possible_moves}")
         if self.log: print(f"Manim chessboards: {self.chess5.chessboards}")
         for chessboard in self.chess5.chessboards:

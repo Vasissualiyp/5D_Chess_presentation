@@ -113,7 +113,7 @@ class Moves():
         """
         return self.dr.get(piece_type, [])
 
-    def get_all_movable_spaces(self, check_if_move_possible, piece, pos, log=False):
+    def get_all_movable_spaces(self, check_if_move_possible, piece, pos, log=False, force_single_moves=False):
         """
         Gets a list of all spaces, where a piece can move to
 
@@ -122,6 +122,8 @@ class Moves():
             piece (str): name of the piece to be moved
             pos (list): 3-list that contains a position of the piece to be moved
             log (bool): whether to output log into the terminal
+            force_single_moves (bool): whether to force single-space moves for pieces 
+                that move >1 square in a line (i.e. rook)
 
         Returns:
             moves_list (list): list of 3-lists of all possible moves
@@ -140,8 +142,12 @@ class Moves():
         elif piece_type in ['p', 'B']: # Set of moves for pawn-like pieces (special)
             return self.get_all_pawn_moves(check_if_move_possible, piece, pos_4d, log)
         else: # Set of moves for pieces that move in a line, i.e. all other pieces
-            return self.get_all_linear_moves(check_if_move_possible, piece_color, 
-                                             list_dr, pos_4d, log)
+            if force_single_moves:
+                return self.get_all_single_moves(check_if_move_possible, piece_color, 
+                                                 list_dr, pos_4d, log)
+            else:
+                return self.get_all_linear_moves(check_if_move_possible, piece_color, 
+                                                 list_dr, pos_4d, log)
 
     def get_all_linear_moves(self, check_if_move_possible, piece_color, list_dr, pos_4d, log):
         """

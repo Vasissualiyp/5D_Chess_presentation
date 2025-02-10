@@ -282,29 +282,33 @@ class Chessboard_5D:
         else: # Can eat enemy pieces
             return 1
 
-    def get_list_of_possible_moves(self, pos):
+    def get_list_of_possible_moves(self, pos, force_single_moves=False):
         """
         Finds possible moves for a piece on the predefined square
         and returns a Chessboard_5D object containing that info
 
         Args:
             pos (list): 3-list of target space
+            force_single_moves (bool): whether to force single-space moves for pieces 
+                that move >1 square in a line (i.e. rook)
 
         Returns:
             list of all possible moves
         """
         possible_moves = self.moves.get_all_movable_spaces(self.check_if_move_possible, 
                                                            self.get_piece(pos), pos, 
-                                                           log=self.log)
+                                                           log=self.log, 
+                                                           force_single_moves=force_single_moves)
         return possible_moves
 
-    def get_board_of_possible_moves(self, pos):
+    def get_board_of_possible_moves(self, pos, force_single_moves=False):
         """
         Finds possible moves for a piece on the predefined square
         and returns a Chessboard_5D object containing that info
 
         Args:
             pos (list): 3-list of target space
+            force_single_moves (bool): whether to force single-space moves for pieces 
 
         Returns:
             Chessboard_5D: a 5D chessboard object, containing possible moves
@@ -312,7 +316,7 @@ class Chessboard_5D:
         piece = self.get_piece(pos)
         _, piece_color = list(piece)
         piece_to_add = "M" + piece_color
-        possible_moves = self.get_list_of_possible_moves(pos)
+        possible_moves = self.get_list_of_possible_moves(pos, force_single_moves)
         self_copy = copy.deepcopy(self)
         for move in possible_moves:
             if log: print(f"Looking at move {move}...")

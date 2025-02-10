@@ -2,7 +2,7 @@ from manim import *
 from manim_slides import Slide, ThreeDSlide
 from manim_5dboard import Manim_Chessboard_5D, sample_game_1
 
-def IntroSlide(self):
+def intro_slide(self):
     title = Text("5D Chess with Multivere Time Travel\nBlack Board Talk").scale(0.8)
     author = Text("By Vasilii Pustovoit, CITA, 2025").scale(0.4)
     title.shift(0.5*UP)
@@ -35,12 +35,30 @@ def AddMyAxes(self, origin, arrow_sizes):
     self.add(arrow_v, arrow_h)
     return arrow_h, arrow_v
 
+def show_piece_moves_slide(self, board_5d, piece, pos='d4'):
+    """
+    Shows moves of a pice
+
+    Args:
+        self (ThreeDSlide): a scene where animation is happening
+        board_5d (Manim_Chessboard_5D): a 5D board where to place the piece
+        piece (str): piece acronym
+        pos (str): position of the piece in chess notation
+    """
+    self.next_slide()
+    board1 = board_5d.manim_chessboards[0]
+    board1.recolor_board()
+    board1.remove_all_pieces()
+    board1.add_piece(piece, pos)
+    board_5d.show_moves([pos,0,0])
+
+
 class Presentation1(ThreeDSlide):
     def construct(self):
         ###################
         ###### INTRO ######
         ###################
-        #IntroSlide(self)
+        #intro_slide(self)
         
         ######################
         ###### 2D MOVES ######
@@ -53,15 +71,16 @@ class Presentation1(ThreeDSlide):
 
         self.add(board_5d)#, board2, board3)
 
+        show_piece_moves_slide(self, board_5d, 'rl')
+        show_piece_moves_slide(self, board_5d, 'bl')
+        show_piece_moves_slide(self, board_5d, 'nl')
+        show_piece_moves_slide(self, board_5d, 'ql')
         self.next_slide()
-        board1.remove_all_pieces()
-        board1.add_piece('rl', 'd4')
-        board_5d.show_moves(['d4',0,0])
+
         #for move in sample_game_1:
         #    start_sq, end_sq = move
         #    board1.move_piece(start_sq, end_sq, eat_pieces=True)
         #board_5d.show_moves(['g4',0,0])
         #board1.move_piece('b1', 'a3', eat_pieces=True)
-        #IntroSlide(self)
 
 
