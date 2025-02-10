@@ -264,60 +264,6 @@ class Manim_Chessboard_2D(VGroup):
         self.sphere_ids[start_matrix[1], start_matrix[0]] = -1
         self.sphere_ids[finish_matrix[1], finish_matrix[0]] = initial_id
 
-    def remove_piece(self, square, animation_speed=None):
-        """
-        Remove the piece and its sphere at the given square.
-
-        Args:
-            square (str): The chess notation (e.g., 'a2', 'e4', etc.) of the piece to remove.
-            animation_speed (float): speed of each animation in sec
-        """
-        if animation_speed == None:
-            animation_speed = self.animation_speed/2
-        piece, sphere = self.get_piece(square)
-        if piece == "" or sphere is None:
-            print(f"No piece to remove at {square}")
-            return
-
-        # 2) Animate removing the sphere if a scene is provided
-        if self.scene is not None:
-            if self.disappearance_anim == "Scale":
-                self.collapse_anim([sphere], anim_speed=animation_speed)
-            elif self.disappearance_anim == "FadeIn":
-                self.scene.play(FadeOut(sphere), run_time=animation_speed)
-            else: raise ValueError(f"Unknown appearance animation: {self.disappearance_anim}")
-        # If you don't want a fade-out animation, you could do:
-        # scene.play(sphere.animate.scale(0.0).fade(1.0), ...)
-        # or any other creative effect.
-
-        # 3) Remove sphere from the scene or group 
-        #    (e.g., if your board is a VGroup, you might do self.remove(sphere) as well)
-        if sphere in self.submobjects:
-            self.remove(sphere)
-
-        # 4) Remove the sphere from the self.spheres list
-        #    First we need the index (id)
-        square_matrix = self.chessutils.chessform_to_matrix(square)
-        removed_id = int(self.sphere_ids[square_matrix[0], square_matrix[1]])
-
-        # Make sure we found a valid id
-        if removed_id == -1:
-            print(f"Something is off; sphere_ids already shows no piece at {square}.")
-            return
-
-        # Actually pop the sphere out of the self.spheres list
-        removed_sphere = self.spheres.pop(removed_id)
-
-        # Confirm we removed the correct object
-        assert removed_sphere == sphere, "Mismatch between popped sphere and the expected sphere."
-
-        # 5) Mark this square as empty
-        self.sphere_ids[square_matrix[0], square_matrix[1]] = -1
-
-        # 6) Decrement all sphere IDs greater than removed_id
-        mask = self.sphere_ids > removed_id
-        self.sphere_ids[mask] -= 1
-
     def add_spheres_to_squares(self, radius=0.2):
         """Add spheres to the center of each square with a piece."""
         id = 0
@@ -360,11 +306,8 @@ class Manim_Chessboard_2D(VGroup):
             """
             piece_mesh = "svg" # svg or sphere
 
-            #id = max(np.max(self.sphere_ids), -1)
             square_center = self.square_pos[idx_1, idx_2, :]
-            # Position the sphere at the same center as the square
             sphere_center = square_center
-            forward, right, normal = self.get_board_directions()
 
             if piece_mesh == "sphere":
                 sphere = Sphere(radius=radius)
@@ -376,8 +319,12 @@ class Manim_Chessboard_2D(VGroup):
                 sphere_center_delta_mag = self.square_size * 0.1 + self.delta
             else:
                 raise ValueError(f"Unknown piece_mesh: {piece_mesh}")
+
+            # Displace the piece, normal to the board
+            forward, right, normal = self.get_board_directions()
             sphere_center_delta_vec = [ sphere_center_delta_mag * n_i for n_i in normal]
             sphere_center += sphere_center_delta_vec
+
             sphere.move_to(sphere_center)
             sphere_color = self.get_object_color_from_piece(piece)
             if piece_mesh == "sphere":
@@ -388,6 +335,104 @@ class Manim_Chessboard_2D(VGroup):
             if self.log: print(self.sphere_ids.T)
             id += 1
             return id
+
+    def add_piece(self, piece, pos, radius=0.2, eat_pieces=False):
+        """
+        Adds piece to square
+
+        Args:
+            piece (str): the name of the piece
+            pos (str): position of the piece in chess notation
+            radius (float): radius of the sphere to be added
+            eat_pieces (bool): whether to throw an error when trying to move 
+                onto another piece. Default: False.
+        """
+        self.chessboard.add_piece(piece, pos, eat_pieces=eat_pieces)
+        idx_1, idx_2 = self.chessutils.chessform_to_matrix(pos)
+        newpiece_id = np.max(self.sphere_ids) + 1
+        id = self.add_sphere_to_square(idx_1, idx_2, radius, piece, newpiece_id)
+        print(f"Sphere ids: {self.sphere_ids}")
+        self.blowup_anim(self.spheres[-1])
+
+    def remove_piece(self, square, animation_speed=None):
+        """
+        Remove the piece and its sphere at the given square.
+
+        Args:
+            square (str): The chess notation (e.g., 'a2', 'e4', etc.) of the piece to remove.
+            animation_speed (float): speed of each animation in sec. Set to 0 to not perform animation.
+        """
+        if animation_speed == None:
+            animation_speed = self.animation_speed/2
+        piece, sphere = self.get_piece(square)
+        if piece == "" or sphere is None:
+            print(f"No piece to remove at {square}")
+            return
+
+        # 2) Animate removing the sphere if a scene is provided
+        if self.scene is not None and animation_speed != 0:
+            if self.disappearance_anim == "Scale":
+                self.collapse_anim([sphere], anim_speed=animation_speed)
+            elif self.disappearance_anim == "FadeIn":
+                self.scene.play(FadeOut(sphere), run_time=animation_speed)
+            else: raise ValueError(f"Unknown appearance animation: {self.disappearance_anim}")
+        # If you don't want a fade-out animation, you could do:
+        # scene.play(sphere.animate.scale(0.0).fade(1.0), ...)
+        # or any other creative effect.
+
+        # 3) Remove sphere from the scene or group 
+        #    (e.g., if your board is a VGroup, you might do self.remove(sphere) as well)
+        if sphere in self.submobjects:
+            self.remove(sphere)
+
+        # 4) Remove the sphere from the self.spheres list
+        #    First we need the index (id)
+        square_matrix = self.chessutils.chessform_to_matrix(square)
+        removed_id = int(self.sphere_ids[square_matrix[0], square_matrix[1]])
+
+        # Make sure we found a valid id
+        if removed_id == -1:
+            print(f"Something is off; sphere_ids already shows no piece at {square}.")
+            return
+
+        # Actually pop the sphere out of the self.spheres list
+        removed_sphere = self.spheres.pop(removed_id)
+
+        # Confirm we removed the correct object
+        assert removed_sphere == sphere, "Mismatch between popped sphere and the expected sphere."
+
+        # 5) Mark this square as empty
+        self.sphere_ids[square_matrix[0], square_matrix[1]] = -1
+        self.chessboard.remove_piece(square)
+
+        # 6) Decrement all sphere IDs greater than removed_id
+        mask = self.sphere_ids > removed_id
+        self.sphere_ids[mask] -= 1
+
+    def remove_all_pieces(self):
+        """
+        Removes all the pieces, empties the board
+        """
+        n = self.board_size
+        spheres_to_remove = []
+        piece_pos_to_remove = []
+        for row_idx in range(n):
+            for col_idx in range(n):
+                idx_1, idx_2 = self.get_matrix_indecies(row_idx, col_idx)
+                chessform_pos = self.chessutils.matrix_to_chessform([idx_1, idx_2])
+                if self.log: print(f"Checking piece at location {chessform_pos}...")
+                piece, sphere = self.get_piece(chessform_pos)
+                if self.log: print(f"piece is: {piece}")
+                if piece in [ "", "a0" ]:
+                    if self.log: print(f"Nothing to do at {chessform_pos}")
+                elif (piece not in ["Ml", "Md"]):
+                    if self.log: print(f"Removing {piece} at {chessform_pos}")
+                    spheres_to_remove.append(sphere)
+                    piece_pos_to_remove.append(chessform_pos)
+
+        self.collapse_anim(spheres_to_remove)
+        for piece_pos in piece_pos_to_remove:
+            self.remove_piece(piece_pos, animation_speed=0)
 
     # Obtaining data about objects
 

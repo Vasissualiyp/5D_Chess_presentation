@@ -52,14 +52,16 @@ class Presentation1(ThreeDSlide):
         board1 = board_5d.manim_chessboards[0]
 
         self.add(board_5d)#, board2, board3)
-        board_5d.show_moves(['b1',0,0])
 
         self.next_slide()
-        for move in sample_game_1:
-            start_sq, end_sq = move
-            board1.move_piece(start_sq, end_sq, eat_pieces=True)
-        board_5d.show_moves(['g4',0,0])
-        board1.move_piece('b1', 'a3', eat_pieces=True)
+        board1.remove_all_pieces()
+        board1.add_piece('rl', 'd4')
+        board_5d.show_moves(['d4',0,0])
+        #for move in sample_game_1:
+        #    start_sq, end_sq = move
+        #    board1.move_piece(start_sq, end_sq, eat_pieces=True)
+        #board_5d.show_moves(['g4',0,0])
+        #board1.move_piece('b1', 'a3', eat_pieces=True)
         #IntroSlide(self)
 
 

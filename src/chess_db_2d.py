@@ -107,6 +107,13 @@ class Chessboard_2D:
                         if self.add_piece(piece_mirror, square_mirror): exit(1)
                     used_squares.append(square)
 
+    def remove_piece(self, pos):
+        """
+        Removes a piece at a given position, given in chess notation
+        """
+        idx_1, idx_2 = self.utils.chessform_to_matrix(pos)
+        self.chessboard_matrix[idx_1, idx_2] = 0
+
     def create_row_of_pieces(self, row_id, piece):
         """
         Creates a row of pieces of a single type
