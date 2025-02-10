@@ -7,10 +7,10 @@ from manim_slides import Slide, ThreeDSlide
 
 config.pixel_width = 480
 config.pixel_height = 360
-config.frame_rate = 30
+config.frame_rate = 24
 
 class Manim_Chessboard_5D(VGroup):
-    def __init__(self, square_size=0.5, 
+    def __init__(self, square_size=1.0, 
                  board_separation=[6, 6], colors=None, 
                  board_size=8, animation_speed=0.5, 
                  scene=None,
@@ -176,11 +176,12 @@ sample_game_1 = [
     ["e7", "e5"],  # Black: Pawn moves e7 -> e5
     ["f2", "f4"],  # White: f2 -> f4 (the actual King's Gambit move)
     ["e5", "f4"],  # Black: exf4 (pawn takes)
-    ["g1", "f3"],  # White: Knight to f3
-    ["g7", "g5"],  # Black: Pawn to g5 (defending the extra pawn)
     ["h2", "h4"],  # White: Pawn to h4
+    ["g7", "g5"],  # Black: Pawn to g5 (defending the extra pawn)
+    ["h1", "h3"],  # White: Rook to h3
     ["g5", "g4"],  # Black: Pawn pushes g4
-    ["f3", "e5"],  # White: Knight to e5
+    ["d1", "g4"],  # White: Queen to g4
+    ["f4", "f3"],  # Black: Pawn pushes f3
 ]
 
 

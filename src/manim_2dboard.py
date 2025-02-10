@@ -18,7 +18,7 @@ class ChessboardColors():
 
 
 class Manim_Chessboard_2D(VGroup):
-    def __init__(self, tm_loc=[0,0], square_size=0.5, 
+    def __init__(self, tm_loc=[0,0], square_size=1.0, 
                  board_separation=[6, 6], colors=None, 
                  chessboard=None,
                  board_size=8, animation_speed=0.5, 
