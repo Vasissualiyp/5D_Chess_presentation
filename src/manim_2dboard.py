@@ -358,28 +358,30 @@ class Manim_Chessboard_2D(VGroup):
                 piece (str): the name of the piece
                 id (int): largest id
             """
-            piece_mesh = "svg"
+            piece_mesh = "svg" # svg or sphere
 
             #id = max(np.max(self.sphere_ids), -1)
             square_center = self.square_pos[idx_1, idx_2, :]
             # Position the sphere at the same center as the square
             sphere_center = square_center
+            forward, right, normal = self.get_board_directions()
 
             if piece_mesh == "sphere":
                 sphere = Sphere(radius=radius)
-                sphere_center[2] = radius + self.delta
+                sphere_center_delta_mag = radius * self.delta
             elif piece_mesh == "svg":
                 img_path_svg, img_scale = self.chessutils.get_piece_image(piece)
                 sphere = SVGMobject(img_path_svg)
                 sphere.set(width=self.square_size * 0.5 * img_scale)
-                sphere_center[2] = self.square_size*0.1 + self.delta
+                sphere_center_delta_mag = self.square_size * 0.1 + self.delta
             else:
                 raise ValueError(f"Unknown piece_mesh: {piece_mesh}")
+            sphere_center_delta_vec = [ sphere_center_delta_mag * n_i for n_i in normal]
+            sphere_center += sphere_center_delta_vec
             sphere.move_to(sphere_center)
             sphere_color = self.get_object_color_from_piece(piece)
             if piece_mesh == "sphere":
                 sphere.set_color(sphere_color)
-            sphere.set_z_index(100000)
             self.spheres.append(sphere)
             self.sphere_ids[idx_1, idx_2] = id
             if self.log: print(f"Sphere IDs array:")
@@ -559,16 +561,23 @@ class Manim_Chessboard_2D(VGroup):
 
     # Utility functions
 
-    def get_board_directions(self):
+    def get_board_directions(self, force_renorm=False):
         """
         Returns directional vectors based on current orientation
+
+        Args:
+            force_renorm (bool): whether to output a vector with the magnitude of 
+                square size (False, default) or unit magnitude (True)
 
         Returns:
             forward (np.array): forward unit vector (i.e. a1->a2)
             right (np.array): right unit vector (i.e. a1->b1)
             normal (np.array): unit vector, normal to the board (|n|=1)
         """
-        side = self.square_size # sidelength of square
+        if force_renorm:
+            side = 1
+        else:
+            side = self.square_size
         if self.orientation == 0:
             forward = np.array([0, side, 0])
             right = np.array([side, 0, 0])
