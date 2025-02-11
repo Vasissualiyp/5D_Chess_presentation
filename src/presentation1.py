@@ -18,7 +18,7 @@ def intro_slide(self, run_time):
     self.next_slide()
     self.play(FadeOut(title, shift=10*RIGHT), FadeOut(author, shift=10*RIGHT))
 
-def draw_vector_to_square(self, board, vec_start, pos_5d, color):
+def draw_vector_to_square(self, board, vec_start, pos_5d, color, run_time):
     """
     Draws a vector arrow to a point on the board, starting from the point passed
 
@@ -28,6 +28,7 @@ def draw_vector_to_square(self, board, vec_start, pos_5d, color):
         vec_start (np.array): start of the vector
         pos_5d (list): 3-list of final vector position
         color (Manim Color): color of the arrow
+        run_time (float): how fast the animation should happen
 
     Returns:
         Arrow: arrow object
@@ -39,10 +40,10 @@ def draw_vector_to_square(self, board, vec_start, pos_5d, color):
     vec_end = board1.get_square_pos_in_3d(square)
 
     vec = Arrow(start=vec_start, end=vec_end, buff=0.0).set_color(color).set_z_index(1000)
-    self.add(vec)
+    self.FadeIn(vec, run_time = run_time)
     return vec
 
-def draw_vector_between_squares(self, board, pos_5d1, pos_5d2, color):
+def draw_vector_between_squares(self, board, pos_5d1, pos_5d2, color, run_time):
     """
     Draws a vector arrow between 2 points on the board
 
@@ -52,6 +53,7 @@ def draw_vector_between_squares(self, board, pos_5d1, pos_5d2, color):
         pos_5d1 (list): 3-list of starting vector position
         pos_5d2 (list): 3-list of final vector position
         color (Manim Color): color of the arrow
+        run_time (float): how fast the animation should happen
 
     Returns:
         Arrow: arrow object
@@ -68,7 +70,7 @@ def draw_vector_between_squares(self, board, pos_5d1, pos_5d2, color):
     vec_end = board2.get_square_pos_in_3d(square2)
 
     vec = Arrow(start=vec_start, end=vec_end, buff=0.0).set_color(color).set_z_index(1000)
-    self.add(vec)
+    self.FadeIn(vec, run_time = run_time)
     return vec
 
 def AddMyAxes(self, origin, arrow_sizes):
@@ -207,9 +209,9 @@ def show_vector_difference(self, board_5d, text_pos, axes_origin_vec, run_time, 
     text_pos = np.array(text_pos)
     color1, color2, color3 = colors
 
-    arrow1 = draw_vector_to_square(self, board_5d, axes_origin_vec, piece_loc, color1)
-    arrow2 = draw_vector_between_squares(self, board_5d, piece_loc, piece_loc_plus1, color2)
-    arrow3 = draw_vector_to_square(self, board_5d, axes_origin_vec, piece_loc_plus1, color3)
+    arrow1 = draw_vector_to_square(self, board_5d, axes_origin_vec, piece_loc, color1, run_time/4)
+    arrow2 = draw_vector_between_squares(self, board_5d, piece_loc, piece_loc_plus1, color2, run_time/4)
+    arrow3 = draw_vector_to_square(self, board_5d, axes_origin_vec, piece_loc_plus1, color3, run_time/4)
     dr_tex = MathTex(r"\mathbf{r_2}", r"\mathbf{ = }", r"\mathbf{r_1}", r"\mathbf{+ }",r"\mathbf{\delta r}", 
                      font_size=50).shift(text_pos)
     dr_tex.set_color_by_tex('r_1', color1)
@@ -222,8 +224,6 @@ def show_vector_difference(self, board_5d, text_pos, axes_origin_vec, run_time, 
     vec_arrows_anim: list[Animation] = [ FadeOut(arrow) for arrow in arrows ]
     vec_arrows_anim.append(Transform(dr_tex, MathTex("")))
     self.play(*vec_arrows_anim, run_time = run_time)
-
-
 
 def show_piece_moves_slide(self, board_5d, piece, pos=central_square, tm_loc=[0,0]):
     """
@@ -277,12 +277,171 @@ def show_queen_moves(self, run_time):
     write_drs(self, piece)
     board_5d.remove_all_movement_vectors()
     board1.delete_board()
-    rm_axes_anim = FadeOut(*[x_axis, y_axis], run_time = run_time)
+    rm_axes_anim = FadeOut(*[x_axis, y_axis], run_time = run_time/2)
     t1_anim = []
     t1_anim.append(rm_axes_anim)
-    self.play(*t1_anim, run_time = run_time)
+    self.play(*t1_anim, run_time = run_time/2)
     self.remove(board_5d, x_axis, y_axis)
+
+def full_dr_explanation_slide(self, run_time):
+    """
+    A slide with full dr explanations in 2D
+    """
+    top_pos = np.array([0,3,0])
+
+    dpos_vec = np.array([0,-1.0,0])
+    accent_color = GOLD
+
+    pos0 = top_pos + dpos_vec
+    dr_title = Tex(r"$\delta$-vector notation definition:").shift(top_pos)
+    self.play(Write(dr_title), run_time = run_time)
     self.next_slide()
+
+    dr_def = MathTex(r"\mathbf{[ x_1, x_2, ..., x_n ]^{m}_{\delta} ",
+                     r"= \left\{ \forall \Vec{v} \, | \,  \Vec{v} = ",
+                     r"\sigma \left( ",
+                     r"[ \pm x_1, \pm x_2, ..., \pm x_n ]",
+                     r"\right) ",
+                     r"\times k, \left| k \right| \le m \right\}}").shift(pos0)
+    dr_def.set_color_by_tex("x_1", accent_color)
+    self.play(Write(dr_def), run_time = run_time)
+
+    possigma = pos0 + dpos_vec
+    dr_sigma = Tex(r"$\sigma(\Vec{a})$ - set of all vectors, resulting \\",
+                 r"from permutations of components of $\Vec{a}$").shift(possigma)
+    self.play(Write(dr_sigma), run_time = run_time)
+    self.next_slide()
+
+    pos1 = possigma + 2 * dpos_vec
+    dr_ex1 = Tex(r"Ex. 1: ",
+                 r"$[1, 0]^\infty_\delta$",
+                 r"$ = \{ $",
+                 r"$[+k, 0], [-k, 0], [0, +k], [0, -k] $",
+                 r"$, k \in \mathbf{Z}_+ \}$").shift(pos1)
+    dr_ex1.set_color_by_tex("[", accent_color)
+    self.play(Write(dr_ex1), run_time = run_time)
+    self.next_slide()
+
+    pos2 = pos1 + dpos_vec
+    dr_ex2 = Tex(r"Ex. 2: ",
+                 r"$[1, 1]^\infty_\delta$",
+                 r"$ = \{ $",
+                 r"$[+k, +k], [-k, +k], [-k, +k], [-k, -k] $",
+                 r"$, k \in \mathbf{Z}_+ \}$").shift(pos2)
+    dr_ex2.set_color_by_tex("[", accent_color)
+    self.play(Write(dr_ex2), run_time = run_time)
+    self.next_slide()
+
+    pos3 = pos2 + dpos_vec
+    dr_ex3 = Tex(r"Ex. 3: ",
+                 r"$[1, 2]^1_\delta$",
+                 r"$ = \{ $",
+                 r"$[\pm 1, +2], [\pm 1, -2], [\pm 2, +1], [\pm 2, -1] $",
+                 r"$\}$").shift(pos3)
+    dr_ex3.set_color_by_tex("[", accent_color)
+    self.play(Write(dr_ex3), run_time = run_time)
+    self.next_slide()
+    
+    # Define new positions for math snippets and pieces
+    img_width = 0.5
+    top_y = 1.5  # Vertical position
+    math_positions = [
+        np.array([-4, top_y, 0]),  # Left
+        np.array([0, top_y, 0]),   # Center
+        np.array([4, top_y, 0])    # Right
+    ]
+    piece_offset = LEFT * 1.5  # Distance between piece and text
+    
+    # Extract just the math parts from each example
+    math_ex1 = dr_ex1[1].copy()
+    math_ex2 = dr_ex2[1].copy()
+    math_ex3 = dr_ex3[1].copy()
+    math_group = VGroup(math_ex1, math_ex2, math_ex3)
+    
+    # Animate: fade out all text except math snippets, move math to top
+    self.play(
+        # Fade out all non-math elements
+        *[FadeOut(obj) for obj in [dr_title, dr_def, dr_sigma,
+                                   dr_ex1, dr_ex2, dr_ex3]],
+        # Move math snippets to new positions
+        math_ex1.animate.move_to(math_positions[0]),
+        math_ex2.animate.move_to(math_positions[1]),
+        math_ex3.animate.move_to(math_positions[2]),
+        run_time=run_time*3
+    )
+    
+    # Add chess pieces next to math snippets
+    piece_codes = ["rl", "bl", "nl"]
+    piece_imgs = []
+    utils = ChessUtils_2D()
+    
+    for i, (code, math_pos) in enumerate(zip(piece_codes, math_positions)):
+        # Get piece image
+        img_path_svg, img_scale = utils.get_piece_image(code)
+        piece_img = SVGMobject(img_path_svg)
+        piece_img.set(width=img_width * img_scale)
+        
+        # Position to left of math snippet
+        piece_img.next_to(math_group[i], LEFT, buff=0.3)
+        
+        # Animate appearance
+        self.play(FadeIn(piece_img), run_time=run_time)
+        piece_imgs.append(piece_img)
+        
+    # ======================
+    # Second Row: ql, kl, pl
+    # ======================
+    second_row_y = top_y - 3.0  # Position below first row
+    second_math_positions = [
+        np.array([-4, second_row_y, 0]),
+        np.array([1, second_row_y, 0]),
+        np.array([5, second_row_y, 0])
+    ]
+    
+    # Create moveset definitions for second row
+    moveset_ql = MathTex(r"[1,0]^\infty_\delta", r"\cup", r"[1,1]^\infty_\delta").set_color(accent_color)
+    moveset_kl = MathTex(r"[1,0]^1_\delta", r"\cup", r"[1,1]^1_\delta").set_color(accent_color)
+    moveset_pl = MathTex(r"[0,1]^*").set_color(accent_color)
+    movesets_list = [ moveset_ql, moveset_kl, moveset_pl ]
+    
+    # Position movesets
+    for moveset, pos in zip([moveset_ql, moveset_kl, moveset_pl], second_math_positions):
+        moveset.move_to(pos)
+    
+    # Animate second row appearing
+    #self.play(
+    #    FadeIn(moveset_ql),
+    #    FadeIn(moveset_kl),
+    #    FadeIn(moveset_pl),
+    #    run_time=run_time
+    #)
+    
+    # Add chess pieces for second row
+    second_piece_codes = ["ql", "kl", "pl"]
+    second_piece_imgs = []
+    
+    for i, (code, moveset, math_pos) in enumerate(zip(second_piece_codes, movesets_list, second_math_positions)):
+        img_path_svg, img_scale = utils.get_piece_image(code)
+        piece_img = SVGMobject(img_path_svg)
+        piece_img.set(width=img_width * img_scale)
+        piece_img.next_to(moveset_ql if i==0 else moveset_kl if i==1 else moveset_pl, LEFT, buff=0.3)
+        
+        self.play(FadeIn(piece_img), FadeIn(moveset), run_time=run_time)
+        second_piece_imgs.append(piece_img)
+    
+    self.next_slide()
+    # ======================
+    # Final Cleanup
+    # ======================
+    self.play(
+        *[FadeOut(obj) for obj in [
+            *math_group, *piece_imgs,          # First row
+            *second_piece_imgs, moveset_ql, moveset_kl, moveset_pl  # Second row
+        ]],
+        run_time=run_time
+    )
+    self.remove(*math_group, *piece_imgs, *second_piece_imgs, moveset_ql, moveset_kl, moveset_pl)
+
 
 
 class Presentation1(ThreeDSlide):
@@ -291,166 +450,11 @@ class Presentation1(ThreeDSlide):
         ###################
         ###### INTRO ######
         ###################
-        #intro_slide(self, run_time)
+        intro_slide(self, run_time)
         
         ######################
         ###### 2D MOVES ######
         ######################
         # Introduction to how to get delta r
-        #show_queen_moves(self, run_time)
-
-        top_pos = np.array([0,3,0])
-
-        dpos_vec = np.array([0,-1.0,0])
-        accent_color = GOLD
-
-        pos0 = top_pos + dpos_vec
-        dr_title = Tex(r"$\delta$-vector notation definition:").shift(top_pos)
-        self.play(Write(dr_title), run_time = run_time)
-        self.next_slide()
-
-        dr_def = MathTex(r"\mathbf{[ x_1, x_2, ..., x_n ]^{m}_{\delta} ",
-                         r"= \left\{ \forall \Vec{v} \, | \,  \Vec{v} = ",
-                         r"\sigma \left( ",
-                         r"[ \pm x_1, \pm x_2, ..., \pm x_n ]",
-                         r"\right) ",
-                         r"\times k, \left| k \right| \le m \right\}}").shift(pos0)
-        dr_def.set_color_by_tex("x_1", accent_color)
-        self.play(Write(dr_def), run_time = run_time)
-
-        possigma = pos0 + dpos_vec
-        dr_sigma = Tex(r"$\sigma(\Vec{a})$ - set of all vectors, resulting \\",
-                     r"from permutations of components of $\Vec{a}$").shift(possigma)
-        self.play(Write(dr_sigma), run_time = run_time)
-        self.next_slide()
-
-        pos1 = possigma + 2 * dpos_vec
-        dr_ex1 = Tex(r"Ex. 1: ",
-                     r"$[1, 0]^\infty_\delta$",
-                     r"$ = \{ $",
-                     r"$[+k, 0], [-k, 0], [0, +k], [0, -k] $",
-                     r"$, k \in \mathbf{Z}_+ \}$").shift(pos1)
-        dr_ex1.set_color_by_tex("[", accent_color)
-        self.play(Write(dr_ex1), run_time = run_time)
-        self.next_slide()
-
-        pos2 = pos1 + dpos_vec
-        dr_ex2 = Tex(r"Ex. 2: ",
-                     r"$[1, 1]^\infty_\delta$",
-                     r"$ = \{ $",
-                     r"$[+k, +k], [-k, +k], [-k, +k], [-k, -k] $",
-                     r"$, k \in \mathbf{Z}_+ \}$").shift(pos2)
-        dr_ex2.set_color_by_tex("[", accent_color)
-        self.play(Write(dr_ex2), run_time = run_time)
-        self.next_slide()
-
-        pos3 = pos2 + dpos_vec
-        dr_ex3 = Tex(r"Ex. 3: ",
-                     r"$[1, 2]^1_\delta$",
-                     r"$ = \{ $",
-                     r"$[\pm 1, +2], [\pm 1, -2], [\pm 2, +1], [\pm 2, -1] $",
-                     r"$\}$").shift(pos3)
-        dr_ex3.set_color_by_tex("[", accent_color)
-        self.play(Write(dr_ex3), run_time = run_time)
-        self.next_slide()
-        
-        # Define new positions for math snippets and pieces
-        img_width = 0.5
-        top_y = 1.5  # Vertical position
-        math_positions = [
-            np.array([-4, top_y, 0]),  # Left
-            np.array([0, top_y, 0]),   # Center
-            np.array([4, top_y, 0])    # Right
-        ]
-        piece_offset = LEFT * 1.5  # Distance between piece and text
-        
-        # Extract just the math parts from each example
-        math_ex1 = dr_ex1[1].copy()
-        math_ex2 = dr_ex2[1].copy()
-        math_ex3 = dr_ex3[1].copy()
-        math_group = VGroup(math_ex1, math_ex2, math_ex3)
-        
-        # Animate: fade out all text except math snippets, move math to top
-        self.play(
-            # Fade out all non-math elements
-            *[FadeOut(obj) for obj in [dr_title, dr_def, dr_sigma,
-                                       dr_ex1, dr_ex2, dr_ex3]],
-            # Move math snippets to new positions
-            math_ex1.animate.move_to(math_positions[0]),
-            math_ex2.animate.move_to(math_positions[1]),
-            math_ex3.animate.move_to(math_positions[2]),
-            run_time=run_time*3
-        )
-        
-        # Add chess pieces next to math snippets
-        piece_codes = ["rl", "bl", "nl"]
-        piece_imgs = []
-        utils = ChessUtils_2D()
-        
-        for i, (code, math_pos) in enumerate(zip(piece_codes, math_positions)):
-            # Get piece image
-            img_path_svg, img_scale = utils.get_piece_image(code)
-            piece_img = SVGMobject(img_path_svg)
-            piece_img.set(width=img_width * img_scale)
-            
-            # Position to left of math snippet
-            piece_img.next_to(math_group[i], LEFT, buff=0.3)
-            
-            # Animate appearance
-            self.play(FadeIn(piece_img), run_time=run_time)
-            piece_imgs.append(piece_img)
-            
-        # ======================
-        # Second Row: ql, kl, pl
-        # ======================
-        second_row_y = top_y - 3.0  # Position below first row
-        second_math_positions = [
-            np.array([-4, second_row_y, 0]),
-            np.array([1, second_row_y, 0]),
-            np.array([5, second_row_y, 0])
-        ]
-        
-        # Create moveset definitions for second row
-        moveset_ql = MathTex(r"[1,0]^\infty_\delta", r"\cup", r"[1,1]^\infty_\delta").set_color(accent_color)
-        moveset_kl = MathTex(r"[1,0]^1_\delta", r"\cup", r"[1,1]^1_\delta").set_color(accent_color)
-        moveset_pl = MathTex(r"[0,1]^*").set_color(accent_color)
-        movesets_list = [ moveset_ql, moveset_kl, moveset_pl ]
-        
-        # Position movesets
-        for moveset, pos in zip([moveset_ql, moveset_kl, moveset_pl], second_math_positions):
-            moveset.move_to(pos)
-        
-        # Animate second row appearing
-        #self.play(
-        #    FadeIn(moveset_ql),
-        #    FadeIn(moveset_kl),
-        #    FadeIn(moveset_pl),
-        #    run_time=run_time
-        #)
-        
-        # Add chess pieces for second row
-        second_piece_codes = ["ql", "kl", "pl"]
-        second_piece_imgs = []
-        
-        for i, (code, moveset, math_pos) in enumerate(zip(second_piece_codes, movesets_list, second_math_positions)):
-            img_path_svg, img_scale = utils.get_piece_image(code)
-            piece_img = SVGMobject(img_path_svg)
-            piece_img.set(width=img_width * img_scale)
-            piece_img.next_to(moveset_ql if i==0 else moveset_kl if i==1 else moveset_pl, LEFT, buff=0.3)
-            
-            self.play(FadeIn(piece_img), FadeIn(moveset), run_time=run_time)
-            second_piece_imgs.append(piece_img)
-        
-        self.next_slide()
-        # ======================
-        # Final Cleanup
-        # ======================
-        self.play(
-            *[FadeOut(obj) for obj in [
-                *math_group, *piece_imgs,          # First row
-                *second_piece_imgs, moveset_ql, moveset_kl, moveset_pl  # Second row
-            ]],
-            run_time=run_time
-        )
-        self.remove(*math_group, *piece_imgs, *second_piece_imgs, moveset_ql, moveset_kl, moveset_pl)
-
+        show_queen_moves(self, run_time)
+        full_dr_explanation_slide(self, run_time)
