@@ -352,7 +352,7 @@ class Manim_Chessboard_2D(VGroup):
         idx_1, idx_2 = self.chessutils.chessform_to_matrix(pos)
         newpiece_id = np.max(self.sphere_ids) + 1
         id = self.add_sphere_to_square(idx_1, idx_2, radius, piece, newpiece_id)
-        print(f"Sphere ids: {self.sphere_ids}")
+        if self.log: print(f"Sphere ids: {self.sphere_ids}")
         self.blowup_anim(self.spheres[-1])
 
     def remove_piece(self, square, animation_speed=None):
@@ -367,7 +367,7 @@ class Manim_Chessboard_2D(VGroup):
             animation_speed = self.animation_speed/2
         piece, sphere = self.get_piece(square)
         if piece == "" or sphere is None:
-            print(f"No piece to remove at {square}")
+            if self.log: print(f"No piece to remove at {square}")
             return
 
         # 2) Animate removing the sphere if a scene is provided

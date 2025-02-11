@@ -1,6 +1,7 @@
 from manim import *
 from manim_slides import Slide, ThreeDSlide
 from manim_5dboard import Manim_Chessboard_5D, sample_game_1
+from moves import Moves
 
 def intro_slide(self):
     title = Text("5D Chess with Multivere Time Travel\nBlack Board Talk").scale(0.8)
@@ -34,6 +35,89 @@ def AddMyAxes(self, origin, arrow_sizes):
     arrow_v = Arrow(start=origin_v, end=[0, v_size, 0]).shift(origin)
     self.add(arrow_v, arrow_h)
     return arrow_h, arrow_v
+
+def write_drs(self, piece):
+    """
+    Writes all dr vectors for a specific piece
+
+    Args:
+        self (Slide): Pass self to make sure that the stuff gets animated
+        piece (str): piece acronym
+    """
+    animations_signless = [] # Array for animations for dr vectors with sign permutations
+    animations_sign = [] # Array for animations for dr vectors without sign permutations
+    animations_sign_ordered = [] # Array for animations for pure dr vectors
+    drs_2d = []
+    drs_2d_sign = []
+    drs_2d_sign_ordered = []
+
+    mv = Moves()
+    drs_4d = mv.get_dr(piece[0])
+    starting_pos = np.array([6.0, 4.0, 0])
+    pos = starting_pos
+
+    textsize = 0.6
+    separation = 1.0 # Separation between the lines, in terms of textsize
+    displacement_vec = np.array([0.0, - separation * textsize, 0.0])
+
+    textpos1 = starting_pos - displacement_vec
+    textpos1[0] = 5.0
+    textpos2 = textpos1
+    textpos2[0] = 5.0
+    textpos3 = textpos1
+    textpos3[0] = 2.0
+    titletext1 = Text("Unit vectors").scale(textsize).shift(textpos1)
+    titletext2 = Text("Sign-independent unit vectors").scale(textsize).shift(textpos2)
+    titletext3 = Text("Sign- and permutation-independent unit vectors", color=RED
+                      ).scale(textsize).shift(textpos3)
+
+    for dr in drs_4d:
+        x, y, _, _ = dr
+        dr_2d = [x, y]
+        if dr_2d not in drs_2d and dr_2d != [0, 0]:
+            drs_2d.append(dr_2d)
+            if x >=0 and y >=0:
+                drs_2d_sign.append(dr_2d)
+                if y <= x:
+                    drs_2d_sign_ordered.append(dr_2d)
+
+    for dr in drs_2d:
+        print(f"Text: {dr}")
+        text = Text(str(dr)).shift(pos).scale(textsize)
+        text_red = Text(str(dr), color=RED).shift(pos).scale(textsize)
+        empty_text = Text("").shift(pos).scale(textsize)
+        text_anim = Write(text)
+        pos += displacement_vec
+
+        # Deal with 2nd transformation into the empty string
+        if dr in drs_2d_sign:
+            text2 = text
+        else:
+            text2 = empty_text
+
+        if dr in drs_2d_sign_ordered:
+            text3 = text_red
+        else:
+            text3 = empty_text
+
+        text_anim_sign = Transform(text, text2)
+        text_anim_sign_ordered = Transform(text2, text3)
+
+        animations_signless.append(text_anim)
+        animations_sign.append(text_anim_sign)
+        animations_sign_ordered.append(text_anim_sign_ordered)
+
+    animations_signless.append(Write(titletext1))
+    animations_sign.append(Transform(titletext1, titletext2))
+    animations_sign_ordered.append(Transform(titletext1, titletext3))
+
+    self.play(*animations_signless, run_time = 0.5)
+    self.next_slide()
+    self.play(*animations_sign, run_time = 0.5)
+    self.next_slide()
+    self.play(*animations_sign_ordered, run_time = 0.5)
+
+
 
 def show_piece_moves_slide(self, board_5d, piece, pos='d4', tm_loc=[0,0]):
     """
@@ -77,13 +161,12 @@ class Presentation1(ThreeDSlide):
 
         self.add(board_5d)#, board2, board3)
 
-        #show_piece_moves_slide(self, board_5d, 'rl')
-        show_piece_moves_slide(self, board_5d, 'ql')
+        show_piece_moves_slide(self, board_5d, 'rl')
         board_5d.draw_all_movement_vectors(['d4', 0, 0], False)
-        #show_piece_moves_slide(self, board_5d, 'nl')
-        #show_piece_moves_slide(self, board_5d, 'ql')
         self.next_slide()
         board_5d.remove_all_movement_vectors()
+        board_5d.draw_all_movement_vectors(['d4', 0, 0], True)
+        write_drs(self, 'rl')
 
         #for move in sample_game_1:
         #    start_sq, end_sq = move

@@ -174,8 +174,10 @@ class Manim_Chessboard_5D(VGroup):
         vec_end   = self.manim_chessboards[id2].get_square_pos_in_3d(square2)
 
         vec_arrow = Arrow(start=vec_start, end=vec_end, buff=0, 
-                          max_tip_length_to_length_ratio=0.2)
-        vec_arrow.color = self.colors.chosen_piece
+                          #stroke_width=5 * self.square_size,
+                          max_stroke_width_to_length_ratio=5,
+                          max_tip_length_to_length_ratio=0.15)
+        vec_arrow.color = WHITE
         vec_arrow.set_z_index(z_index)
         return vec_arrow
 
