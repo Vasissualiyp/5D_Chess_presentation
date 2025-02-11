@@ -5,14 +5,15 @@ from manim_5dboard import Manim_Chessboard_5D, sample_game_1
 from moves import Moves
 
 central_square = 'e4'
+central_square_plus1 = 'f3'
 
-def intro_slide(self):
+def intro_slide(self, run_time):
     title = Text("5D Chess with Multivere Time Travel\nBlack Board Talk").scale(0.8)
     author = Text("By Vasilii Pustovoit, CITA, 2025").scale(0.4)
     title.shift(0.5*UP)
     author.shift(0.5*DOWN)
-    self.play(Write(title), run_time = 0.5)
-    self.play(Write(author), run_time = 0.5)
+    self.play(Write(title), run_time = run_time)
+    self.play(Write(author), run_time = run_time)
     self.next_slide()
     self.play(FadeOut(title, shift=10*RIGHT), FadeOut(author, shift=10*RIGHT))
 
@@ -36,10 +37,38 @@ def draw_vector_to_square(self, board, vec_start, pos_5d, color):
     board1 = board.manim_chessboards[board_id]
     vec_end = board1.get_square_pos_in_3d(square)
 
-    vec = Arrow(start=vec_start, end=vec_end, buff=0.0).set_color(color)
+    vec = Arrow(start=vec_start, end=vec_end, buff=0.0).set_color(color).set_z_index(1000)
     self.add(vec)
     return vec
 
+def draw_vector_between_squares(self, board, pos_5d1, pos_5d2, color):
+    """
+    Draws a vector arrow between 2 points on the board
+
+    Args:
+        self (Slide): Pass self to make sure that the stuff gets animated
+        board (Manim_Chessboard_5D): a board to draw the vector towards
+        pos_5d1 (list): 3-list of starting vector position
+        pos_5d2 (list): 3-list of final vector position
+        color (Manim Color): color of the arrow
+
+    Returns:
+        Arrow: arrow object
+    """
+    square1, time1, mult1 = pos_5d1
+    square2, time2, mult2 = pos_5d2
+    tm_loc1 = [time1, mult1]
+    tm_loc2 = [time2, mult2]
+    board_id1 = board.chess5.get_chessboard_by_tm(tm_loc1)
+    board_id2 = board.chess5.get_chessboard_by_tm(tm_loc2)
+    board1 = board.manim_chessboards[board_id1]
+    board2 = board.manim_chessboards[board_id2]
+    vec_start = board1.get_square_pos_in_3d(square1)
+    vec_end = board2.get_square_pos_in_3d(square2)
+
+    vec = Arrow(start=vec_start, end=vec_end, buff=0.0).set_color(color).set_z_index(1000)
+    self.add(vec)
+    return vec
 
 def AddMyAxes(self, origin, arrow_sizes):
     """
@@ -85,7 +114,6 @@ def write_drs(self, piece):
     mv = Moves()
     drs_4d = mv.get_dr(piece[0])
     starting_pos = np.array([6.0, 4.0, 0.0])
-    origin_vec = np.array([*origin, 0.0])
     pos = starting_pos
 
     textsize = 0.6
@@ -166,6 +194,34 @@ def write_drs(self, piece):
     self.play(*animations_delete, run_time = animation_speed)
     self.remove(titletext1, titletext2, titletext3, *text_objs)
 
+def show_vector_difference(self, board_5d, text_pos, axes_origin_vec, run_time, colors, piece_loc, piece_loc_plus1):
+    """
+    Shows vector equation of the form r2 = r1 + delta(r)
+
+    Args:
+        self (Slide): Pass self to make sure that the stuff gets animated
+        colors (list): list of colors
+        ...
+    """
+    text_pos = np.array(text_pos)
+    color1, color2, color3 = colors
+
+    arrow1 = draw_vector_to_square(self, board_5d, axes_origin_vec, piece_loc, color1)
+    arrow2 = draw_vector_between_squares(self, board_5d, piece_loc, piece_loc_plus1, color2)
+    arrow3 = draw_vector_to_square(self, board_5d, axes_origin_vec, piece_loc_plus1, color3)
+    dr_tex = MathTex(r"\mathbf{r_2}", r"\mathbf{ = }", r"\mathbf{r_1}", r"\mathbf{+ }",r"\mathbf{\delta r}", 
+                     font_size=50).shift(text_pos)
+    dr_tex.set_color_by_tex('r_1', color1)
+    dr_tex.set_color_by_tex('elta', color2)
+    dr_tex.set_color_by_tex('r_2', color3)
+    self.play(Write(dr_tex))
+
+    self.next_slide()
+    arrows = [ arrow1, arrow2, arrow3 ]
+    vec_arrows_anim: list[Animation] = [ FadeOut(arrow) for arrow in arrows ]
+    vec_arrows_anim.append(Transform(dr_tex, MathTex("")))
+    self.play(*vec_arrows_anim, run_time = run_time)
+
 
 
 def show_piece_moves_slide(self, board_5d, piece, pos=central_square, tm_loc=[0,0]):
@@ -187,6 +243,46 @@ def show_piece_moves_slide(self, board_5d, piece, pos=central_square, tm_loc=[0,
     board2d.add_piece(piece, pos)
     board_5d.show_moves([pos,tm_loc[0],tm_loc[1]])
 
+def show_queen_moves(self, run_time):
+    """
+    Show moves of queen, and some other slides
+    """
+
+    axes_origin = [-4.5, -4.5]
+    axes_extensions = 9.5
+    piece_loc = [central_square, 0, 0]
+    piece_loc_plus1 = [central_square_plus1, 0, 0]
+    axes_origin_vec = np.array([*axes_origin, 0])
+
+    x_axis, y_axis = AddMyAxes(self, axes_origin, 
+                               [axes_extensions, axes_extensions])
+    log = False
+    board_5d = Manim_Chessboard_5D(scene=self, log=log)
+    board_5d.default_chess_configuration_setup()
+    board1 = board_5d.manim_chessboards[0]
+
+    self.add(board_5d)#, board2, board3)
+
+    piece = 'ql'
+    show_piece_moves_slide(self, board_5d, piece)
+    board_5d.draw_all_movement_vectors(piece_loc, False) # All movement vectors
+    self.next_slide()
+    board_5d.remove_all_movement_vectors()
+    board_5d.draw_all_movement_vectors(piece_loc, True) # Unit vectors
+
+    #show_vector_difference(self, board_5d, [5.5, -3, 0], axes_origin_vec, run_time, 
+    #                       [ PINK, RED, GOLD ], piece_loc, piece_loc_plus1)
+
+    write_drs(self, piece)
+    board_5d.remove_all_movement_vectors()
+    board1.delete_board()
+    rm_axes_anim = FadeOut(*[x_axis, y_axis], run_time = run_time)
+    t1_anim = []
+    t1_anim.append(rm_axes_anim)
+    self.play(*t1_anim, run_time = run_time)
+    self.remove(board_5d, x_axis, y_axis)
+    self.next_slide()
+
 
 class Presentation1(ThreeDSlide):
     def construct(self):
@@ -194,46 +290,13 @@ class Presentation1(ThreeDSlide):
         ###################
         ###### INTRO ######
         ###################
-        #intro_slide(self)
+        #intro_slide(self, run_time)
         
         ######################
         ###### 2D MOVES ######
         ######################
-        axes_origin = [-4.5, -4.5]
-        axes_extensions = 9.5
-        piece_loc = [central_square, 0, 0]
-        axes_origin_vec = np.array([*axes_origin, 0])
-
-        x_axis, y_axis = AddMyAxes(self, axes_origin, 
-                                   [axes_extensions, axes_extensions])
-        log = False
-        board_5d = Manim_Chessboard_5D(scene=self, log=log)
-        board_5d.default_chess_configuration_setup()
-        board1 = board_5d.manim_chessboards[0]
-
-        self.add(board_5d)#, board2, board3)
-
-        piece = 'ql'
-        show_piece_moves_slide(self, board_5d, piece)
-        board_5d.draw_all_movement_vectors(piece_loc, False) # All movement vectors
-        self.next_slide()
-        board_5d.remove_all_movement_vectors()
-        board_5d.draw_all_movement_vectors(piece_loc, True) # Unit vectors
-        draw_vector_to_square(self, board_5d, axes_origin_vec, piece_loc, AQUABLUE)
-        write_drs(self, piece)
-        board_5d.remove_all_movement_vectors()
-        board1.delete_board()
-        rm_axes_anim = FadeOut(*[x_axis, y_axis], run_time = run_time)
-        t1_anim = []
-        t1_anim.append(rm_axes_anim)
-        t1_anim.append(Write(MathTex(r"r_2 = r_1 + \delta r")))
-        self.play(*t1_anim, run_time = run_time)
-        self.remove(board_5d, x_axis, y_axis)
-        self.next_slide()
-
-
-
-        self.next_slide()
+        # Introduction to how to get delta r
+        #show_queen_moves(self, run_time)
 
         #for move in sample_game_1:
         #    start_sq, end_sq = move

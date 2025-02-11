@@ -204,6 +204,8 @@ class Manim_Chessboard_5D(VGroup):
         else:
             raise TypeError(f"Cannot play animation when scene is None")
 
+        self.vec_arrows.clear()
+
     def show_moves(self, pos, force_single_moves=False):
         """
         Show moves of a piece, located at the provided position.
