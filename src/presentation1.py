@@ -93,12 +93,14 @@ def write_drs(self, piece):
         if dr in drs_2d_sign:
             text2 = text
         else:
-            text2 = empty_text
+            #text2 = empty_text
+            text2 = text.copy().scale(0.5).set_color(GREY)
 
         if dr in drs_2d_sign_ordered:
             text3 = text_red
         else:
-            text3 = empty_text
+            #text3 = empty_text
+            text3 = text.copy().scale(0.5).set_color(GREY)
 
         text_anim_sign = Transform(text, text2)
         text_anim_sign_ordered = Transform(text2, text3)
@@ -161,12 +163,13 @@ class Presentation1(ThreeDSlide):
 
         self.add(board_5d)#, board2, board3)
 
-        show_piece_moves_slide(self, board_5d, 'rl')
+        piece = 'ql'
+        show_piece_moves_slide(self, board_5d, piece)
         board_5d.draw_all_movement_vectors(['d4', 0, 0], False)
         self.next_slide()
         board_5d.remove_all_movement_vectors()
         board_5d.draw_all_movement_vectors(['d4', 0, 0], True)
-        write_drs(self, 'rl')
+        write_drs(self, piece)
 
         #for move in sample_game_1:
         #    start_sq, end_sq = move
