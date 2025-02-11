@@ -54,6 +54,8 @@ class Manim_Chessboard_5D(VGroup):
                                     first_turn_black=self.first_turn_black,
                                     log=self.log)
 
+    # Adding chessboards 
+
     def default_chess_configuration_setup(self):
         """
         Sets up the default 8x8 chessboard.
@@ -86,6 +88,8 @@ class Manim_Chessboard_5D(VGroup):
                                                    animation_speed=self.animation_speed)
         self.manim_chessboards.append(manim_new_chessboard)
         self.add(manim_new_chessboard)
+
+    # Change board/camera positions/rotations
 
     def reorient_all_boards(self, final_orientation):
         """
@@ -131,24 +135,7 @@ class Manim_Chessboard_5D(VGroup):
         # Animate them all together in parallel
         return AnimationGroup(*animations)
 
-    def show_moves(self, pos, force_single_moves=False):
-        """
-        Show moves of a piece, located at the provided position.
-        """
-        possible_moves = self.chess5.get_list_of_possible_moves(pos, force_single_moves)
-        if self.log: print(f"Possible moves: {possible_moves}")
-        if self.log: print(f"Manim chessboards: {self.chess5.chessboards}")
-        for chessboard in self.chess5.chessboards:
-            chessboard_loc = chessboard.chessboard_tm_pos
-            if self.log: print(f"Location of chessboard: {chessboard_loc}")
-            filtered_moves = [ move[0] for move in possible_moves 
-                              if move[1] == chessboard_loc[0] 
-                              and move[2] == chessboard_loc[1] ]
-            chessboard_id = self.chess5.get_chessboard_by_tm(chessboard_loc)
-            assert chessboard_id != -1, f"Failed to retireve chessboard from {chessboard_loc}"
-            manim_chessboard = self.manim_chessboards[chessboard_id]
-            manim_chessboard.recolor_list = filtered_moves
-            manim_chessboard.recolor_board(manim_chessboard.recolor_from_list, special_squares=[pos[0]])
+    # Drawing vectors
 
     def draw_vector_between_positions(self, pos1, pos2):
         """
@@ -215,6 +202,25 @@ class Manim_Chessboard_5D(VGroup):
             self.scene.play(*animations)
         else:
             raise TypeError(f"Cannot play animation when scene is None")
+
+    def show_moves(self, pos, force_single_moves=False):
+        """
+        Show moves of a piece, located at the provided position.
+        """
+        possible_moves = self.chess5.get_list_of_possible_moves(pos, force_single_moves)
+        if self.log: print(f"Possible moves: {possible_moves}")
+        if self.log: print(f"Manim chessboards: {self.chess5.chessboards}")
+        for chessboard in self.chess5.chessboards:
+            chessboard_loc = chessboard.chessboard_tm_pos
+            if self.log: print(f"Location of chessboard: {chessboard_loc}")
+            filtered_moves = [ move[0] for move in possible_moves 
+                              if move[1] == chessboard_loc[0] 
+                              and move[2] == chessboard_loc[1] ]
+            chessboard_id = self.chess5.get_chessboard_by_tm(chessboard_loc)
+            assert chessboard_id != -1, f"Failed to retireve chessboard from {chessboard_loc}"
+            manim_chessboard = self.manim_chessboards[chessboard_id]
+            manim_chessboard.recolor_list = filtered_moves
+            manim_chessboard.recolor_board(manim_chessboard.recolor_from_list, special_squares=[pos[0]])
 
 
     def add_chessboard(self, chessboard_loc, origin_board):

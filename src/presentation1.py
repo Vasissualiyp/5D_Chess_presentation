@@ -47,9 +47,12 @@ def write_drs(self, piece):
     animations_signless = [] # Array for animations for dr vectors with sign permutations
     animations_sign = [] # Array for animations for dr vectors without sign permutations
     animations_sign_ordered = [] # Array for animations for pure dr vectors
+    animations_delete = [] # Array for animations for deleting of dr vectors
     drs_2d = []
     drs_2d_sign = []
     drs_2d_sign_ordered = []
+    text_objs = []
+    animation_speed = 0.5
 
     mv = Moves()
     drs_4d = mv.get_dr(piece[0])
@@ -102,22 +105,37 @@ def write_drs(self, piece):
             #text3 = empty_text
             text3 = text.copy().scale(0.5).set_color(GREY)
 
+        text_objs.append(text)
+        text_objs.append(text2)
+        text_objs.append(text3)
         text_anim_sign = Transform(text, text2)
         text_anim_sign_ordered = Transform(text2, text3)
+        text_anim_delete = Transform(text, empty_text)
+        text_anim_delete2 = Transform(text2, empty_text)
+        text_anim_delete3 = Transform(text3, empty_text)
 
         animations_signless.append(text_anim)
         animations_sign.append(text_anim_sign)
         animations_sign_ordered.append(text_anim_sign_ordered)
+        animations_delete.append(text_anim_delete)
+        animations_delete.append(text_anim_delete2)
+        animations_delete.append(text_anim_delete3)
 
     animations_signless.append(Write(titletext1))
     animations_sign.append(Transform(titletext1, titletext2))
     animations_sign_ordered.append(Transform(titletext1, titletext3))
+    animations_delete.append(Transform(titletext1, Text("")))
+    animations_delete.append(Transform(titletext2, Text("")))
+    animations_delete.append(Transform(titletext3, Text("")))
 
-    self.play(*animations_signless, run_time = 0.5)
+    self.play(*animations_signless, run_time = animation_speed)
     self.next_slide()
-    self.play(*animations_sign, run_time = 0.5)
+    self.play(*animations_sign, run_time = animation_speed)
     self.next_slide()
-    self.play(*animations_sign_ordered, run_time = 0.5)
+    self.play(*animations_sign_ordered, run_time = animation_speed)
+    self.next_slide()
+    self.play(*animations_delete, run_time = animation_speed)
+    self.remove(titletext1, titletext2, titletext3, *text_objs)
 
 
 
@@ -156,7 +174,7 @@ class Presentation1(ThreeDSlide):
 
         x_axis, y_axis = AddMyAxes(self, axes_origin, 
                                    [axes_extensions, axes_extensions])
-        log = True
+        log = False
         board_5d = Manim_Chessboard_5D(scene=self, log=log)
         board_5d.default_chess_configuration_setup()
         board1 = board_5d.manim_chessboards[0]
@@ -165,11 +183,15 @@ class Presentation1(ThreeDSlide):
 
         piece = 'ql'
         show_piece_moves_slide(self, board_5d, piece)
-        board_5d.draw_all_movement_vectors(['d4', 0, 0], False)
+        board_5d.draw_all_movement_vectors(['d4', 0, 0], False) # All movement vectors
         self.next_slide()
         board_5d.remove_all_movement_vectors()
-        board_5d.draw_all_movement_vectors(['d4', 0, 0], True)
+        board_5d.draw_all_movement_vectors(['d4', 0, 0], True) # Unit vectors
         write_drs(self, piece)
+        board_5d.remove_all_movement_vectors()
+        board1.delete_board()
+        self.remove(board_5d, x_axis, y_axis)
+        self.next_slide()
 
         #for move in sample_game_1:
         #    start_sq, end_sq = move

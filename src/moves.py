@@ -149,7 +149,7 @@ class Moves():
                 return self.get_all_linear_moves(check_if_move_possible, piece_color, 
                                                  list_dr, pos_4d, log)
 
-    def get_all_linear_moves(self, check_if_move_possible, piece_color, list_dr, pos_4d, log):
+    def get_all_linear_moves(self, check_if_move_possible, piece_color, list_dr, pos_4d, log=False):
         """
         Obtains movable spaces for pieces that move in straight lines (rooks, queens, bishops, etc.)
 
@@ -202,11 +202,11 @@ class Moves():
             list_dr = new_list_dr
             list_dr_eat = new_list_dr_eat
 
-        print("Looking at the non-eating moves...")
+        if log: print("Looking at the non-eating moves...")
         for base_dr in list_dr:
             self.test_single_tile(check_if_move_possible, pos_4d, base_dr, 
                                                 piece_color, moves_list, log, force_noeat=2)
-        print("Looking at the eating moves...")
+        if log: print("Looking at the eating moves...")
         for base_dr in list_dr_eat:
             self.test_single_tile(check_if_move_possible, pos_4d, base_dr, 
                                                 piece_color, moves_list, log, force_noeat=1)

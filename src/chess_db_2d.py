@@ -50,7 +50,7 @@ class Chessboard_2D:
         else:
             self.chessboard_matrix[square_loc[0], square_loc[1]] = piece_val
 
-    def move_piece(self, pos1, pos2, eat_pieces=False):
+    def move_piece(self, pos1, pos2, eat_pieces=False, log=False):
         """
         Moves a piece from pos1 to pos2 in chess notation.
         """
@@ -58,7 +58,7 @@ class Chessboard_2D:
         target = self.get_piece(pos2)
         self.add_piece("", pos1, eat_pieces=True) # Remove the piece
         if target != "":
-            print(f"{piece} at {pos1} eats {target} at {pos2}")
+            if log: print(f"{piece} at {pos1} eats {target} at {pos2}")
             self.add_piece("", pos2) # Remove the target piece
         self.add_piece(piece, pos2, eat_pieces=eat_pieces)
 

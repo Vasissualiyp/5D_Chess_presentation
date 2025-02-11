@@ -140,6 +140,23 @@ class Manim_Chessboard_2D(VGroup):
             elif appearance_anim == "Scale": self.blowup_anim(self.board_tiles)
             else: raise ValueError(f"Unknown appearance animation: {appearance_anim}")
 
+    def delete_board(self):
+        """
+        Removes a square chessboard and pieces from it
+        """
+        appearance_anim = self.appearance_anim
+        scene = self.scene
+        self.remove_all_pieces()
+        if scene is None:
+            self.remove(*self.board_tiles)
+        else:
+            if appearance_anim == "FadeIn": scene.play(FadeOut(*self.board_tiles), run_time=self.animation_speed)
+            elif appearance_anim == "Scale": self.collapse_anim(self.board_tiles)
+            else: raise ValueError(f"Unknown appearance animation: {appearance_anim}")
+
+        print(f"Keep in mind that the board for now is still present in memory, "+
+              "even though it's not present in the scene!")
+
     # Board 3D scene manipulation: movement
 
     def rotate_board(self, angle, axis=np.array([0,0,1])): # Currently useless
@@ -257,7 +274,7 @@ class Manim_Chessboard_2D(VGroup):
             sphere.shift(delta_vector)
         else:
             self.scene.play(ApplyMethod(sphere.shift, delta_vector),run_time=move_speed)
-        self.chessboard.move_piece(square_start, square_finish, eat_pieces=eat_pieces)
+        self.chessboard.move_piece(square_start, square_finish, eat_pieces=eat_pieces, log=self.log)
         if self.log: print(f"Sphere IDs array:")
         if self.log: print(self.sphere_ids.T)
         initial_id = self.sphere_ids[start_matrix[1], start_matrix[0]]
