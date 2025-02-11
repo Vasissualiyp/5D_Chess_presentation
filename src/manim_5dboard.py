@@ -200,6 +200,7 @@ class Manim_Chessboard_5D(VGroup):
 
         if self.scene is not None:
             self.scene.play(*animations)
+            self.scene.remove(*self.vec_arrows)
         else:
             raise TypeError(f"Cannot play animation when scene is None")
 

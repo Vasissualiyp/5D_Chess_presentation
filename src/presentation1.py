@@ -1,7 +1,10 @@
 from manim import *
+from manim.utils.color.XKCD import AQUABLUE
 from manim_slides import Slide, ThreeDSlide
 from manim_5dboard import Manim_Chessboard_5D, sample_game_1
 from moves import Moves
+
+central_square = 'e4'
 
 def intro_slide(self):
     title = Text("5D Chess with Multivere Time Travel\nBlack Board Talk").scale(0.8)
@@ -12,6 +15,31 @@ def intro_slide(self):
     self.play(Write(author), run_time = 0.5)
     self.next_slide()
     self.play(FadeOut(title, shift=10*RIGHT), FadeOut(author, shift=10*RIGHT))
+
+def draw_vector_to_square(self, board, vec_start, pos_5d, color):
+    """
+    Draws a vector arrow to a point on the board, starting from the point passed
+
+    Args:
+        self (Slide): Pass self to make sure that the stuff gets animated
+        board (Manim_Chessboard_5D): a board to draw the vector towards
+        vec_start (np.array): start of the vector
+        pos_5d (list): 3-list of final vector position
+        color (Manim Color): color of the arrow
+
+    Returns:
+        Arrow: arrow object
+    """
+    square, time, mult = pos_5d
+    tm_loc = [time, mult]
+    board_id = board.chess5.get_chessboard_by_tm(tm_loc)
+    board1 = board.manim_chessboards[board_id]
+    vec_end = board1.get_square_pos_in_3d(square)
+
+    vec = Arrow(start=vec_start, end=vec_end, buff=0.0).set_color(color)
+    self.add(vec)
+    return vec
+
 
 def AddMyAxes(self, origin, arrow_sizes):
     """
@@ -38,7 +66,7 @@ def AddMyAxes(self, origin, arrow_sizes):
 
 def write_drs(self, piece):
     """
-    Writes all dr vectors for a specific piece
+    Writes all dr vectors for a specific piece.
 
     Args:
         self (Slide): Pass self to make sure that the stuff gets animated
@@ -56,7 +84,8 @@ def write_drs(self, piece):
 
     mv = Moves()
     drs_4d = mv.get_dr(piece[0])
-    starting_pos = np.array([6.0, 4.0, 0])
+    starting_pos = np.array([6.0, 4.0, 0.0])
+    origin_vec = np.array([*origin, 0.0])
     pos = starting_pos
 
     textsize = 0.6
@@ -139,7 +168,7 @@ def write_drs(self, piece):
 
 
 
-def show_piece_moves_slide(self, board_5d, piece, pos='d4', tm_loc=[0,0]):
+def show_piece_moves_slide(self, board_5d, piece, pos=central_square, tm_loc=[0,0]):
     """
     Shows moves of a pice
 
@@ -161,6 +190,7 @@ def show_piece_moves_slide(self, board_5d, piece, pos='d4', tm_loc=[0,0]):
 
 class Presentation1(ThreeDSlide):
     def construct(self):
+        run_time = 0.5
         ###################
         ###### INTRO ######
         ###################
@@ -171,6 +201,8 @@ class Presentation1(ThreeDSlide):
         ######################
         axes_origin = [-4.5, -4.5]
         axes_extensions = 9.5
+        piece_loc = [central_square, 0, 0]
+        axes_origin_vec = np.array([*axes_origin, 0])
 
         x_axis, y_axis = AddMyAxes(self, axes_origin, 
                                    [axes_extensions, axes_extensions])
@@ -183,14 +215,24 @@ class Presentation1(ThreeDSlide):
 
         piece = 'ql'
         show_piece_moves_slide(self, board_5d, piece)
-        board_5d.draw_all_movement_vectors(['d4', 0, 0], False) # All movement vectors
+        board_5d.draw_all_movement_vectors(piece_loc, False) # All movement vectors
         self.next_slide()
         board_5d.remove_all_movement_vectors()
-        board_5d.draw_all_movement_vectors(['d4', 0, 0], True) # Unit vectors
+        board_5d.draw_all_movement_vectors(piece_loc, True) # Unit vectors
+        draw_vector_to_square(self, board_5d, axes_origin_vec, piece_loc, AQUABLUE)
         write_drs(self, piece)
         board_5d.remove_all_movement_vectors()
         board1.delete_board()
+        rm_axes_anim = FadeOut(*[x_axis, y_axis], run_time = run_time)
+        t1_anim = []
+        t1_anim.append(rm_axes_anim)
+        t1_anim.append(Write(MathTex(r"r_2 = r_1 + \delta r")))
+        self.play(*t1_anim, run_time = run_time)
         self.remove(board_5d, x_axis, y_axis)
+        self.next_slide()
+
+
+
         self.next_slide()
 
         #for move in sample_game_1:
