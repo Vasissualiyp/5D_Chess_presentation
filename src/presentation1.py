@@ -270,8 +270,8 @@ def show_queen_moves(self, run_time):
     board_5d.remove_all_movement_vectors()
     board_5d.draw_all_movement_vectors(piece_loc, True) # Unit vectors
 
-    #show_vector_difference(self, board_5d, [5.5, -3, 0], axes_origin_vec, run_time, 
-    #                       [ PINK, RED, GOLD ], piece_loc, piece_loc_plus1)
+    show_vector_difference(self, board_5d, [5.5, -3, 0], axes_origin_vec, run_time, 
+                           [ PINK, RED, GOLD ], piece_loc, piece_loc_plus1)
 
     write_drs(self, piece)
     board_5d.remove_all_movement_vectors()
@@ -297,6 +297,64 @@ class Presentation1(ThreeDSlide):
         ######################
         # Introduction to how to get delta r
         #show_queen_moves(self, run_time)
+
+        top_pos = np.array([0,3,0])
+        dpos_vec = np.array([0,-1.0,0])
+        accent_color = GOLD
+
+        pos0 = top_pos + dpos_vec
+        dr_title = Tex(r"$\delta$-vector notation definition:").shift(top_pos)
+        self.play(Write(dr_title), run_time = run_time)
+        self.next_slide()
+
+        dr_def = MathTex(r"\mathbf{[ x_1, x_2, ..., x_n ]^{m}_{\delta} ",
+                         r"= \left\{ \forall \Vec{v} \, | \,  \Vec{v} = ",
+                         r"\sigma \left( ",
+                         r"[ \pm x_1, \pm x_2, ..., \pm x_n ]",
+                         r"\right) ",
+                         r"\times k, \left| k \right| \le m \right\}}").shift(pos0)
+        dr_def.set_color_by_tex("x_1", accent_color)
+        self.play(Write(dr_def), run_time = run_time)
+
+        possigma = pos0 + dpos_vec
+        dr_sigma = Tex(r"$\sigma(\Vec{a})$ - set of all vectors, resulting \\",
+                     r"from permutations of components of $\Vec{a}$").shift(possigma)
+        self.play(Write(dr_sigma), run_time = run_time)
+        self.next_slide()
+
+        pos1 = possigma + 2 * dpos_vec
+        dr_ex1 = Tex(r"Ex. 1: ",
+                     r"$[1, 0]^\infty_\delta$",
+                     r"$ = \{ $",
+                     r"$[+k, 0], [-k, 0], [0, +k], [0, -k] $",
+                     r"$, k \in \mathbf{Z}_+ \}$").shift(pos1)
+        dr_ex1.set_color_by_tex("[", accent_color)
+        self.play(Write(dr_ex1), run_time = run_time)
+        self.next_slide()
+
+        pos2 = pos1 + dpos_vec
+        dr_ex2 = Tex(r"Ex. 2: ",
+                     r"$[1, 1]^\infty_\delta$",
+                     r"$ = \{ $",
+                     r"$[+k, +k], [-k, +k], [-k, +k], [-k, -k] $",
+                     r"$, k \in \mathbf{Z}_+ \}$").shift(pos2)
+        dr_ex2.set_color_by_tex("[", accent_color)
+        self.play(Write(dr_ex2), run_time = run_time)
+        self.next_slide()
+
+        pos3 = pos2 + dpos_vec
+        dr_ex3 = Tex(r"Ex. 3: ",
+                     r"$[1, 2]^1_\delta$",
+                     r"$ = \{ $",
+                     r"$[\pm 1, +2], [\pm 1, -2], [\pm 2, +1], [\pm 2, -1] $",
+                     r"$\}$").shift(pos3)
+        dr_ex3.set_color_by_tex("[", accent_color)
+        self.play(Write(dr_ex3), run_time = run_time)
+        self.next_slide()
+
+        text_objs = [dr_ex1, dr_ex2, dr_ex3, dr_def, dr_title, dr_sigma]
+        text_anims: list[Animation] = [ FadeOut(obj) for obj in text_objs ]
+        self.play(text_anims, run_time = run_time)
 
         #for move in sample_game_1:
         #    start_sq, end_sq = move
