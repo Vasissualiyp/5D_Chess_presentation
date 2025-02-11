@@ -344,8 +344,8 @@ class Manim_Chessboard_2D(VGroup):
 
             sphere.move_to(sphere_center)
             sphere.set_z_index(self.pieces_z_index)
-            sphere_color = self.get_object_color_from_piece(piece)
             if piece_mesh == "sphere":
+                sphere_color = self.get_object_color_from_piece(piece)
                 sphere.set_color(sphere_color)
             self.spheres.append(sphere)
             self.sphere_ids[idx_1, idx_2] = id

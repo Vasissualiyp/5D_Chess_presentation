@@ -2,6 +2,7 @@ from manim import *
 from manim.utils.color.XKCD import AQUABLUE
 from manim_slides import Slide, ThreeDSlide
 from manim_5dboard import Manim_Chessboard_5D, sample_game_1
+from chess_db_2d import ChessUtils_2D
 from moves import Moves
 
 central_square = 'e4'
@@ -299,6 +300,7 @@ class Presentation1(ThreeDSlide):
         #show_queen_moves(self, run_time)
 
         top_pos = np.array([0,3,0])
+
         dpos_vec = np.array([0,-1.0,0])
         accent_color = GOLD
 
@@ -351,15 +353,104 @@ class Presentation1(ThreeDSlide):
         dr_ex3.set_color_by_tex("[", accent_color)
         self.play(Write(dr_ex3), run_time = run_time)
         self.next_slide()
-
-        text_objs = [dr_ex1, dr_ex2, dr_ex3, dr_def, dr_title, dr_sigma]
-        text_anims: list[Animation] = [ FadeOut(obj) for obj in text_objs ]
-        self.play(text_anims, run_time = run_time)
-
-        #for move in sample_game_1:
-        #    start_sq, end_sq = move
-        #    board1.move_piece(start_sq, end_sq, eat_pieces=True)
-        #board_5d.show_moves(['g4',0,0])
-        #board1.move_piece('b1', 'a3', eat_pieces=True)
-
+        
+        # Define new positions for math snippets and pieces
+        img_width = 0.5
+        top_y = 1.5  # Vertical position
+        math_positions = [
+            np.array([-4, top_y, 0]),  # Left
+            np.array([0, top_y, 0]),   # Center
+            np.array([4, top_y, 0])    # Right
+        ]
+        piece_offset = LEFT * 1.5  # Distance between piece and text
+        
+        # Extract just the math parts from each example
+        math_ex1 = dr_ex1[1].copy()
+        math_ex2 = dr_ex2[1].copy()
+        math_ex3 = dr_ex3[1].copy()
+        math_group = VGroup(math_ex1, math_ex2, math_ex3)
+        
+        # Animate: fade out all text except math snippets, move math to top
+        self.play(
+            # Fade out all non-math elements
+            *[FadeOut(obj) for obj in [dr_title, dr_def, dr_sigma,
+                                       dr_ex1, dr_ex2, dr_ex3]],
+            # Move math snippets to new positions
+            math_ex1.animate.move_to(math_positions[0]),
+            math_ex2.animate.move_to(math_positions[1]),
+            math_ex3.animate.move_to(math_positions[2]),
+            run_time=run_time*3
+        )
+        
+        # Add chess pieces next to math snippets
+        piece_codes = ["rl", "bl", "nl"]
+        piece_imgs = []
+        utils = ChessUtils_2D()
+        
+        for i, (code, math_pos) in enumerate(zip(piece_codes, math_positions)):
+            # Get piece image
+            img_path_svg, img_scale = utils.get_piece_image(code)
+            piece_img = SVGMobject(img_path_svg)
+            piece_img.set(width=img_width * img_scale)
+            
+            # Position to left of math snippet
+            piece_img.next_to(math_group[i], LEFT, buff=0.3)
+            
+            # Animate appearance
+            self.play(FadeIn(piece_img), run_time=run_time)
+            piece_imgs.append(piece_img)
+            
+        # ======================
+        # Second Row: ql, kl, pl
+        # ======================
+        second_row_y = top_y - 3.0  # Position below first row
+        second_math_positions = [
+            np.array([-4, second_row_y, 0]),
+            np.array([1, second_row_y, 0]),
+            np.array([5, second_row_y, 0])
+        ]
+        
+        # Create moveset definitions for second row
+        moveset_ql = MathTex(r"[1,0]^\infty_\delta", r"\cup", r"[1,1]^\infty_\delta").set_color(accent_color)
+        moveset_kl = MathTex(r"[1,0]^1_\delta", r"\cup", r"[1,1]^1_\delta").set_color(accent_color)
+        moveset_pl = MathTex(r"[0,1]^*").set_color(accent_color)
+        movesets_list = [ moveset_ql, moveset_kl, moveset_pl ]
+        
+        # Position movesets
+        for moveset, pos in zip([moveset_ql, moveset_kl, moveset_pl], second_math_positions):
+            moveset.move_to(pos)
+        
+        # Animate second row appearing
+        #self.play(
+        #    FadeIn(moveset_ql),
+        #    FadeIn(moveset_kl),
+        #    FadeIn(moveset_pl),
+        #    run_time=run_time
+        #)
+        
+        # Add chess pieces for second row
+        second_piece_codes = ["ql", "kl", "pl"]
+        second_piece_imgs = []
+        
+        for i, (code, moveset, math_pos) in enumerate(zip(second_piece_codes, movesets_list, second_math_positions)):
+            img_path_svg, img_scale = utils.get_piece_image(code)
+            piece_img = SVGMobject(img_path_svg)
+            piece_img.set(width=img_width * img_scale)
+            piece_img.next_to(moveset_ql if i==0 else moveset_kl if i==1 else moveset_pl, LEFT, buff=0.3)
+            
+            self.play(FadeIn(piece_img), FadeIn(moveset), run_time=run_time)
+            second_piece_imgs.append(piece_img)
+        
+        self.next_slide()
+        # ======================
+        # Final Cleanup
+        # ======================
+        self.play(
+            *[FadeOut(obj) for obj in [
+                *math_group, *piece_imgs,          # First row
+                *second_piece_imgs, moveset_ql, moveset_kl, moveset_pl  # Second row
+            ]],
+            run_time=run_time
+        )
+        self.remove(*math_group, *piece_imgs, *second_piece_imgs, moveset_ql, moveset_kl, moveset_pl)
 
