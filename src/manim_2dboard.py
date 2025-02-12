@@ -28,6 +28,7 @@ class Manim_Chessboard_2D(VGroup):
                  board_size=8, animation_speed=0.5, 
                  camera_center=[0,0],
                  scene: Optional[ThreeDSlide] = None,
+                 non_const_color_parity = False,
                  log=False, **kwargs):
         """
         A single 2D chessboard instance
@@ -41,6 +42,7 @@ class Manim_Chessboard_2D(VGroup):
             board_size (int): number of squares per board dimension
             camera_center (array): a location of camera center in time-multiverse coordinates
             scene (Scene): A scene in which the animations should be happening
+            non_const_color_parity (bool): if set to True, will switch color parity based on tm_loc
             animation_speed (float): speed of each animation in sec
         """
         # Needed for animations?
@@ -61,6 +63,10 @@ class Manim_Chessboard_2D(VGroup):
         self.mlight = chesscolors.piece_light
         self.mdark = chesscolors.piece_dark
         self.special_color = chesscolors.chosen_piece
+        if non_const_color_parity:
+            self.color_parity = ( tm_loc[0] + tm_loc[1] ) % 2
+        else:
+            self.color_parity = 0 # Whether the square colors are regular (0) or inverted (1)
 
         # Board geometry
         self.board_size = board_size
@@ -117,7 +123,7 @@ class Manim_Chessboard_2D(VGroup):
             for col in range(n):
                 idx_1, idx_2 = self.get_matrix_indecies(row, col)
                 # Choose color by alternating
-                color_index = (idx_1 + idx_2) % 2
+                color_index = (idx_1 + idx_2 + self.color_parity) % 2
                 fill_color = self.board_colors[color_index]
 
                 # Create a Prism from that square
@@ -524,9 +530,9 @@ class Manim_Chessboard_2D(VGroup):
         elif square in special_squares:
             return self.special_color
         else:
-            return self.board_colors[(idx_1 + idx_2) % 2]
+            return self.board_colors[(idx_1 + idx_2 + self.color_parity) % 2]
 
-    def recolor_board(self, color_rule=None, special_squares=[]):
+    def recolor_board(self, color_rule=None, special_squares=[], return_anim=False):
         """
         Recolors every square prism on the board.
 
@@ -535,6 +541,12 @@ class Manim_Chessboard_2D(VGroup):
                 A callable that takes (row, col) or (idx_1, idx_2)
                 and returns a valid Manim color. If None, just invert
                 the black/white pattern, for example.
+            special_squares (list): list of special squares to color different color
+            retrun_anim (bool): if set to False (default), recolors the board 
+                itself. If set to True, passes recoloring animation list
+
+        Returns:
+            list: list of animations, or empty list if coloring happened automatically
         """
         n = self.board_size
         animations = []
@@ -543,7 +555,7 @@ class Manim_Chessboard_2D(VGroup):
         # (Just an example; you can define your own logic.)
         if color_rule is None:
             def color_rule(idx_1, idx_2, special_squares=[]):
-                return self.board_colors[(idx_1 + idx_2) % 2]
+                return self.board_colors[(idx_1 + idx_2 + self.color_parity) % 2]
 
         for row in range(n):
             for col in range(n):
@@ -561,8 +573,14 @@ class Manim_Chessboard_2D(VGroup):
                 else:
                     anim = prism_tile.animate.set_fill(new_color, opacity=self.board_opacity)
                     animations.append(anim)
-        if self.scene is not None and animations:
+        if self.scene is not None and animations and not return_anim:
             self.scene.play(*animations,run_time=self.recolor_animation_speed)
+            return []
+        elif return_anim:
+            return animations
+        else:
+            print(f"Failed to recolor the board properly")
+            return []
 
     def get_object_color_from_piece(self, piece, 
                                     dark_color=None, 
@@ -579,6 +597,15 @@ class Manim_Chessboard_2D(VGroup):
             return dark_color
         else:
             raise ValueError(f"Not allowed color: {piece_color}. Allowed vaues: l, d.")
+
+    def change_board_opacity(self, new_opacity):
+        """
+        Changes the board opacity to provided value, returns list of animations
+        """
+        self.board_opacity = new_opacity
+        anims = self.recolor_board(return_anim=True)
+        return anims
+
 
     # Animations
 

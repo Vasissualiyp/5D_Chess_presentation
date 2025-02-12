@@ -464,14 +464,15 @@ class Presentation1(ThreeDSlide):
         ###### 3D MOVES ######
         ######################
         board_5d = Manim_Chessboard_5D(square_size=0.5, board_separation=[5,5],
+                                       mode_3d=True,
                                        scene=self, log=log)
 
         board_5d.add_empty_chessboard([0,0])
         board_5d.add_empty_chessboard([0,1])
-        #board_5d.add_empty_chessboard([0,-1])
+        board_5d.add_empty_chessboard([0,-1])
         self.move_camera(phi=60*DEGREES, theta=-60*DEGREES)
         self.play(board_5d.reorient_all_boards(2))
-        anim = board_5d.change_board_separation([4,1])
-        self.play(anim)
+        self.play(board_5d.change_board_separation([4,1]))
+        board_5d.change_boards_opacity(0.3)
         #board_5d.add_empty_chessboard([0,2])
         #board_5d.add_empty_chessboard([0,-2])

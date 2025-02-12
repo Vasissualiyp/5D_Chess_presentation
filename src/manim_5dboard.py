@@ -14,6 +14,7 @@ class Manim_Chessboard_5D(VGroup):
                  board_separation=[6, 6], colors=None, 
                  board_size=8, animation_speed=0.5, 
                  scene=None,
+                 mode_3d=False,
                  log=False, **kwargs):
         """
         A 5D chessboard instance
@@ -26,6 +27,8 @@ class Manim_Chessboard_5D(VGroup):
             board_size (int): number of squares per board dimension
             animation_speed (float): speed of each animation in sec
             scene (Scene): A scene in which the animations should be happening
+            mode_3d (bool): whether the board is in 2D/4D mode (False) or 3D mode 
+                for cube animations (True)
             log (bool): Whether to enable logging
         """
         super().__init__(**kwargs)
@@ -40,6 +43,7 @@ class Manim_Chessboard_5D(VGroup):
         self.scene = scene
         self.camera_center = [0, 0]
         self.vec_arrows = []
+        self.mode_3d = mode_3d
 
         if colors is not None:
             self.colors = colors
@@ -67,6 +71,7 @@ class Manim_Chessboard_5D(VGroup):
                                                    board_separation=self.board_separation, 
                                                    chessboard=target_chessboard, 
                                                    scene=self.scene,
+                                                   non_const_color_parity=self.mode_3d,
                                                    animation_speed=self.animation_speed)
         manim_new_chessboard.add_spheres_to_squares(radius=self.sphere_radius)
         self.manim_chessboards.append(manim_new_chessboard)
@@ -85,6 +90,7 @@ class Manim_Chessboard_5D(VGroup):
                                                    board_separation=self.board_separation, 
                                                    chessboard=target_chessboard, 
                                                    scene=self.scene,
+                                                   non_const_color_parity=self.mode_3d,
                                                    animation_speed=self.animation_speed)
         self.manim_chessboards.append(manim_new_chessboard)
         self.add(manim_new_chessboard)
@@ -158,6 +164,25 @@ class Manim_Chessboard_5D(VGroup):
         
         # Return all animations grouped together
         return AnimationGroup(*animations)
+
+    def change_boards_opacity(self, new_opacity):
+        """
+        Changes the opacity values for all boards
+        """
+        animations = []
+        for chessboard in self.chess5.chessboards:
+            chessboard_loc = chessboard.chessboard_tm_pos
+            if self.log: print(f"Location of chessboard: {chessboard_loc}")
+            chessboard_id = self.chess5.get_chessboard_by_tm(chessboard_loc)
+            assert chessboard_id != -1, f"Failed to retireve chessboard from {chessboard_loc}"
+            manim_chessboard = self.manim_chessboards[chessboard_id]
+            anims = manim_chessboard.change_board_opacity(new_opacity)
+            animations.extend(anims)
+
+        if self.scene is not None:
+            self.scene.play(*animations, run_time = self.animation_speed)
+        else:
+            raise TypeError(f"Failed to change board opacity, when no scene is passed")
 
     # Drawing vectors
 
