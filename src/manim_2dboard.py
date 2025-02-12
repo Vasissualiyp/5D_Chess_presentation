@@ -63,6 +63,7 @@ class Manim_Chessboard_2D(VGroup):
         self.mlight = chesscolors.piece_light
         self.mdark = chesscolors.piece_dark
         self.special_color = chesscolors.chosen_piece
+        self.recolor_scheme = "opacity" # "color" or "opacity-color"
         if non_const_color_parity:
             self.color_parity = ( tm_loc[0] + tm_loc[1] ) % 2
         else:
@@ -96,6 +97,7 @@ class Manim_Chessboard_2D(VGroup):
         self.disappearance_anim = "Scale" # Scale or FadeOut
         self.recolor_animation_speed = self.animation_speed / 5
         self.board_opacity = 1
+        self.move_opacity = 0.4
 
         # Board properties relative to other boards
         self.tm_loc = tm_loc
@@ -105,6 +107,8 @@ class Manim_Chessboard_2D(VGroup):
         self.arrows_z_index = self.board_z_index + 1
         self.pieces_z_index = self.board_z_index + 2
 
+        # Matrix that gets ID of a sphere from its position on the board
+        self.sphere_ids = np.zeros((self.board_size,self.board_size), dtype=int) 
         self.create_prism_board()
         self.spheres = []  # Keep track of all spheres if you want to animate them later
 
@@ -321,8 +325,6 @@ class Manim_Chessboard_2D(VGroup):
         id = 0
         n = self.board_size
         self.pieces = [] # deepseek
-        # Matrix that gets ID of a sphere from its position on the board
-        self.sphere_ids = np.zeros((n,n), dtype=int) 
 
         # If we're using column-majaor matrix:
         for row_idx in range(n):
@@ -337,7 +339,7 @@ class Manim_Chessboard_2D(VGroup):
                     if self.log: print(f"Not adding sphere at {chessform_pos}")
                 elif (piece not in ["Ml", "Md"]):
                     if self.log: print(f"Adding {piece} at {chessform_pos}")
-                    id = self.add_sphere_to_square(idx_1, idx_2, radius, piece, id)
+                    id = self.add_sphere_to_square(idx_1, idx_2, radius, piece)
 
         if self.scene is None:
             for sphere in self.spheres:
@@ -345,7 +347,7 @@ class Manim_Chessboard_2D(VGroup):
         else:
             self.blowup_anim(self.spheres)
 
-    def add_sphere_to_square(self, idx_1, idx_2, radius, piece, id):
+    def add_sphere_to_square(self, idx_1, idx_2, radius, piece):
             """
             Adds a sphere or a piece svg to a specific square
     
@@ -354,7 +356,6 @@ class Manim_Chessboard_2D(VGroup):
                 idx_2 (int): 2nd index of a square
                 radius (float): radius of the sphere to be added
                 piece (str): the name of the piece
-                id (int): largest id
             """
             piece_mesh = "svg" # svg or sphere
 
@@ -383,11 +384,11 @@ class Manim_Chessboard_2D(VGroup):
                 sphere_color = self.get_object_color_from_piece(piece)
                 sphere.set_color(sphere_color)
             self.spheres.append(sphere)
-            self.sphere_ids[idx_1, idx_2] = id
+            new_id = len(self.spheres) - 1
+            self.sphere_ids[idx_1, idx_2] = new_id
             if self.log: print(f"Sphere IDs array:")
             if self.log: print(self.sphere_ids.T)
-            id += 1
-            return id
+            return new_id
 
     def add_piece(self, piece, pos, radius=0.2, eat_pieces=False):
         """
@@ -402,8 +403,7 @@ class Manim_Chessboard_2D(VGroup):
         """
         self.chessboard.add_piece(piece, pos, eat_pieces=eat_pieces)
         idx_1, idx_2 = self.chessutils.chessform_to_matrix(pos)
-        newpiece_id = np.max(self.sphere_ids) + 1
-        id = self.add_sphere_to_square(idx_1, idx_2, radius, piece, newpiece_id)
+        id = self.add_sphere_to_square(idx_1, idx_2, radius, piece)
         if self.log: print(f"Sphere ids: {self.sphere_ids}")
         self.blowup_anim(self.spheres[-1])
 
@@ -602,12 +602,20 @@ class Manim_Chessboard_2D(VGroup):
                 tile_index = row * n + col  # or row * n + col, if that’s how you appended them
                 prism_tile = self.board_tiles[tile_index]
 
-                # Apply the rule
+                # Apply the color rule
                 new_color = color_rule(idx_1, idx_2, special_squares=special_squares)
-                if self.scene == None:
-                    prism_tile.set_fill(new_color, opacity=self.board_opacity)
+
+                # Apply the opacity rule
+                if new_color not in self.board_colors and self.recolor_scheme == "color-opacity":
+                    opacity = self.move_opacity
                 else:
-                    anim = prism_tile.animate.set_fill(new_color, opacity=self.board_opacity)
+                    opacity = self.board_opacity
+
+                # Recolor the board
+                if self.scene == None:
+                    prism_tile.set_fill(new_color, opacity=opacity)
+                else:
+                    anim = prism_tile.animate.set_fill(new_color, opacity=opacity)
                     animations.append(anim)
         if self.scene is not None and animations and not return_anim:
             self.scene.play(*animations,run_time=self.recolor_animation_speed)

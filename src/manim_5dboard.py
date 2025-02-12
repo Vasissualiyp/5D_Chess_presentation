@@ -321,7 +321,7 @@ class Manim_Chessboard_5D(VGroup):
 
         self.vec_arrows.clear()
 
-    def show_moves(self, pos, force_single_moves=False):
+    def show_moves(self, pos, recolor_scheme="opacity", force_single_moves=False):
         """
         Show moves of a piece, located at the provided position.
         """
@@ -338,6 +338,7 @@ class Manim_Chessboard_5D(VGroup):
             assert chessboard_id != -1, f"Failed to retireve chessboard from {chessboard_loc}"
             manim_chessboard = self.manim_chessboards[chessboard_id]
             manim_chessboard.recolor_list = filtered_moves
+            manim_chessboard.recolor_scheme = recolor_scheme
             manim_chessboard.recolor_board(manim_chessboard.recolor_from_list, special_squares=[pos[0]])
 
     def set_animation_speed(self, animation_speed):
