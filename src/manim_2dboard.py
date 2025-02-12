@@ -165,6 +165,9 @@ class Manim_Chessboard_2D(VGroup):
 
                 tile_index = row * n + col
                 old_prism = self.board_tiles[tile_index]
+                old_prism_center = old_prism.get_center()
+
+                self.square_pos[idx_1, idx_2, :] = old_prism_center[:]
                 
                 # Instead of creating a new prism, modify the existing one
                 new_dimensions = (self.square_size, self.square_size, new_height)
@@ -174,7 +177,7 @@ class Manim_Chessboard_2D(VGroup):
                     .set_fill(fill_color, opacity=self.board_opacity)
                     .set_stroke(width=0)
                     .rotate(angle, axis=axis)
-                    .move_to(old_prism.get_center())
+                    .move_to(old_prism_center)
                 )
                 animations.append(anim)
         
@@ -322,7 +325,6 @@ class Manim_Chessboard_2D(VGroup):
 
     def add_spheres_to_squares(self, radius=0.2):
         """Add spheres to the center of each square with a piece."""
-        id = 0
         n = self.board_size
         self.pieces = [] # deepseek
 
@@ -347,7 +349,7 @@ class Manim_Chessboard_2D(VGroup):
         else:
             self.blowup_anim(self.spheres)
 
-    def add_sphere_to_square(self, idx_1, idx_2, radius, piece):
+    def add_sphere_to_square(self, idx_1, idx_2, radius, piece, force_center=False):
             """
             Adds a sphere or a piece svg to a specific square
     
@@ -356,11 +358,16 @@ class Manim_Chessboard_2D(VGroup):
                 idx_2 (int): 2nd index of a square
                 radius (float): radius of the sphere to be added
                 piece (str): the name of the piece
+                force_center (bool): whether force the piece to be rendered in the 
+                    geometric center of the tile, including depth-wise
             """
             piece_mesh = "svg" # svg or sphere
 
             square_center = self.square_pos[idx_1, idx_2, :]
             sphere_center = square_center
+
+            #tile_index = idx_1 * self.board_size + idx_2
+            #square_center = self.board_tiles[tile_index].get_center()
 
             if piece_mesh == "sphere":
                 sphere = Sphere(radius=radius)
@@ -369,7 +376,15 @@ class Manim_Chessboard_2D(VGroup):
                 img_path_svg, img_scale = self.chessutils.get_piece_image(piece)
                 sphere = SVGMobject(img_path_svg)
                 sphere.set(width=self.square_size * 0.5 * img_scale)
-                sphere_center_delta_mag = self.square_size * 0.1 + self.delta
+
+                # Rotate the image to be normal to the board
+                axis, angle = self.calculate_rotation_vector(0, self.orientation)
+                sphere.rotate(angle, axis=axis)
+
+                if force_center:
+                    sphere_center_delta_mag = 0.0
+                else:
+                    sphere_center_delta_mag = self.square_size * 0.1 + self.delta
             else:
                 raise ValueError(f"Unknown piece_mesh: {piece_mesh}")
 
@@ -390,7 +405,7 @@ class Manim_Chessboard_2D(VGroup):
             if self.log: print(self.sphere_ids.T)
             return new_id
 
-    def add_piece(self, piece, pos, radius=0.2, eat_pieces=False):
+    def add_piece(self, piece, pos, radius=0.2, eat_pieces=False, force_center=False):
         """
         Adds piece to square
 
@@ -403,7 +418,7 @@ class Manim_Chessboard_2D(VGroup):
         """
         self.chessboard.add_piece(piece, pos, eat_pieces=eat_pieces)
         idx_1, idx_2 = self.chessutils.chessform_to_matrix(pos)
-        id = self.add_sphere_to_square(idx_1, idx_2, radius, piece)
+        id = self.add_sphere_to_square(idx_1, idx_2, radius, piece, force_center)
         if self.log: print(f"Sphere ids: {self.sphere_ids}")
         self.blowup_anim(self.spheres[-1])
 

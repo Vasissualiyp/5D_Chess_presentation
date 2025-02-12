@@ -442,6 +442,25 @@ def full_dr_explanation_slide(self, run_time):
     )
     self.remove(*math_group, *piece_imgs, *second_piece_imgs, moveset_ql, moveset_kl, moveset_pl)
 
+def show_moves_3d(self, board_5d, piece, piece_pos):
+    """
+    Brief description of function
+
+    Args:
+        arg1 (type): description
+
+    Returns:
+        return_type: description
+    """
+    print(f"{piece} has begun")
+    board2d_id = board_5d.chess5.get_chessboard_by_tm([0,0])
+    board_2d = board_5d.manim_chessboards[board2d_id]
+    board_2d.add_piece(piece, central_square, force_center=True)
+    board_5d.show_moves(piece_pos, recolor_scheme="color-opacity")
+    self.wait(5)
+    self.next_slide()
+    board_2d.remove_all_pieces()
+    board_5d.recolor_all_boards()
 
 
 class Presentation1(ThreeDSlide):
@@ -483,48 +502,12 @@ class Presentation1(ThreeDSlide):
         self.next_slide()
         #board_5d.disassemble_the_cube()
 
-        # Add rook to e4 on central board, show its moves
-        board2d_id = board_5d.chess5.get_chessboard_by_tm([0,0])
-        board_2d = board_5d.manim_chessboards[board2d_id]
-
         self.begin_ambient_camera_rotation(rate=0.2)
-
-        # Rook
-        print(f"Rook has begun")
-        board_2d.add_piece('rl', central_square)
-        board_5d.show_moves(piece_pos, recolor_scheme="color-opacity")
-        self.wait(5)
-        board_2d.remove_all_pieces()
-        self.next_slide()
-
-        print(f"Bishop has begun")
-        board_2d.add_piece('bl', central_square)
-        board_5d.show_moves(piece_pos, recolor_scheme="color-opacity")
-        self.wait(5)
-        board_2d.remove_all_pieces()
-        self.next_slide()
-
-        print(f"Knight has begun")
-        board_2d.add_piece('nl', central_square)
-        board_5d.show_moves(piece_pos, recolor_scheme="color-opacity")
-        self.wait(5)
-        board_2d.remove_all_pieces()
-        self.next_slide()
-
-        print(f"Queen has begun")
-        board_2d.add_piece('ql', central_square)
-        board_5d.show_moves(piece_pos, recolor_scheme="color-opacity")
-        self.wait(5)
-        board_2d.remove_all_pieces()
-        self.next_slide()
-
-        print(f"King has begun")
-        board_2d.add_piece('kl', central_square)
-        board_5d.show_moves(piece_pos, recolor_scheme="color-opacity")
-        self.wait(5)
-        board_2d.remove_all_pieces()
-        self.next_slide()
-
+        show_moves_3d(self, board_5d, 'rl', piece_pos)
+        show_moves_3d(self, board_5d, 'bl', piece_pos)
+        show_moves_3d(self, board_5d, 'nl', piece_pos)
+        show_moves_3d(self, board_5d, 'ql', piece_pos)
+        show_moves_3d(self, board_5d, 'kl', piece_pos)
         self.stop_ambient_camera_rotation()
 
 

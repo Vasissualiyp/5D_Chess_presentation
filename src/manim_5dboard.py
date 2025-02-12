@@ -339,7 +339,26 @@ class Manim_Chessboard_5D(VGroup):
             manim_chessboard = self.manim_chessboards[chessboard_id]
             manim_chessboard.recolor_list = filtered_moves
             manim_chessboard.recolor_scheme = recolor_scheme
-            manim_chessboard.recolor_board(manim_chessboard.recolor_from_list, special_squares=[pos[0]])
+
+            # Highlight the position of the piece with a different color
+            if chessboard_loc == [pos[1], pos[2]]:
+                special_squares=[pos[0]]
+            else:
+                special_squares=[]
+
+            manim_chessboard.recolor_board(manim_chessboard.recolor_from_list, 
+                                           special_squares=special_squares)
+
+    def recolor_all_boards(self):
+        """
+        Resets coloring for all boards
+        """
+        for chessboard in self.chess5.chessboards:
+            chessboard_loc = chessboard.chessboard_tm_pos
+            chessboard_id = self.chess5.get_chessboard_by_tm(chessboard_loc)
+            assert chessboard_id != -1, f"Failed to retireve chessboard from {chessboard_loc}"
+            manim_chessboard = self.manim_chessboards[chessboard_id]
+            manim_chessboard.recolor_board()
 
     def set_animation_speed(self, animation_speed):
         """
