@@ -447,14 +447,27 @@ def full_dr_explanation_slide(self, run_time):
 class Presentation1(ThreeDSlide):
     def construct(self):
         run_time = 0.5
+        log = False
         ###################
         ###### INTRO ######
         ###################
-        intro_slide(self, run_time)
+        #intro_slide(self, run_time)
         
         ######################
         ###### 2D MOVES ######
         ######################
         # Introduction to how to get delta r
-        show_queen_moves(self, run_time)
-        full_dr_explanation_slide(self, run_time)
+        #show_queen_moves(self, run_time)
+        #full_dr_explanation_slide(self, run_time)
+
+        ######################
+        ###### 3D MOVES ######
+        ######################
+        board_5d = Manim_Chessboard_5D(scene=self, log=log)
+        board_5d.add_empty_chessboard([0,0])
+        board_5d.add_empty_chessboard([1,0])
+        board_5d.add_empty_chessboard([2,0])
+        board_5d.add_empty_chessboard([-1,0])
+        board_5d.add_empty_chessboard([-2,0])
+
+
