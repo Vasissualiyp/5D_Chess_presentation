@@ -150,42 +150,29 @@ class Manim_Chessboard_2D(VGroup):
         """
         Updates the height of all prisms on the chessboard and animates the change.
         """
-        old_prisms = self.board_tiles.copy()
+        animations = []
         n = self.board_size
         
-        new_prisms = []
         for row in range(n):
             for col in range(n):
                 idx_1, idx_2 = self.get_matrix_indecies(row, col)
                 color_index = (idx_1 + idx_2 + self.color_parity) % 2
                 fill_color = self.board_colors[color_index]
-    
-                # Create new prism with updated height and correct opacity
-                new_prism = Prism(
-                    dimensions=(self.square_size, self.square_size, new_height),
-                )
-                new_prism.set_fill(fill_color, opacity=self.board_opacity)  # FIX 1: Use current opacity
-                new_prism.set_stroke(width=0)
-                axis, angle = self.calculate_rotation_vector(0, self.orientation)
-                new_prism.rotate(angle, axis=axis)
-    
-                # FIX 2: Position at OLD prism's current location
+
                 tile_index = row * n + col
-                old_prism = old_prisms[tile_index]
-                new_prism.move_to(old_prism.get_center())  # Critical fix for orientation
+                old_prism = self.board_tiles[tile_index]
                 
-                new_prisms.append(new_prism)
-    
-        # FIX 3: Replace entire list after creation
-        self.scene.remove(*self.board_tiles)
-        self.board_tiles.clear()
-        self.board_tiles = new_prisms
-        
-        # Create animations
-        animations = [
-            ReplacementTransform(old, new, run_time=self.animation_speed)
-            for old, new in zip(old_prisms, new_prisms)
-        ]
+                # Instead of creating a new prism, modify the existing one
+                new_dimensions = (self.square_size, self.square_size, new_height)
+                axis, angle = self.calculate_rotation_vector(0, self.orientation)
+                anim = old_prism.animate.become(
+                    Prism(dimensions=new_dimensions)
+                    .set_fill(fill_color, opacity=self.board_opacity)
+                    .set_stroke(width=0)
+                    .rotate(angle, axis=axis)
+                    .move_to(old_prism.get_center())
+                )
+                animations.append(anim)
         
         return animations
 

@@ -189,7 +189,7 @@ class Manim_Chessboard_5D(VGroup):
     def assemble_the_cube(self, new_opacity, orientation=2):
         """
         Assembles the cube in given orientation.
-
+    
         Args:
             new_opacity (float): opacity of the boards
             orientation (int): orientation of the cube
@@ -198,42 +198,34 @@ class Manim_Chessboard_5D(VGroup):
         """
         animations1 = []
         animations2 = []
-        cleanup_actions = []
-
+    
         orientation = int(orientation)
         self.old_board_separation = self.board_separation
         self.old_board_orientation = self.board_orientation
-
-        if orientation==1:
-            new_board_separation = [ self.square_size, self.board_separation[1] ]
-        elif orientation==2:
-            new_board_separation = [ self.board_separation[0], self.square_size ]
+    
+        if orientation == 1:
+            new_board_separation = [self.square_size, self.board_separation[1]]
+        elif orientation == 2:
+            new_board_separation = [self.board_separation[0], self.square_size]
         else:
             raise ValueError(f"Orientation value of {orientation} is not allowed!")
-
+    
         self.scene.play(self.reorient_all_boards(orientation))
         self.scene.play(self.change_board_separation(new_board_separation))
-
+    
         for chessboard in self.chess5.chessboards:
             chessboard_loc = chessboard.chessboard_tm_pos
             if self.log: print(f"Location of chessboard: {chessboard_loc}")
             chessboard_id = self.chess5.get_chessboard_by_tm(chessboard_loc)
-            assert chessboard_id != -1, f"Failed to retireve chessboard from {chessboard_loc}"
+            assert chessboard_id != -1, f"Failed to retrieve chessboard from {chessboard_loc}"
             manim_chessboard = self.manim_chessboards[chessboard_id]
             anims_opacity = manim_chessboard.change_board_opacity(new_opacity)
             anims_extrude = manim_chessboard.change_prism_height(self.square_size)
-            # Add cleanup callback
-            cleanup_actions.append(
-                lambda: self.scene.remove(*manim_chessboard.board_tiles)
-            )
             animations1.extend(anims_extrude)
             animations2.extend(anims_opacity)
-
+    
         self.scene.play(*animations1)
         self.scene.play(*animations2)
-
-        for cleanup in cleanup_actions:
-            cleanup()
 
     def disassemble_the_cube(self):
         """
@@ -241,31 +233,22 @@ class Manim_Chessboard_5D(VGroup):
         """
         animations1 = []
         animations2 = []
-        cleanup_actions = []
 
         for chessboard in self.chess5.chessboards:
             chessboard_loc = chessboard.chessboard_tm_pos
             if self.log: print(f"Location of chessboard: {chessboard_loc}")
             chessboard_id = self.chess5.get_chessboard_by_tm(chessboard_loc)
-            assert chessboard_id != -1, f"Failed to retireve chessboard from {chessboard_loc}"
+            assert chessboard_id != -1, f"Failed to retrieve chessboard from {chessboard_loc}"
             manim_chessboard = self.manim_chessboards[chessboard_id]
             anims_opacity = manim_chessboard.change_board_opacity(1.0)
             anims_extrude = manim_chessboard.change_prism_height(manim_chessboard.prism_height)
-            # Add cleanup callback
-            cleanup_actions.append(
-                lambda: self.scene.remove(*manim_chessboard.board_tiles)
-            )
-            animations1.extend(anims_extrude)
-            animations2.extend(anims_opacity)
+            animations1.extend(anims_opacity)
+            animations2.extend(anims_extrude)
 
-        self.scene.play(*animations2)
         self.scene.play(*animations1)
-
+        self.scene.play(*animations2)
         self.scene.play(self.change_board_separation(self.old_board_separation))
         self.scene.play(self.reorient_all_boards(self.old_board_orientation))
-
-        for cleanup in cleanup_actions:
-            cleanup()
 
     # Drawing vectors
 
