@@ -130,7 +130,7 @@ class Manim_Chessboard_2D(VGroup):
                 square_prism = Prism(
                     dimensions=(self.square_size, self.square_size, self.prism_height),
                 )
-                square_prism.set_fill(fill_color, opacity=1)
+                square_prism.set_fill(fill_color, opacity=self.board_opacity)
                 square_prism.set_stroke(width=0)
 
                 square = self.chessutils.matrix_to_chessform([idx_1, idx_2])
@@ -145,6 +145,45 @@ class Manim_Chessboard_2D(VGroup):
             if appearance_anim == "FadeIn": scene.play(FadeIn(*self.board_tiles), run_time=self.animation_speed)
             elif appearance_anim == "Scale": self.blowup_anim(self.board_tiles)
             else: raise ValueError(f"Unknown appearance animation: {appearance_anim}")
+
+    def change_prism_height(self, new_height):
+        """
+        Updates the height of all prisms on the chessboard and animates the change.
+        """
+        old_prisms = self.board_tiles.copy()
+        n = self.board_size
+        
+        new_prisms = []
+        for row in range(n):
+            for col in range(n):
+                idx_1, idx_2 = self.get_matrix_indecies(row, col)
+                color_index = (idx_1 + idx_2 + self.color_parity) % 2
+                fill_color = self.board_colors[color_index]
+    
+                # Create new prism with updated height and correct opacity
+                new_prism = Prism(
+                    dimensions=(self.square_size, self.square_size, new_height),
+                )
+                new_prism.set_fill(fill_color, opacity=self.board_opacity)  # FIX 1: Use current opacity
+                new_prism.set_stroke(width=0)
+    
+                # FIX 2: Position at OLD prism's current location
+                tile_index = row * n + col
+                old_prism = old_prisms[tile_index]
+                new_prism.move_to(old_prism.get_center())  # Critical fix for orientation
+                
+                new_prisms.append(new_prism)
+    
+        # FIX 3: Replace entire list after creation
+        self.board_tiles = new_prisms
+        
+        # Create animations
+        animations = [
+            ReplacementTransform(old, new, run_time=self.animation_speed)
+            for old, new in zip(old_prisms, new_prisms)
+        ]
+        
+        return animations
 
     def delete_board(self):
         """

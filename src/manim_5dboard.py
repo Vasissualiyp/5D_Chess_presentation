@@ -44,6 +44,7 @@ class Manim_Chessboard_5D(VGroup):
         self.camera_center = [0, 0]
         self.vec_arrows = []
         self.mode_3d = mode_3d
+        self.board_orientation = 0
 
         if colors is not None:
             self.colors = colors
@@ -109,6 +110,7 @@ class Manim_Chessboard_5D(VGroup):
         """
         # Convert final_orientation to int to ensure type consistency
         final_orientation = int(final_orientation)
+        self.board_orientation = final_orientation
         
         # Collect animations from all chessboards
         animations = []
@@ -164,6 +166,53 @@ class Manim_Chessboard_5D(VGroup):
         
         # Return all animations grouped together
         return AnimationGroup(*animations)
+
+    def assemble_the_cube(self, new_opacity, orientation=1):
+        """
+        Assembles the cube in given orientation.
+
+        Args:
+            new_opacity (float): opacity of the boards
+            orientation (int): orientation of the cube
+                1 - time-normal
+                2 - multiverse-normal
+        """
+        animations1 = []
+        animations2 = []
+        animations3 = []
+        orientation = int(orientation)
+        self.old_board_separation = self.board_separation
+        self.old_board_orientation = self.board_orientation
+
+        if orientation==1:
+            new_board_separation = [ self.board_separation[0], self.square_size ]
+        elif orientation==2:
+            new_board_separation = [ self.square_size, self.board_separation[1] ]
+        else:
+            raise ValueError(f"Orientation value of {orientation} is not allowed!")
+
+        self.scene.play(self.reorient_all_boards(orientation))
+        #self.scene.play(self.change_board_separation(new_board_separation))
+
+        for chessboard in self.chess5.chessboards:
+            chessboard_loc = chessboard.chessboard_tm_pos
+            if self.log: print(f"Location of chessboard: {chessboard_loc}")
+            chessboard_id = self.chess5.get_chessboard_by_tm(chessboard_loc)
+            assert chessboard_id != -1, f"Failed to retireve chessboard from {chessboard_loc}"
+            manim_chessboard = self.manim_chessboards[chessboard_id]
+            anims_opacity = manim_chessboard.change_board_opacity(new_opacity)
+            anims_separation = manim_chessboard.change_board_separation(new_board_separation)
+            anims_extrude = manim_chessboard.change_prism_height(self.square_size)
+            if not isinstance(anims_separation, list):
+                anims_separation = [anims_separation]
+            animations1.extend(anims_opacity)
+            animations2.extend(anims_separation)
+            animations3.extend(anims_extrude)
+
+        self.scene.play(*animations2)
+        self.scene.play(*animations1)
+        self.scene.play(*animations3)
+
 
     def change_boards_opacity(self, new_opacity):
         """
