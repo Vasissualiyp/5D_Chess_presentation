@@ -93,15 +93,32 @@ class Manim_Chessboard_5D(VGroup):
 
     def reorient_all_boards(self, final_orientation):
         """
-        Reorient all sub-boards to the specified orientation (0, 1, or 2).
-        Returns an AnimationGroup that can be passed to scene.play(...).
+        Reorient all sub-boards to the specified orientation.
+        
+        Args:
+            final_orientation (int): Target orientation (0, 1, or 2)
+            
+        Returns:
+            AnimationGroup: Group of all rotation animations
         """
+        # Convert final_orientation to int to ensure type consistency
+        final_orientation = int(final_orientation)
+        
+        # Collect animations from all chessboards
         animations = []
         for chessboard in self.manim_chessboards:
-            anim = chessboard.reorient_board(int(final_orientation))
-            animations.append(anim)
-    
-        # Animate them all together in parallel
+            try:
+                anim = chessboard.reorient_board(final_orientation)
+                animations.append(anim)
+            except Exception as e:
+                print(f"Error rotating chessboard: {e}")
+                continue
+        
+        # Return empty AnimationGroup if no animations were created
+        if not animations:
+            return AnimationGroup()
+            
+        # Return the group of animations
         return AnimationGroup(*animations)
 
     def change_camera_center(self, camera_center):

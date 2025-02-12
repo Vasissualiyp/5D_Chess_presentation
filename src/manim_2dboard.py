@@ -159,15 +159,6 @@ class Manim_Chessboard_2D(VGroup):
 
     # Board 3D scene manipulation: rotation
 
-    def rotate_board(self, angle, axis=np.array([0,0,1])): # Currently useless
-        """
-        Rotates the entire board by a specified angle around a given axis in 3D.
-        Args:
-            angle (float): The angle to rotate in radians.
-            axis (array): The axis of rotation (default is the Z-axis).
-        """
-        self.rotate(angle, axis=axis, about_point=self.board_loc)
-
     def reorient_board(self, final_orientation):
         """
         Reorient the board to regular, multiverse-normal, or time-normal view.
@@ -183,8 +174,9 @@ class Manim_Chessboard_2D(VGroup):
         """
         axis, angle = self.calculate_rotation_vector(self.orientation, final_orientation)
         self.orientation = final_orientation
+        board_group = Group(*self.board_tiles)
         return Rotate(
-            self, 
+            board_group, 
             angle=angle, 
             axis=axis, 
             about_point=list(self.board_loc),  # can be np.array or list
@@ -203,7 +195,6 @@ class Manim_Chessboard_2D(VGroup):
             self.animate: A Manim animation object
         """
         self.board_loc = new_loc
-        #return self.animate.move_to(new_loc).set_run_time(self.animation_speed)
         board_group = Group(*self.board_tiles)
         return board_group.animate.move_to(new_loc)
 
