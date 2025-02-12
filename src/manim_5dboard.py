@@ -167,6 +167,25 @@ class Manim_Chessboard_5D(VGroup):
         # Return all animations grouped together
         return AnimationGroup(*animations)
 
+    def change_boards_opacity(self, new_opacity):
+        """
+        Changes the opacity values for all boards
+        """
+        animations = []
+        for chessboard in self.chess5.chessboards:
+            chessboard_loc = chessboard.chessboard_tm_pos
+            if self.log: print(f"Location of chessboard: {chessboard_loc}")
+            chessboard_id = self.chess5.get_chessboard_by_tm(chessboard_loc)
+            assert chessboard_id != -1, f"Failed to retireve chessboard from {chessboard_loc}"
+            manim_chessboard = self.manim_chessboards[chessboard_id]
+            anims = manim_chessboard.change_board_opacity(new_opacity)
+            animations.extend(anims)
+
+        if self.scene is not None:
+            self.scene.play(*animations, run_time = self.animation_speed)
+        else:
+            raise TypeError(f"Failed to change board opacity, when no scene is passed")
+
     def assemble_the_cube(self, new_opacity, orientation=2):
         """
         Assembles the cube in given orientation.
@@ -179,7 +198,8 @@ class Manim_Chessboard_5D(VGroup):
         """
         animations1 = []
         animations2 = []
-        animations3 = []
+        cleanup_actions = []
+
         orientation = int(orientation)
         self.old_board_separation = self.board_separation
         self.old_board_orientation = self.board_orientation
@@ -201,37 +221,51 @@ class Manim_Chessboard_5D(VGroup):
             assert chessboard_id != -1, f"Failed to retireve chessboard from {chessboard_loc}"
             manim_chessboard = self.manim_chessboards[chessboard_id]
             anims_opacity = manim_chessboard.change_board_opacity(new_opacity)
-            anims_separation = manim_chessboard.change_board_separation(new_board_separation)
             anims_extrude = manim_chessboard.change_prism_height(self.square_size)
-            if not isinstance(anims_separation, list):
-                anims_separation = [anims_separation]
-            animations1.extend(anims_opacity)
-            animations2.extend(anims_separation)
-            animations3.extend(anims_extrude)
+            # Add cleanup callback
+            cleanup_actions.append(
+                lambda: self.scene.remove(*manim_chessboard.board_tiles)
+            )
+            animations1.extend(anims_extrude)
+            animations2.extend(anims_opacity)
 
-        #self.scene.play(*animations2)
         self.scene.play(*animations1)
-        self.scene.play(*animations3)
+        self.scene.play(*animations2)
 
+        for cleanup in cleanup_actions:
+            cleanup()
 
-    def change_boards_opacity(self, new_opacity):
+    def disassemble_the_cube(self):
         """
-        Changes the opacity values for all boards
+        Disassembles the cube, using previously saved values for orientation and separation
         """
-        animations = []
+        animations1 = []
+        animations2 = []
+        cleanup_actions = []
+
         for chessboard in self.chess5.chessboards:
             chessboard_loc = chessboard.chessboard_tm_pos
             if self.log: print(f"Location of chessboard: {chessboard_loc}")
             chessboard_id = self.chess5.get_chessboard_by_tm(chessboard_loc)
             assert chessboard_id != -1, f"Failed to retireve chessboard from {chessboard_loc}"
             manim_chessboard = self.manim_chessboards[chessboard_id]
-            anims = manim_chessboard.change_board_opacity(new_opacity)
-            animations.extend(anims)
+            anims_opacity = manim_chessboard.change_board_opacity(1.0)
+            anims_extrude = manim_chessboard.change_prism_height(manim_chessboard.prism_height)
+            # Add cleanup callback
+            cleanup_actions.append(
+                lambda: self.scene.remove(*manim_chessboard.board_tiles)
+            )
+            animations1.extend(anims_extrude)
+            animations2.extend(anims_opacity)
 
-        if self.scene is not None:
-            self.scene.play(*animations, run_time = self.animation_speed)
-        else:
-            raise TypeError(f"Failed to change board opacity, when no scene is passed")
+        self.scene.play(*animations2)
+        self.scene.play(*animations1)
+
+        self.scene.play(self.change_board_separation(self.old_board_separation))
+        self.scene.play(self.reorient_all_boards(self.old_board_orientation))
+
+        for cleanup in cleanup_actions:
+            cleanup()
 
     # Drawing vectors
 
@@ -322,6 +356,14 @@ class Manim_Chessboard_5D(VGroup):
             manim_chessboard = self.manim_chessboards[chessboard_id]
             manim_chessboard.recolor_list = filtered_moves
             manim_chessboard.recolor_board(manim_chessboard.recolor_from_list, special_squares=[pos[0]])
+
+    def set_animation_speed(self, animation_speed):
+        """
+        Sets animation speed
+        """
+        self.animation_speed = animation_speed
+        for chessboard in self.manim_chessboards:
+            chessboard.animation_speed = animation_speed
 
 
     def add_chessboard(self, chessboard_loc, origin_board):
