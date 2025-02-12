@@ -733,7 +733,7 @@ class Manim_Chessboard_2D(VGroup):
         """
         n = self.board_size
         board_center = self.board_loc
-        forward, right, normal = self.get_board_directions()
+        forward, right, normal = self.get_board_directions(force_renorm=True)
 
         col, row = self.chessutils.chessform_to_matrix(square)
         idx_1, idx_2 = self.get_matrix_indecies(row, col)
