@@ -471,7 +471,7 @@ class Presentation1(ThreeDSlide):
         board_5d.add_empty_chessboard([0,1])
         board_5d.add_empty_chessboard([0,-1])
         self.move_camera(phi=60*DEGREES, theta=-60*DEGREES)
-        board_5d.assemble_the_cube(0.1, orientation=2)
+        board_5d.assemble_the_cube(0.01, orientation=2)
         #board_5d.change_board_separation([1, 0.5])
         #board_5d.change_boards_opacity(0.3)
         #board_5d.add_empty_chessboard([0,2])

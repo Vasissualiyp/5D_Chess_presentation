@@ -239,9 +239,13 @@ class Manim_Chessboard_2D(VGroup):
         Returns:
             self.animate: A Manim animation object
         """
+        old_loc = self.board_loc
         self.board_loc = new_loc
+        delta_loc = new_loc - old_loc
+        print(f"old_loc: {old_loc}")
+        print(f"new_loc: {new_loc}")
         board_group = Group(*self.board_tiles)
-        return board_group.animate.move_to(new_loc)
+        return board_group.animate.shift(delta_loc)
 
     def change_camera_center(self, camera_center):
         """
@@ -266,7 +270,9 @@ class Manim_Chessboard_2D(VGroup):
         Returns:
             self.animate: A Manim animation object
         """
+        print(f"board_separation before reassignment: {self.board_separation}")
         self.board_separation = board_separation
+        print(f"board_separation after reassignment: {self.board_separation}")
         new_board_loc=self.get_updated_board_pos()
         return self.move_board_to_new_loc(new_board_loc)
 
@@ -782,8 +788,12 @@ class Manim_Chessboard_2D(VGroup):
             array: new location vector
         """
         time_sep, mult_sep = self.board_separation
+        print(f"Updated t/m separation: {time_sep, mult_sep}")
+        print(f"tm_loc: {self.tm_loc}")
+        print(f"camera_center: {self.camera_center}")
         new_board_loc=np.array([(self.tm_loc[0] - self.camera_center[0])*time_sep, 
                                 (self.tm_loc[1] - self.camera_center[1])*mult_sep, 0])
+        print(f"Updated board location: {new_board_loc}")
         return new_board_loc
 
     def get_square_pos_in_3d(self, square):

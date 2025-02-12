@@ -167,7 +167,7 @@ class Manim_Chessboard_5D(VGroup):
         # Return all animations grouped together
         return AnimationGroup(*animations)
 
-    def assemble_the_cube(self, new_opacity, orientation=1):
+    def assemble_the_cube(self, new_opacity, orientation=2):
         """
         Assembles the cube in given orientation.
 
@@ -185,14 +185,14 @@ class Manim_Chessboard_5D(VGroup):
         self.old_board_orientation = self.board_orientation
 
         if orientation==1:
-            new_board_separation = [ self.board_separation[0], self.square_size ]
-        elif orientation==2:
             new_board_separation = [ self.square_size, self.board_separation[1] ]
+        elif orientation==2:
+            new_board_separation = [ self.board_separation[0], self.square_size ]
         else:
             raise ValueError(f"Orientation value of {orientation} is not allowed!")
 
         self.scene.play(self.reorient_all_boards(orientation))
-        #self.scene.play(self.change_board_separation(new_board_separation))
+        self.scene.play(self.change_board_separation(new_board_separation))
 
         for chessboard in self.chess5.chessboards:
             chessboard_loc = chessboard.chessboard_tm_pos
@@ -209,7 +209,7 @@ class Manim_Chessboard_5D(VGroup):
             animations2.extend(anims_separation)
             animations3.extend(anims_extrude)
 
-        self.scene.play(*animations2)
+        #self.scene.play(*animations2)
         self.scene.play(*animations1)
         self.scene.play(*animations3)
 
