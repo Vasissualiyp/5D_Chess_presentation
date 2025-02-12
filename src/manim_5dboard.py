@@ -121,18 +121,25 @@ class Manim_Chessboard_5D(VGroup):
 
     def change_board_separation(self, board_separation):
         """
-        Move all board to new positions in 3D schene, based on new board separation array
-
+        Change the separation between boards in the 5D space
+        
         Args:
-            board_separation (array): distance between the centers of the boards in 5D, 
-                has time and multiverse components
+            board_separation (list): New separation values
+            
+        Returns:
+            AnimationGroup: A group of animations to be played
         """
         animations = []
         for chessboard in self.manim_chessboards:
+            # Get the animation for each chessboard
             anim = chessboard.change_board_separation(board_separation)
-            animations.append(anim)
-    
-        # Animate them all together in parallel
+            # If we got a single animation, put it in a list
+            if not isinstance(anim, list):
+                anim = [anim]
+            # Extend our animations list
+            animations.extend(anim)
+        
+        # Return all animations grouped together
         return AnimationGroup(*animations)
 
     # Drawing vectors

@@ -157,7 +157,7 @@ class Manim_Chessboard_2D(VGroup):
         print(f"Keep in mind that the board for now is still present in memory, "+
               "even though it's not present in the scene!")
 
-    # Board 3D scene manipulation: movement
+    # Board 3D scene manipulation: rotation
 
     def rotate_board(self, angle, axis=np.array([0,0,1])): # Currently useless
         """
@@ -191,7 +191,7 @@ class Manim_Chessboard_2D(VGroup):
             run_time=self.animation_speed
         )
 
-    # Board 3D scene manipulation: rotation
+    # Board 3D scene manipulation: translation
 
     def move_board_to_new_loc(self, new_loc):
         """
@@ -203,7 +203,9 @@ class Manim_Chessboard_2D(VGroup):
             self.animate: A Manim animation object
         """
         self.board_loc = new_loc
-        return self.animate.move_to(new_loc).set_run_time(self.animation_speed)
+        #return self.animate.move_to(new_loc).set_run_time(self.animation_speed)
+        board_group = Group(*self.board_tiles)
+        return board_group.animate.move_to(new_loc)
 
     def change_camera_center(self, camera_center):
         """
