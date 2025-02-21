@@ -8,6 +8,8 @@ from moves import Moves
 central_square = 'e4'
 central_square_plus1 = 'f3'
 
+# Slides
+
 def intro_slide(self, run_time):
     title = Text("5D Chess with Multivere Time Travel\nBlack Board Talk").scale(0.8)
     author = Text("By Vasilii Pustovoit, CITA, 2025").scale(0.4)
@@ -17,232 +19,6 @@ def intro_slide(self, run_time):
     self.play(Write(author), run_time = run_time)
     self.next_slide()
     self.play(FadeOut(title, shift=10*RIGHT), FadeOut(author, shift=10*RIGHT))
-
-def draw_vector_to_square(self, board, vec_start, pos_5d, color, run_time):
-    """
-    Draws a vector arrow to a point on the board, starting from the point passed
-
-    Args:
-        self (Slide): Pass self to make sure that the stuff gets animated
-        board (Manim_Chessboard_5D): a board to draw the vector towards
-        vec_start (np.array): start of the vector
-        pos_5d (list): 3-list of final vector position
-        color (Manim Color): color of the arrow
-        run_time (float): how fast the animation should happen
-
-    Returns:
-        Arrow: arrow object
-    """
-    square, time, mult = pos_5d
-    tm_loc = [time, mult]
-    board_id = board.chess5.get_chessboard_by_tm(tm_loc)
-    board1 = board.manim_chessboards[board_id]
-    vec_end = board1.get_square_pos_in_3d(square)
-
-    vec = Arrow(start=vec_start, end=vec_end, buff=0.0).set_color(color).set_z_index(1000)
-    self.FadeIn(vec, run_time = run_time)
-    return vec
-
-def draw_vector_between_squares(self, board, pos_5d1, pos_5d2, color, run_time):
-    """
-    Draws a vector arrow between 2 points on the board
-
-    Args:
-        self (Slide): Pass self to make sure that the stuff gets animated
-        board (Manim_Chessboard_5D): a board to draw the vector towards
-        pos_5d1 (list): 3-list of starting vector position
-        pos_5d2 (list): 3-list of final vector position
-        color (Manim Color): color of the arrow
-        run_time (float): how fast the animation should happen
-
-    Returns:
-        Arrow: arrow object
-    """
-    square1, time1, mult1 = pos_5d1
-    square2, time2, mult2 = pos_5d2
-    tm_loc1 = [time1, mult1]
-    tm_loc2 = [time2, mult2]
-    board_id1 = board.chess5.get_chessboard_by_tm(tm_loc1)
-    board_id2 = board.chess5.get_chessboard_by_tm(tm_loc2)
-    board1 = board.manim_chessboards[board_id1]
-    board2 = board.manim_chessboards[board_id2]
-    vec_start = board1.get_square_pos_in_3d(square1)
-    vec_end = board2.get_square_pos_in_3d(square2)
-
-    vec = Arrow(start=vec_start, end=vec_end, buff=0.0).set_color(color).set_z_index(1000)
-    self.FadeIn(vec, run_time = run_time)
-    return vec
-
-def AddMyAxes(self, origin, arrow_sizes):
-    """
-    Creates axes
-
-    Args:
-        self (Slide): Pass self to make sure that the stuff gets animated
-        origin (array): coordinates of the origin of the axes
-        arrow_sizes (array): sizes of the x and y vectors
-
-    Returns:
-        arrow_h, arrow_v: axis arrow objects
-    """
-    extension_fac = 0.1
-    origin = np.array([origin[0], origin[1], 0])
-    h_size = arrow_sizes[0]
-    v_size = arrow_sizes[1]
-    origin_h = np.array([- extension_fac * v_size, 0, 0])
-    origin_v = np.array([0, - extension_fac * v_size, 0])
-    arrow_h = Arrow(start=origin_h, end=[h_size, 0, 0]).shift(origin)
-    arrow_v = Arrow(start=origin_v, end=[0, v_size, 0]).shift(origin)
-    self.add(arrow_v, arrow_h)
-    return arrow_h, arrow_v
-
-def write_drs(self, piece):
-    """
-    Writes all dr vectors for a specific piece.
-
-    Args:
-        self (Slide): Pass self to make sure that the stuff gets animated
-        piece (str): piece acronym
-    """
-    animations_signless = [] # Array for animations for dr vectors with sign permutations
-    animations_sign = [] # Array for animations for dr vectors without sign permutations
-    animations_sign_ordered = [] # Array for animations for pure dr vectors
-    animations_delete = [] # Array for animations for deleting of dr vectors
-    drs_2d = []
-    drs_2d_sign = []
-    drs_2d_sign_ordered = []
-    text_objs = []
-    animation_speed = 0.5
-
-    mv = Moves()
-    drs_4d = mv.get_dr(piece[0])
-    starting_pos = np.array([6.0, 4.0, 0.0])
-    pos = starting_pos
-
-    textsize = 0.6
-    separation = 1.0 # Separation between the lines, in terms of textsize
-    displacement_vec = np.array([0.0, - separation * textsize, 0.0])
-
-    textpos1 = starting_pos - displacement_vec
-    textpos1[0] = 5.0
-    textpos2 = textpos1
-    textpos2[0] = 5.0
-    textpos3 = textpos1
-    textpos3[0] = 2.0
-    titletext1 = Text("Unit vectors").scale(textsize).shift(textpos1)
-    titletext2 = Text("Sign-independent unit vectors").scale(textsize).shift(textpos2)
-    titletext3 = Text("Sign- and permutation-independent unit vectors", color=RED
-                      ).scale(textsize).shift(textpos3)
-
-    for dr in drs_4d:
-        x, y, _, _ = dr
-        dr_2d = [x, y]
-        if dr_2d not in drs_2d and dr_2d != [0, 0]:
-            drs_2d.append(dr_2d)
-            if x >=0 and y >=0:
-                drs_2d_sign.append(dr_2d)
-                if y <= x:
-                    drs_2d_sign_ordered.append(dr_2d)
-
-    for dr in drs_2d:
-        print(f"Text: {dr}")
-        text = Text(str(dr)).shift(pos).scale(textsize)
-        text_red = Text(str(dr), color=RED).shift(pos).scale(textsize)
-        empty_text = Text("").shift(pos).scale(textsize)
-        text_anim = Write(text)
-        pos += displacement_vec
-
-        # Deal with 2nd transformation into the empty string
-        if dr in drs_2d_sign:
-            text2 = text
-        else:
-            #text2 = empty_text
-            text2 = text.copy().scale(0.5).set_color(GREY)
-
-        if dr in drs_2d_sign_ordered:
-            text3 = text_red
-        else:
-            #text3 = empty_text
-            text3 = text.copy().scale(0.5).set_color(GREY)
-
-        text_objs.append(text)
-        text_objs.append(text2)
-        text_objs.append(text3)
-        text_anim_sign = Transform(text, text2)
-        text_anim_sign_ordered = Transform(text2, text3)
-        text_anim_delete = Transform(text, empty_text)
-        text_anim_delete2 = Transform(text2, empty_text)
-        text_anim_delete3 = Transform(text3, empty_text)
-
-        animations_signless.append(text_anim)
-        animations_sign.append(text_anim_sign)
-        animations_sign_ordered.append(text_anim_sign_ordered)
-        animations_delete.append(text_anim_delete)
-        animations_delete.append(text_anim_delete2)
-        animations_delete.append(text_anim_delete3)
-
-    animations_signless.append(Write(titletext1))
-    animations_sign.append(Transform(titletext1, titletext2))
-    animations_sign_ordered.append(Transform(titletext1, titletext3))
-    animations_delete.append(Transform(titletext1, Text("")))
-    animations_delete.append(Transform(titletext2, Text("")))
-    animations_delete.append(Transform(titletext3, Text("")))
-
-    self.play(*animations_signless, run_time = animation_speed)
-    self.next_slide()
-    self.play(*animations_sign, run_time = animation_speed)
-    self.next_slide()
-    self.play(*animations_sign_ordered, run_time = animation_speed)
-    self.next_slide()
-    self.play(*animations_delete, run_time = animation_speed)
-    self.remove(titletext1, titletext2, titletext3, *text_objs)
-
-def show_vector_difference(self, board_5d, text_pos, axes_origin_vec, run_time, colors, piece_loc, piece_loc_plus1):
-    """
-    Shows vector equation of the form r2 = r1 + delta(r)
-
-    Args:
-        self (Slide): Pass self to make sure that the stuff gets animated
-        colors (list): list of colors
-        ...
-    """
-    text_pos = np.array(text_pos)
-    color1, color2, color3 = colors
-
-    arrow1 = draw_vector_to_square(self, board_5d, axes_origin_vec, piece_loc, color1, run_time/4)
-    arrow2 = draw_vector_between_squares(self, board_5d, piece_loc, piece_loc_plus1, color2, run_time/4)
-    arrow3 = draw_vector_to_square(self, board_5d, axes_origin_vec, piece_loc_plus1, color3, run_time/4)
-    dr_tex = MathTex(r"\mathbf{r_2}", r"\mathbf{ = }", r"\mathbf{r_1}", r"\mathbf{+ }",r"\mathbf{\delta r}", 
-                     font_size=50).shift(text_pos)
-    dr_tex.set_color_by_tex('r_1', color1)
-    dr_tex.set_color_by_tex('elta', color2)
-    dr_tex.set_color_by_tex('r_2', color3)
-    self.play(Write(dr_tex))
-
-    self.next_slide()
-    arrows = [ arrow1, arrow2, arrow3 ]
-    vec_arrows_anim: list[Animation] = [ FadeOut(arrow) for arrow in arrows ]
-    vec_arrows_anim.append(Transform(dr_tex, MathTex("")))
-    self.play(*vec_arrows_anim, run_time = run_time)
-
-def show_piece_moves_slide(self, board_5d, piece, pos=central_square, tm_loc=[0,0]):
-    """
-    Shows moves of a pice
-
-    Args:
-        self (ThreeDSlide): a scene where animation is happening
-        board_5d (Manim_Chessboard_5D): a 5D board where to place the piece
-        piece (str): piece acronym
-        pos (str): position of the piece in chess notation
-        tm_loc (list): position of host chessboard for the piece of interest
-    """
-    self.next_slide()
-    board2d_id = board_5d.chess5.get_chessboard_by_tm(tm_loc)
-    board2d = board_5d.manim_chessboards[board2d_id]
-    board2d.recolor_board()
-    board2d.remove_all_pieces()
-    board2d.add_piece(piece, pos)
-    board_5d.show_moves([pos,tm_loc[0],tm_loc[1]])
 
 def show_queen_moves(self, run_time):
     """
@@ -442,52 +218,284 @@ def full_dr_explanation_slide(self, run_time):
     )
     self.remove(*math_group, *piece_imgs, *second_piece_imgs, moveset_ql, moveset_kl, moveset_pl)
 
-def show_moves_3d(self, board_5d, piece, piece_pos):
+# Utils
+
+def draw_vector_to_square(self, board, vec_start, pos_5d, color, run_time):
     """
-    Brief description of function
+    Draws a vector arrow to a point on the board, starting from the point passed
+
+    Args:
+        self (Slide): Pass self to make sure that the stuff gets animated
+        board (Manim_Chessboard_5D): a board to draw the vector towards
+        vec_start (np.array): start of the vector
+        pos_5d (list): 3-list of final vector position
+        color (Manim Color): color of the arrow
+        run_time (float): how fast the animation should happen
+
+    Returns:
+        Arrow: arrow object
+    """
+    square, time, mult = pos_5d
+    tm_loc = [time, mult]
+    board_id = board.chess5.get_chessboard_by_tm(tm_loc)
+    board1 = board.manim_chessboards[board_id]
+    vec_end = board1.get_square_pos_in_3d(square)
+
+    vec = Arrow(start=vec_start, end=vec_end, buff=0.0).set_color(color).set_z_index(1000)
+    self.play(FadeIn(vec, run_time = run_time))
+    return vec
+
+def draw_vector_between_squares(self, board, pos_5d1, pos_5d2, color, run_time):
+    """
+    Draws a vector arrow between 2 points on the board
+
+    Args:
+        self (Slide): Pass self to make sure that the stuff gets animated
+        board (Manim_Chessboard_5D): a board to draw the vector towards
+        pos_5d1 (list): 3-list of starting vector position
+        pos_5d2 (list): 3-list of final vector position
+        color (Manim Color): color of the arrow
+        run_time (float): how fast the animation should happen
+
+    Returns:
+        Arrow: arrow object
+    """
+    square1, time1, mult1 = pos_5d1
+    square2, time2, mult2 = pos_5d2
+    tm_loc1 = [time1, mult1]
+    tm_loc2 = [time2, mult2]
+    board_id1 = board.chess5.get_chessboard_by_tm(tm_loc1)
+    board_id2 = board.chess5.get_chessboard_by_tm(tm_loc2)
+    board1 = board.manim_chessboards[board_id1]
+    board2 = board.manim_chessboards[board_id2]
+    vec_start = board1.get_square_pos_in_3d(square1)
+    vec_end = board2.get_square_pos_in_3d(square2)
+
+    vec = Arrow(start=vec_start, end=vec_end, buff=0.0).set_color(color).set_z_index(1000)
+    self.play(FadeIn(vec, run_time = run_time))
+    return vec
+
+def AddMyAxes(self, origin, arrow_sizes):
+    """
+    Creates axes
+
+    Args:
+        self (Slide): Pass self to make sure that the stuff gets animated
+        origin (array): coordinates of the origin of the axes
+        arrow_sizes (array): sizes of the x and y vectors
+
+    Returns:
+        arrow_h, arrow_v: axis arrow objects
+    """
+    extension_fac = 0.1
+    origin = np.array([origin[0], origin[1], 0])
+    h_size = arrow_sizes[0]
+    v_size = arrow_sizes[1]
+    origin_h = np.array([- extension_fac * v_size, 0, 0])
+    origin_v = np.array([0, - extension_fac * v_size, 0])
+    arrow_h = Arrow(start=origin_h, end=[h_size, 0, 0]).shift(origin)
+    arrow_v = Arrow(start=origin_v, end=[0, v_size, 0]).shift(origin)
+    self.add(arrow_v, arrow_h)
+    return arrow_h, arrow_v
+
+def write_drs(self, piece):
+    """
+    Writes all dr vectors for a specific piece.
+
+    Args:
+        self (Slide): Pass self to make sure that the stuff gets animated
+        piece (str): piece acronym
+    """
+    animations_signless = [] # Array for animations for dr vectors with sign permutations
+    animations_sign = [] # Array for animations for dr vectors without sign permutations
+    animations_sign_ordered = [] # Array for animations for pure dr vectors
+    animations_delete = [] # Array for animations for deleting of dr vectors
+    drs_2d = []
+    drs_2d_sign = []
+    drs_2d_sign_ordered = []
+    text_objs = []
+    animation_speed = 0.5
+
+    mv = Moves()
+    drs_4d = mv.get_dr(piece[0])
+    starting_pos = np.array([6.0, 4.0, 0.0])
+    pos = starting_pos
+
+    textsize = 0.6
+    separation = 1.0 # Separation between the lines, in terms of textsize
+    displacement_vec = np.array([0.0, - separation * textsize, 0.0])
+
+    textpos1 = starting_pos - displacement_vec
+    textpos1[0] = 5.0
+    textpos2 = textpos1
+    textpos2[0] = 5.0
+    textpos3 = textpos1
+    textpos3[0] = 2.0
+    titletext1 = Text("Unit vectors").scale(textsize).shift(textpos1)
+    titletext2 = Text("Sign-independent unit vectors").scale(textsize).shift(textpos2)
+    titletext3 = Text("Sign- and permutation-independent unit vectors", color=RED
+                      ).scale(textsize).shift(textpos3)
+
+    for dr in drs_4d:
+        x, y, _, _ = dr
+        dr_2d = [x, y]
+        if dr_2d not in drs_2d and dr_2d != [0, 0]:
+            drs_2d.append(dr_2d)
+            if x >=0 and y >=0:
+                drs_2d_sign.append(dr_2d)
+                if y <= x:
+                    drs_2d_sign_ordered.append(dr_2d)
+
+    for dr in drs_2d:
+        print(f"Text: {dr}")
+        text = Text(str(dr)).shift(pos).scale(textsize)
+        text_red = Text(str(dr), color=RED).shift(pos).scale(textsize)
+        empty_text = Text("").shift(pos).scale(textsize)
+        text_anim = Write(text)
+        pos += displacement_vec
+
+        # Deal with 2nd transformation into the empty string
+        if dr in drs_2d_sign:
+            text2 = text
+        else:
+            #text2 = empty_text
+            text2 = text.copy().scale(0.5).set_color(GREY)
+
+        if dr in drs_2d_sign_ordered:
+            text3 = text_red
+        else:
+            #text3 = empty_text
+            text3 = text.copy().scale(0.5).set_color(GREY)
+
+        text_objs.append(text)
+        text_objs.append(text2)
+        text_objs.append(text3)
+        text_anim_sign = Transform(text, text2)
+        text_anim_sign_ordered = Transform(text2, text3)
+        text_anim_delete = Transform(text, empty_text)
+        text_anim_delete2 = Transform(text2, empty_text)
+        text_anim_delete3 = Transform(text3, empty_text)
+
+        animations_signless.append(text_anim)
+        animations_sign.append(text_anim_sign)
+        animations_sign_ordered.append(text_anim_sign_ordered)
+        animations_delete.append(text_anim_delete)
+        animations_delete.append(text_anim_delete2)
+        animations_delete.append(text_anim_delete3)
+
+    animations_signless.append(Write(titletext1))
+    animations_sign.append(Transform(titletext1, titletext2))
+    animations_sign_ordered.append(Transform(titletext1, titletext3))
+    animations_delete.append(Transform(titletext1, Text("")))
+    animations_delete.append(Transform(titletext2, Text("")))
+    animations_delete.append(Transform(titletext3, Text("")))
+
+    self.play(*animations_signless, run_time = animation_speed)
+    self.next_slide()
+    self.play(*animations_sign, run_time = animation_speed)
+    self.next_slide()
+    self.play(*animations_sign_ordered, run_time = animation_speed)
+    self.next_slide()
+    self.play(*animations_delete, run_time = animation_speed)
+    self.remove(titletext1, titletext2, titletext3, *text_objs)
+
+def show_vector_difference(self, board_5d, text_pos, axes_origin_vec, run_time, colors, piece_loc, piece_loc_plus1):
+    """
+    Shows vector equation of the form r2 = r1 + delta(r)
+
+    Args:
+        self (Slide): Pass self to make sure that the stuff gets animated
+        colors (list): list of colors
+        ...
+    """
+    text_pos = np.array(text_pos)
+    color1, color2, color3 = colors
+
+    arrow1 = draw_vector_to_square(self, board_5d, axes_origin_vec, piece_loc, color1, run_time/4)
+    arrow2 = draw_vector_between_squares(self, board_5d, piece_loc, piece_loc_plus1, color2, run_time/4)
+    arrow3 = draw_vector_to_square(self, board_5d, axes_origin_vec, piece_loc_plus1, color3, run_time/4)
+    dr_tex = MathTex(r"\mathbf{r_2}", r"\mathbf{ = }", r"\mathbf{r_1}", r"\mathbf{+ }",r"\mathbf{\delta r}", 
+                     font_size=50).shift(text_pos)
+    dr_tex.set_color_by_tex('r_1', color1)
+    dr_tex.set_color_by_tex('elta', color2)
+    dr_tex.set_color_by_tex('r_2', color3)
+    self.play(Write(dr_tex))
+
+    self.next_slide()
+    arrows = [ arrow1, arrow2, arrow3 ]
+    vec_arrows_anim: list[Animation] = [ FadeOut(arrow) for arrow in arrows ]
+    vec_arrows_anim.append(Transform(dr_tex, MathTex("")))
+    self.play(*vec_arrows_anim, run_time = run_time)
+
+def show_piece_moves_slide(self, board_5d, piece, pos=central_square, tm_loc=[0,0]):
+    """
+    Shows moves of a pice
+
+    Args:
+        self (ThreeDSlide): a scene where animation is happening
+        board_5d (Manim_Chessboard_5D): a 5D board where to place the piece
+        piece (str): piece acronym
+        pos (str): position of the piece in chess notation
+        tm_loc (list): position of host chessboard for the piece of interest
+    """
+    self.next_slide()
+    board2d_id = board_5d.chess5.get_chessboard_by_tm(tm_loc)
+    board2d = board_5d.manim_chessboards[board2d_id]
+    board2d.recolor_board()
+    board2d.remove_all_pieces()
+    board2d.add_piece(piece, pos)
+    board_5d.show_moves([pos,tm_loc[0],tm_loc[1]])
+
+def show_moves_3d(self, board_5d, piece, piece_pos, moveset):
+    """
+    Show moves of a piece on a 3D cube
 
     Args:
         arg1 (type): description
-
-    Returns:
-        return_type: description
     """
+    run_time = 0.5
     print(f"{piece} has begun")
+    self.add_fixed_in_frame_mobjects(moveset)
+    moveset.to_corner(UR)
     board2d_id = board_5d.chess5.get_chessboard_by_tm([0,0])
     board_2d = board_5d.manim_chessboards[board2d_id]
     board_2d.add_piece(piece, central_square, force_center=True)
     board_5d.show_moves(piece_pos, recolor_scheme="color-opacity")
+    #self.play(moveset, run_time = run_time)
     self.wait(5)
     self.next_slide()
     board_2d.remove_all_pieces()
     board_5d.recolor_all_boards()
+    self.remove(moveset)
 
 
-class Presentation1(ThreeDSlide):
+class PresentationSlides1_2(ThreeDSlide):
     def construct(self):
         run_time = 0.5
         log = False
         ###################
         ###### INTRO ######
         ###################
-        #intro_slide(self, run_time)
+        intro_slide(self, run_time)
         
         ######################
         ###### 2D MOVES ######
         ######################
         # Introduction to how to get delta r
-        #show_queen_moves(self, run_time)
-        #full_dr_explanation_slide(self, run_time)
+        show_queen_moves(self, run_time)
+        full_dr_explanation_slide(self, run_time)
 
-        ######################
-        ###### 3D MOVES ######
-        ######################
+class PresentationSlides_3(ThreeDSlide):
+    def construct(self):
+        run_time = 0.5
+        log = False
         board_5d = Manim_Chessboard_5D(square_size=0.5, board_separation=[5,5],
                                        mode_3d=True,
                                        scene=self, log=log)
 
+        # Setting up the cube
         piece_pos = [central_square, 0, 0]
-        board_5d.set_animation_speed(0.1)
+        board_5d.set_animation_speed(run_time/10)
         board_5d.add_empty_chessboard([0,0])
         board_5d.add_empty_chessboard([0,1])
         board_5d.add_empty_chessboard([0,-1])
@@ -496,22 +504,38 @@ class Presentation1(ThreeDSlide):
         board_5d.add_empty_chessboard([0,3])
         board_5d.add_empty_chessboard([0,-3])
         board_5d.add_empty_chessboard([0,4])
-        board_5d.set_animation_speed(0.5)
         self.move_camera(phi=60*DEGREES, theta=-60*DEGREES)
+        print("Assembling the cube...")
         board_5d.assemble_the_cube(0.03, orientation=2)
+        print("Assembled the cube")
         self.next_slide()
+        board_5d.set_animation_speed(run_time)
         #board_5d.disassemble_the_cube()
 
+        # Cycling through moves
+        accent_color = GOLD
+        moveset_rl = Tex("Rook: ", r"$[1,0,0]^\infty_\delta$").set_color(accent_color)
+        moveset_bl = Tex("Bishop: ", r"$[1,1,0]^\infty_\delta$").set_color(accent_color)
+        moveset_nl = Tex("Knight: ", r"$[1,2,0]^1_\delta$").set_color(accent_color)
+
+        moveset_ql = Tex("Queen: ", r"$[1,0,0]^\infty_\delta$", 
+                             r"$\cup$",
+                             r"$[1,1,0]^\infty_\delta$", 
+                             r"$\cup$", 
+                             r"$[1,1,1]^\infty_\delta$").set_color(accent_color)
+
+        moveset_Pl = Tex("Princess: ", r"$[1,0,0]^\infty_\delta$", 
+                             r"$\cup$",
+                             r"$[1,1,0]^\infty_\delta$").set_color(accent_color)
+
+        moveset_kl = Tex("King: ", r"$[1,0]^1_\delta$", r"$\cup$", r"$[1,1]^1_\delta$").set_color(accent_color)
+        moveset_pl = Tex("Pawn: ", r"$[0,1]^*$").set_color(accent_color)
+
         self.begin_ambient_camera_rotation(rate=0.2)
-        show_moves_3d(self, board_5d, 'rl', piece_pos)
-        show_moves_3d(self, board_5d, 'bl', piece_pos)
-        show_moves_3d(self, board_5d, 'nl', piece_pos)
-        show_moves_3d(self, board_5d, 'ql', piece_pos)
-        show_moves_3d(self, board_5d, 'kl', piece_pos)
+        show_moves_3d(self, board_5d, 'rl', piece_pos, moveset_rl)
+        show_moves_3d(self, board_5d, 'bl', piece_pos, moveset_bl)
+        show_moves_3d(self, board_5d, 'nl', piece_pos, moveset_nl)
+        show_moves_3d(self, board_5d, 'Pl', piece_pos, moveset_Pl)
+        show_moves_3d(self, board_5d, 'ql', piece_pos, moveset_ql)
+        show_moves_3d(self, board_5d, 'kl', piece_pos, moveset_kl)
         self.stop_ambient_camera_rotation()
-
-
-
-
-
-

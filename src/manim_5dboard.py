@@ -321,9 +321,20 @@ class Manim_Chessboard_5D(VGroup):
 
         self.vec_arrows.clear()
 
-    def show_moves(self, pos, recolor_scheme="opacity", force_single_moves=False):
+    def show_moves(self, pos, special_moves_recolor="", recolor_scheme="opacity", force_single_moves=False):
         """
         Show moves of a piece, located at the provided position.
+        Args:
+            pos (list): 3-list of position of the target piece that "moves"
+            special_moves_recolor (str): scheme of recoloring special moves. Vales:
+                "" - no highlight, other than piece at pos
+                "board" - the same board as piece at pos
+                "piece_type_#" - piece of a type # (i.e. piece_type_r will highlight rook moves)
+            recolor_scheme (str): scheme for recoloring. Values:
+                opacity - change color only
+                color-opacity - change color and opacity
+            force_single_moves (bool): whether to show only 1st move
+                (i.e. for queen, it will be king's moves)
         """
         possible_moves = self.chess5.get_list_of_possible_moves(pos, force_single_moves)
         if self.log: print(f"Possible moves: {possible_moves}")
