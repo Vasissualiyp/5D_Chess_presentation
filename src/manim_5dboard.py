@@ -321,7 +321,7 @@ class Manim_Chessboard_5D(VGroup):
 
         self.vec_arrows.clear()
 
-    def show_moves(self, pos, special_moves_recolor="", recolor_scheme="opacity", force_single_moves=False):
+    def show_moves(self, pos, special_moves_recolor="", recolor_scheme="color", force_single_moves=False):
         """
         Show moves of a piece, located at the provided position.
         Args:
@@ -331,7 +331,7 @@ class Manim_Chessboard_5D(VGroup):
                 "board" - the same board as piece at pos
                 "piece_type_#" - piece of a type # (i.e. piece_type_r will highlight rook moves)
             recolor_scheme (str): scheme for recoloring. Values:
-                opacity - change color only
+                color - change color only
                 color-opacity - change color and opacity
             force_single_moves (bool): whether to show only 1st move
                 (i.e. for queen, it will be king's moves)

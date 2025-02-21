@@ -63,7 +63,7 @@ class Manim_Chessboard_2D(VGroup):
         self.mlight = chesscolors.piece_light
         self.mdark = chesscolors.piece_dark
         self.special_color = chesscolors.chosen_piece
-        self.recolor_scheme = "opacity" # "color" or "opacity-color"
+        self.recolor_scheme = "color" # "color" or "opacity-color"
         if non_const_color_parity:
             self.color_parity = ( tm_loc[0] + tm_loc[1] ) % 2
         else:

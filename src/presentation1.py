@@ -7,6 +7,7 @@ from moves import Moves
 
 central_square = 'e4'
 central_square_plus1 = 'f3'
+central_square_3vec = [central_square, 0, 0]
 
 # Slides
 
@@ -446,6 +447,26 @@ def show_piece_moves_slide(self, board_5d, piece, pos=central_square, tm_loc=[0,
     board2d.add_piece(piece, pos)
     board_5d.show_moves([pos,tm_loc[0],tm_loc[1]])
 
+def show_4d_moves(self, piece, board_5d, wait=2):
+    """
+    Shows moves of a piece on 4d board
+
+    Args:
+        self (ThreeDSlide): a scene where animation is happening
+        piece (str): piece acronym
+        board_5d (Manim_Chessboard_5D): a 5D board object
+        wait (int): number of seconds to wait
+    """
+    board2d_id = board_5d.chess5.get_chessboard_by_tm([0,0])
+    board_2d = board_5d.manim_chessboards[board2d_id]
+    board_2d.add_piece(piece, central_square, force_center=True)
+    board_5d.show_moves(central_square_3vec)
+    board_5d.draw_all_movement_vectors(central_square_3vec)
+    self.wait(wait)
+    board_5d.remove_all_movement_vectors()
+    board_5d.recolor_all_boards()
+    board_2d.remove_all_pieces()
+
 def show_moves_3d(self, board_5d, piece, piece_pos, moveset):
     """
     Show moves of a piece on a 3D cube
@@ -461,12 +482,66 @@ def show_moves_3d(self, board_5d, piece, piece_pos, moveset):
     board_2d = board_5d.manim_chessboards[board2d_id]
     board_2d.add_piece(piece, central_square, force_center=True)
     board_5d.show_moves(piece_pos, recolor_scheme="color-opacity")
-    #self.play(moveset, run_time = run_time)
     self.wait(5)
     self.next_slide()
     board_2d.remove_all_pieces()
     board_5d.recolor_all_boards()
     self.remove(moveset)
+
+def cube_moves_3d_slide(self):
+    """
+    Showes moves on a 3D cube
+    """
+    run_time = 0.5
+    log = False
+    board_5d = Manim_Chessboard_5D(square_size=0.5, board_separation=[5,5],
+                                   mode_3d=True,
+                                   scene=self, log=log)
+
+    # Setting up the cube
+    piece_pos = [central_square, 0, 0]
+    board_5d.set_animation_speed(run_time/10)
+    board_5d.add_empty_chessboard([0,0])
+    for i in range(-3,5):
+        if i != 0: board_5d.add_empty_chessboard([0,i])
+    self.move_camera(phi=60*DEGREES, theta=-60*DEGREES)
+    print("Assembling the cube...")
+    board_5d.assemble_the_cube(0.03, orientation=2)
+    print("Assembled the cube")
+    self.next_slide()
+    board_5d.set_animation_speed(run_time)
+    #board_5d.disassemble_the_cube()
+
+    # Cycling through moves
+    accent_color = GOLD
+    moveset_rl = Tex("Rook: ", r"$[1,0,0]^\infty_\delta$").set_color(accent_color)
+    moveset_bl = Tex("Bishop: ", r"$[1,1,0]^\infty_\delta$").set_color(accent_color)
+    moveset_nl = Tex("Knight: ", r"$[1,2,0]^1_\delta$").set_color(accent_color)
+
+    moveset_ql = Tex("Queen: ", r"$[1,0,0]^\infty_\delta$", 
+                         r"$\cup$",
+                         r"$[1,1,0]^\infty_\delta$", 
+                         r"$\cup$", 
+                         r"$[1,1,1]^\infty_\delta$").set_color(accent_color)
+
+    moveset_Pl = Tex("Princess: ", r"$[1,0,0]^\infty_\delta$", 
+                         r"$\cup$",
+                         r"$[1,1,0]^\infty_\delta$").set_color(accent_color)
+
+    moveset_kl = Tex("King: ", r"$[1,0]^1_\delta$", r"$\cup$", r"$[1,1]^1_\delta$").set_color(accent_color)
+    moveset_pl = Tex("Pawn: ", r"$[0,1]^*$").set_color(accent_color)
+
+    self.begin_ambient_camera_rotation(rate=0.2)
+    show_moves_3d(self, board_5d, 'rl', piece_pos, moveset_rl)
+    show_moves_3d(self, board_5d, 'bl', piece_pos, moveset_bl)
+    show_moves_3d(self, board_5d, 'nl', piece_pos, moveset_nl)
+    show_moves_3d(self, board_5d, 'Pl', piece_pos, moveset_Pl)
+    show_moves_3d(self, board_5d, 'ql', piece_pos, moveset_ql)
+    show_moves_3d(self, board_5d, 'kl', piece_pos, moveset_kl)
+    self.stop_ambient_camera_rotation()
+    board_5d.disassemble_the_cube()
+    self.move_camera(phi=0*DEGREES, theta=-90*DEGREES)
+    return board_5d
 
 
 class PresentationSlides1_2(ThreeDSlide):
@@ -487,55 +562,28 @@ class PresentationSlides1_2(ThreeDSlide):
 
 class PresentationSlides_3(ThreeDSlide):
     def construct(self):
+        ######################
+        ###### 3D MOVES ######
+        ######################
+        # Currently cannot render this into manim-slides
+        board_5d = cube_moves_3d_slide(self)
+
+class PresentationSlides_4(ThreeDSlide):
+    def construct(self):
         run_time = 0.5
         log = False
+        wait=2
+        # When using in the total presentation, board_5d should be created in cube_moves_3d_slice
         board_5d = Manim_Chessboard_5D(square_size=0.5, board_separation=[5,5],
                                        mode_3d=True,
                                        scene=self, log=log)
-
-        # Setting up the cube
-        piece_pos = [central_square, 0, 0]
         board_5d.set_animation_speed(run_time/10)
         board_5d.add_empty_chessboard([0,0])
-        board_5d.add_empty_chessboard([0,1])
-        board_5d.add_empty_chessboard([0,-1])
-        board_5d.add_empty_chessboard([0,2])
-        board_5d.add_empty_chessboard([0,-2])
-        board_5d.add_empty_chessboard([0,3])
-        board_5d.add_empty_chessboard([0,-3])
-        board_5d.add_empty_chessboard([0,4])
+        for i in range(-3,5):
+            if i != 0: board_5d.add_empty_chessboard([0,i])
+
         self.move_camera(phi=60*DEGREES, theta=-60*DEGREES)
-        print("Assembling the cube...")
-        board_5d.assemble_the_cube(0.03, orientation=2)
-        print("Assembled the cube")
-        self.next_slide()
-        board_5d.set_animation_speed(run_time)
-        #board_5d.disassemble_the_cube()
+        self.play(board_5d.reorient_all_boards(2))
 
-        # Cycling through moves
-        accent_color = GOLD
-        moveset_rl = Tex("Rook: ", r"$[1,0,0]^\infty_\delta$").set_color(accent_color)
-        moveset_bl = Tex("Bishop: ", r"$[1,1,0]^\infty_\delta$").set_color(accent_color)
-        moveset_nl = Tex("Knight: ", r"$[1,2,0]^1_\delta$").set_color(accent_color)
-
-        moveset_ql = Tex("Queen: ", r"$[1,0,0]^\infty_\delta$", 
-                             r"$\cup$",
-                             r"$[1,1,0]^\infty_\delta$", 
-                             r"$\cup$", 
-                             r"$[1,1,1]^\infty_\delta$").set_color(accent_color)
-
-        moveset_Pl = Tex("Princess: ", r"$[1,0,0]^\infty_\delta$", 
-                             r"$\cup$",
-                             r"$[1,1,0]^\infty_\delta$").set_color(accent_color)
-
-        moveset_kl = Tex("King: ", r"$[1,0]^1_\delta$", r"$\cup$", r"$[1,1]^1_\delta$").set_color(accent_color)
-        moveset_pl = Tex("Pawn: ", r"$[0,1]^*$").set_color(accent_color)
-
-        self.begin_ambient_camera_rotation(rate=0.2)
-        show_moves_3d(self, board_5d, 'rl', piece_pos, moveset_rl)
-        show_moves_3d(self, board_5d, 'bl', piece_pos, moveset_bl)
-        show_moves_3d(self, board_5d, 'nl', piece_pos, moveset_nl)
-        show_moves_3d(self, board_5d, 'Pl', piece_pos, moveset_Pl)
-        show_moves_3d(self, board_5d, 'ql', piece_pos, moveset_ql)
-        show_moves_3d(self, board_5d, 'kl', piece_pos, moveset_kl)
-        self.stop_ambient_camera_rotation()
+        show_4d_moves(self, 'ql', board_5d, wait=wait)
+        show_4d_moves(self, 'bl', board_5d, wait=wait)
