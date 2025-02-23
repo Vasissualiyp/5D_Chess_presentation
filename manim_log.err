@@ -1,0 +1,598 @@
+Manim Community v0.18.1
+
+[02/23/25 14:59:30] ERROR                                                               module_ops.py:92
+                                1 is not in the script                                                  
+                                                                                                        
+                    ERROR                                                               module_ops.py:92
+                                2 is not in the script                                                  
+                                                                                                        
+                    DEBUG    Hashing ...                                                  hashing.py:352
+                    DEBUG    Hashing done in 0.352234 s.                                  hashing.py:364
+                    DEBUG    Hash generated :  1983865578_2287711717_223132457            hashing.py:367
+                    INFO     Animation 0 : Using cached data (hash :                cairo_renderer.py:88
+                             1983865578_2287711717_223132457)                                           
+                    DEBUG    List of the first few animation hashes of the scene:   cairo_renderer.py:97
+                             ['1983865578_2287711717_223132457']                                        
+Animation 0: FadeIn(Group):   0%|          | 0/1 [00:00<?, ?it/s]                                                                 [02/23/25 14:59:31] DEBUG    Hashing ...                                                  hashing.py:352
+                    DEBUG    Hashing done in 0.761090 s.                                  hashing.py:364
+                    DEBUG    Hash generated :  188947037_2481756711_3628589307            hashing.py:367
+                    INFO     Animation 1 : Using cached data (hash :                cairo_renderer.py:88
+                             188947037_2481756711_3628589307)                                           
+                    DEBUG    List of the first few animation hashes of the scene:   cairo_renderer.py:97
+                             ['1983865578_2287711717_223132457',                                        
+                             '188947037_2481756711_3628589307']                                         
+Animation 1: _MethodAnimation(Prism of 6 submobjects), etc.:   0%|          | 0/1 [00:00<?, ?it/s]                                                                                                  [02/23/25 14:59:32] DEBUG    Hashing ...                                                  hashing.py:352
+[02/23/25 14:59:33] DEBUG    Hashing done in 1.070130 s.                                  hashing.py:364
+                    DEBUG    Hash generated :  188947037_1677388162_2603560611            hashing.py:367
+                    INFO     Animation 2 : Using cached data (hash :                cairo_renderer.py:88
+                             188947037_1677388162_2603560611)                                           
+                    DEBUG    List of the first few animation hashes of the scene:   cairo_renderer.py:97
+                             ['1983865578_2287711717_223132457',                                        
+                             '188947037_2481756711_3628589307',                                         
+                             '188947037_1677388162_2603560611']                                         
+Animation 2: FadeIn(Group):   0%|          | 0/1 [00:00<?, ?it/s]                                                                                     DEBUG    Hashing ...                                                  hashing.py:352
+[02/23/25 14:59:35] DEBUG    Hashing done in 1.465897 s.                                  hashing.py:364
+                    DEBUG    Hash generated :  188947037_52260282_3255389517              hashing.py:367
+                    DEBUG    List of the first few animation hashes of the scene:   cairo_renderer.py:97
+                             ['1983865578_2287711717_223132457',                                        
+                             '188947037_2481756711_3628589307',                                         
+                             '188947037_1677388162_2603560611',                                         
+                             '188947037_52260282_3255389517']                                           
+Animation 3: _MethodAnimation(Prism of 6 submobjects), etc.:   0%|          | 0/2 [00:00<?, ?it/s]Animation 3: _MethodAnimation(Prism of 6 submobjects), etc.: 100%|██████████| 2/2 [00:00<00:00, 11.73it/s]                                                                                                                              INFO     Animation 3 : Partial movie file written in        scene_file_writer.py:527
+                             '/home/vasilii/research/anim/5DChess/media/videos/                         
+                             presentation1/360p24/partial_movie_files/Presentat                         
+                             ionSlides_4/188947037_52260282_3255389517.mp4'                             
+                    DEBUG    Hashing ...                                                  hashing.py:352
+[02/23/25 14:59:37] DEBUG    Hashing done in 1.794079 s.                                  hashing.py:364
+                    DEBUG    Hash generated :  188947037_1933206579_419851338             hashing.py:367
+                    INFO     Animation 4 : Using cached data (hash :                cairo_renderer.py:88
+                             188947037_1933206579_419851338)                                            
+                    DEBUG    List of the first few animation hashes of the scene:   cairo_renderer.py:97
+                             ['1983865578_2287711717_223132457',                                        
+                             '188947037_2481756711_3628589307',                                         
+                             '188947037_1677388162_2603560611',                                         
+                             '188947037_52260282_3255389517',                                           
+                             '188947037_1933206579_419851338']                                          
+Animation 4: FadeIn(Group):   0%|          | 0/1 [00:00<?, ?it/s]                                                                 [02/23/25 14:59:38] DEBUG    Hashing ...                                                  hashing.py:352
+[02/23/25 14:59:40] DEBUG    Hashing done in 2.181912 s.                                  hashing.py:364
+                    DEBUG    Hash generated :  188947037_2417022478_986663883             hashing.py:367
+                    DEBUG    List of the first few animation hashes of the scene:   cairo_renderer.py:97
+                             ['1983865578_2287711717_223132457',                                        
+                             '188947037_2481756711_3628589307',                                         
+                             '188947037_1677388162_2603560611',                                         
+                             '188947037_52260282_3255389517',                                           
+                             '188947037_1933206579_419851338']                                          
+Animation 5: _MethodAnimation(Prism of 6 submobjects), etc.:   0%|          | 0/2 [00:00<?, ?it/s]Animation 5: _MethodAnimation(Prism of 6 submobjects), etc.: 100%|██████████| 2/2 [00:00<00:00, 11.59it/s]                                                                                                                              INFO     Animation 5 : Partial movie file written in        scene_file_writer.py:527
+                             '/home/vasilii/research/anim/5DChess/media/videos/                         
+                             presentation1/360p24/partial_movie_files/Presentat                         
+                             ionSlides_4/188947037_2417022478_986663883.mp4'                            
+                    DEBUG    Hashing ...                                                  hashing.py:352
+[02/23/25 14:59:43] DEBUG    Hashing done in 2.503958 s.                                  hashing.py:364
+                    DEBUG    Hash generated :  188947037_1090741356_3742114048            hashing.py:367
+                    INFO     Animation 6 : Using cached data (hash :                cairo_renderer.py:88
+                             188947037_1090741356_3742114048)                                           
+                    DEBUG    List of the first few animation hashes of the scene:   cairo_renderer.py:97
+                             ['1983865578_2287711717_223132457',                                        
+                             '188947037_2481756711_3628589307',                                         
+                             '188947037_1677388162_2603560611',                                         
+                             '188947037_52260282_3255389517',                                           
+                             '188947037_1933206579_419851338']                                          
+Animation 6: FadeIn(Group):   0%|          | 0/1 [00:00<?, ?it/s]                                                                                     DEBUG    Hashing ...                                                  hashing.py:352
+[02/23/25 14:59:46] DEBUG    Hashing done in 2.879034 s.                                  hashing.py:364
+                    DEBUG    Hash generated :  188947037_3883748894_4014472638            hashing.py:367
+                    INFO     Animation 7 : Using cached data (hash :                cairo_renderer.py:88
+                             188947037_3883748894_4014472638)                                           
+                    DEBUG    List of the first few animation hashes of the scene:   cairo_renderer.py:97
+                             ['1983865578_2287711717_223132457',                                        
+                             '188947037_2481756711_3628589307',                                         
+                             '188947037_1677388162_2603560611',                                         
+                             '188947037_52260282_3255389517',                                           
+                             '188947037_1933206579_419851338']                                          
+Animation 7: _MethodAnimation(Prism of 6 submobjects), etc.:   0%|          | 0/1 [00:00<?, ?it/s]                                                                                                  [02/23/25 14:59:47] DEBUG    Hashing ...                                                  hashing.py:352
+[02/23/25 14:59:50] DEBUG    Hashing done in 3.210703 s.                                  hashing.py:364
+                    DEBUG    Hash generated :  188947037_801111343_1446138822             hashing.py:367
+                    INFO     Animation 8 : Using cached data (hash :                cairo_renderer.py:88
+                             188947037_801111343_1446138822)                                            
+                    DEBUG    List of the first few animation hashes of the scene:   cairo_renderer.py:97
+                             ['1983865578_2287711717_223132457',                                        
+                             '188947037_2481756711_3628589307',                                         
+                             '188947037_1677388162_2603560611',                                         
+                             '188947037_52260282_3255389517',                                           
+                             '188947037_1933206579_419851338']                                          
+Animation 8: FadeIn(Group):   0%|          | 0/1 [00:00<?, ?it/s]                                                                 [02/23/25 14:59:51] DEBUG    Hashing ...                                                  hashing.py:352
+[02/23/25 14:59:54] DEBUG    Hashing done in 3.560410 s.                                  hashing.py:364
+                    DEBUG    Hash generated :  188947037_4190965103_1100856562            hashing.py:367
+                    DEBUG    List of the first few animation hashes of the scene:   cairo_renderer.py:97
+                             ['1983865578_2287711717_223132457',                                        
+                             '188947037_2481756711_3628589307',                                         
+                             '188947037_1677388162_2603560611',                                         
+                             '188947037_52260282_3255389517',                                           
+                             '188947037_1933206579_419851338']                                          
+Animation 9: _MethodAnimation(Prism of 6 submobjects), etc.:   0%|          | 0/2 [00:00<?, ?it/s]Animation 9: _MethodAnimation(Prism of 6 submobjects), etc.: 100%|██████████| 2/2 [00:00<00:00, 11.69it/s]                                                                                                          [02/23/25 14:59:55] INFO     Animation 9 : Partial movie file written in        scene_file_writer.py:527
+                             '/home/vasilii/research/anim/5DChess/media/videos/                         
+                             presentation1/360p24/partial_movie_files/Presentat                         
+                             ionSlides_4/188947037_4190965103_1100856562.mp4'                           
+                    DEBUG    Hashing ...                                                  hashing.py:352
+[02/23/25 14:59:59] DEBUG    Hashing done in 3.919576 s.                                  hashing.py:364
+                    DEBUG    Hash generated :  188947037_3388669621_4197898053            hashing.py:367
+                    INFO     Animation 10 : Using cached data (hash :               cairo_renderer.py:88
+                             188947037_3388669621_4197898053)                                           
+                    DEBUG    List of the first few animation hashes of the scene:   cairo_renderer.py:97
+                             ['1983865578_2287711717_223132457',                                        
+                             '188947037_2481756711_3628589307',                                         
+                             '188947037_1677388162_2603560611',                                         
+                             '188947037_52260282_3255389517',                                           
+                             '188947037_1933206579_419851338']                                          
+Animation 10: FadeIn(Group):   0%|          | 0/1 [00:00<?, ?it/s]                                                                  [02/23/25 15:00:00] DEBUG    Hashing ...                                                  hashing.py:352
+[02/23/25 15:00:04] DEBUG    Hashing done in 4.323236 s.                                  hashing.py:364
+                    DEBUG    Hash generated :  188947037_2609928357_3819198336            hashing.py:367
+                    DEBUG    List of the first few animation hashes of the scene:   cairo_renderer.py:97
+                             ['1983865578_2287711717_223132457',                                        
+                             '188947037_2481756711_3628589307',                                         
+                             '188947037_1677388162_2603560611',                                         
+                             '188947037_52260282_3255389517',                                           
+                             '188947037_1933206579_419851338']                                          
+Animation 11: _MethodAnimation(Prism of 6 submobjects), etc.:   0%|          | 0/2 [00:00<?, ?it/s]Animation 11: _MethodAnimation(Prism of 6 submobjects), etc.: 100%|██████████| 2/2 [00:00<00:00, 11.90it/s]                                                                                                           [02/23/25 15:00:05] INFO     Animation 11 : Partial movie file written in       scene_file_writer.py:527
+                             '/home/vasilii/research/anim/5DChess/media/videos/                         
+                             presentation1/360p24/partial_movie_files/Presentat                         
+                             ionSlides_4/188947037_2609928357_3819198336.mp4'                           
+                    DEBUG    Hashing ...                                                  hashing.py:352
+[02/23/25 15:00:10] DEBUG    Hashing done in 4.564657 s.                                  hashing.py:364
+                    DEBUG    Hash generated :  188947037_83880037_3507611790              hashing.py:367
+                    INFO     Animation 12 : Using cached data (hash :               cairo_renderer.py:88
+                             188947037_83880037_3507611790)                                             
+                    DEBUG    List of the first few animation hashes of the scene:   cairo_renderer.py:97
+                             ['1983865578_2287711717_223132457',                                        
+                             '188947037_2481756711_3628589307',                                         
+                             '188947037_1677388162_2603560611',                                         
+                             '188947037_52260282_3255389517',                                           
+                             '188947037_1933206579_419851338']                                          
+Animation 12: FadeIn(Group):   0%|          | 0/1 [00:00<?, ?it/s]                                                                                      DEBUG    Hashing ...                                                  hashing.py:352
+[02/23/25 15:00:15] DEBUG    Hashing done in 4.939380 s.                                  hashing.py:364
+                    DEBUG    Hash generated :  188947037_1628103366_2088367695            hashing.py:367
+                    DEBUG    List of the first few animation hashes of the scene:   cairo_renderer.py:97
+                             ['1983865578_2287711717_223132457',                                        
+                             '188947037_2481756711_3628589307',                                         
+                             '188947037_1677388162_2603560611',                                         
+                             '188947037_52260282_3255389517',                                           
+                             '188947037_1933206579_419851338']                                          
+Animation 13: _MethodAnimation(Prism of 6 submobjects), etc.:   0%|          | 0/2 [00:00<?, ?it/s]Animation 13: _MethodAnimation(Prism of 6 submobjects), etc.: 100%|██████████| 2/2 [00:00<00:00, 12.11it/s]                                                                                                           [02/23/25 15:00:16] INFO     Animation 13 : Partial movie file written in       scene_file_writer.py:527
+                             '/home/vasilii/research/anim/5DChess/media/videos/                         
+                             presentation1/360p24/partial_movie_files/Presentat                         
+                             ionSlides_4/188947037_1628103366_2088367695.mp4'                           
+                    DEBUG    Hashing ...                                                  hashing.py:352
+[02/23/25 15:00:21] DEBUG    Hashing done in 5.255827 s.                                  hashing.py:364
+                    DEBUG    Hash generated :  188947037_3012912214_475332232             hashing.py:367
+                    INFO     Animation 14 : Using cached data (hash :               cairo_renderer.py:88
+                             188947037_3012912214_475332232)                                            
+                    DEBUG    List of the first few animation hashes of the scene:   cairo_renderer.py:97
+                             ['1983865578_2287711717_223132457',                                        
+                             '188947037_2481756711_3628589307',                                         
+                             '188947037_1677388162_2603560611',                                         
+                             '188947037_52260282_3255389517',                                           
+                             '188947037_1933206579_419851338']                                          
+Animation 14: FadeIn(Group):   0%|          | 0/1 [00:00<?, ?it/s]                                                                  [02/23/25 15:00:22] DEBUG    Hashing ...                                                  hashing.py:352
+[02/23/25 15:00:28] DEBUG    Hashing done in 5.657848 s.                                  hashing.py:364
+                    DEBUG    Hash generated :  188947037_1091272439_2340845440            hashing.py:367
+                    INFO     Animation 15 : Using cached data (hash :               cairo_renderer.py:88
+                             188947037_1091272439_2340845440)                                           
+                    DEBUG    List of the first few animation hashes of the scene:   cairo_renderer.py:97
+                             ['1983865578_2287711717_223132457',                                        
+                             '188947037_2481756711_3628589307',                                         
+                             '188947037_1677388162_2603560611',                                         
+                             '188947037_52260282_3255389517',                                           
+                             '188947037_1933206579_419851338']                                          
+Animation 15: _MethodAnimation(Prism of 6 submobjects), etc.:   0%|          | 0/1 [00:00<?, ?it/s]                                                                                                   [02/23/25 15:00:29] DEBUG    Hashing ...                                                  hashing.py:352
+[02/23/25 15:00:34] DEBUG    Hashing done in 5.660511 s.                                  hashing.py:364
+                    DEBUG    Hash generated :  2238638401_3396949846_3143113720           hashing.py:367
+                    INFO     Animation 16 : Using cached data (hash :               cairo_renderer.py:88
+                             2238638401_3396949846_3143113720)                                          
+                    DEBUG    List of the first few animation hashes of the scene:   cairo_renderer.py:97
+                             ['1983865578_2287711717_223132457',                                        
+                             '188947037_2481756711_3628589307',                                         
+                             '188947037_1677388162_2603560611',                                         
+                             '188947037_52260282_3255389517',                                           
+                             '188947037_1933206579_419851338']                                          
+Animation 16: _MethodAnimation(ValueTracker), etc.:   0%|          | 0/1 [00:00<?, ?it/s]Animation 16: _MethodAnimation(ValueTracker), etc.: 100%|██████████| 1/1 [00:00<00:00,  1.64it/s]                                                                                                 [02/23/25 15:00:35] DEBUG    Hashing ...                                                  hashing.py:352
+[02/23/25 15:00:41] DEBUG    Hashing done in 5.642889 s.                                  hashing.py:364
+                    DEBUG    Hash generated :  1820953386_2957708804_3914700789           hashing.py:367
+                    INFO     Animation 17 : Using cached data (hash :               cairo_renderer.py:88
+                             1820953386_2957708804_3914700789)                                          
+                    DEBUG    List of the first few animation hashes of the scene:   cairo_renderer.py:97
+                             ['1983865578_2287711717_223132457',                                        
+                             '188947037_2481756711_3628589307',                                         
+                             '188947037_1677388162_2603560611',                                         
+                             '188947037_52260282_3255389517',                                           
+                             '188947037_1933206579_419851338']                                          
+Animation 17: AnimationGroup(Group):   0%|          | 0/1 [00:00<?, ?it/s]Animation 17: AnimationGroup(Group): 100%|██████████| 1/1 [00:00<00:00,  1.19it/s]                                                                                  [02/23/25 15:00:43] DEBUG    Hashing ...                                                  hashing.py:352
+[02/23/25 15:00:49] DEBUG    Hashing done in 5.614949 s.                                  hashing.py:364
+                    DEBUG    Hash generated :  1820953386_3653233694_3851146156           hashing.py:367
+                    INFO     Animation 18 : Using cached data (hash :               cairo_renderer.py:88
+                             1820953386_3653233694_3851146156)                                          
+                    DEBUG    List of the first few animation hashes of the scene:   cairo_renderer.py:97
+                             ['1983865578_2287711717_223132457',                                        
+                             '188947037_2481756711_3628589307',                                         
+                             '188947037_1677388162_2603560611',                                         
+                             '188947037_52260282_3255389517',                                           
+                             '188947037_1933206579_419851338']                                          
+Animation 18: FadeIn(Group):   0%|          | 0/1 [00:00<?, ?it/s]                                                                                      DEBUG    Hashing ...                                                  hashing.py:352
+[02/23/25 15:00:55] DEBUG    Hashing done in 5.612971 s.                                  hashing.py:364
+                    DEBUG    Hash generated :  1820953386_1397479370_3828986258           hashing.py:367
+                    INFO     Animation 19 : Using cached data (hash :               cairo_renderer.py:88
+                             1820953386_1397479370_3828986258)                                          
+                    DEBUG    List of the first few animation hashes of the scene:   cairo_renderer.py:97
+                             ['1983865578_2287711717_223132457',                                        
+                             '188947037_2481756711_3628589307',                                         
+                             '188947037_1677388162_2603560611',                                         
+                             '188947037_52260282_3255389517',                                           
+                             '188947037_1933206579_419851338']                                          
+Animation 19: _MethodAnimation(VMobjectFromSVGPath), etc.:   0%|          | 0/1 [00:00<?, ?it/s]                                                                                                [02/23/25 15:00:56] DEBUG    Hashing ...                                                  hashing.py:352
+[02/23/25 15:01:01] DEBUG    Hashing done in 5.607653 s.                                  hashing.py:364
+                    DEBUG    Hash generated :  1820953386_832680000_3978221884            hashing.py:367
+                    INFO     Animation 20 : Using cached data (hash :               cairo_renderer.py:88
+                             1820953386_832680000_3978221884)                                           
+                    DEBUG    List of the first few animation hashes of the scene:   cairo_renderer.py:97
+                             ['1983865578_2287711717_223132457',                                        
+                             '188947037_2481756711_3628589307',                                         
+                             '188947037_1677388162_2603560611',                                         
+                             '188947037_52260282_3255389517',                                           
+                             '188947037_1933206579_419851338']                                          
+Animation 20: _MethodAnimation(Prism of 6 submobjects), etc.:   0%|          | 0/1 [00:00<?, ?it/s]Animation 20: _MethodAnimation(Prism of 6 submobjects), etc.: 100%|██████████| 1/1 [00:00<00:00,  1.61it/s]                                                                                                           [02/23/25 15:01:02] DEBUG    Hashing ...                                                  hashing.py:352
+[02/23/25 15:01:08] DEBUG    Hashing done in 5.587774 s.                                  hashing.py:364
+                    DEBUG    Hash generated :  1820953386_682170648_3887553735            hashing.py:367
+                    INFO     Animation 21 : Using cached data (hash :               cairo_renderer.py:88
+                             1820953386_682170648_3887553735)                                           
+                    DEBUG    List of the first few animation hashes of the scene:   cairo_renderer.py:97
+                             ['1983865578_2287711717_223132457',                                        
+                             '188947037_2481756711_3628589307',                                         
+                             '188947037_1677388162_2603560611',                                         
+                             '188947037_52260282_3255389517',                                           
+                             '188947037_1933206579_419851338']                                          
+Animation 21: _MethodAnimation(Prism of 6 submobjects), etc.:   0%|          | 0/1 [00:00<?, ?it/s]Animation 21: _MethodAnimation(Prism of 6 submobjects), etc.: 100%|██████████| 1/1 [00:00<00:00,  1.82it/s]                                                                                                           [02/23/25 15:01:09] DEBUG    Hashing ...                                                  hashing.py:352
+[02/23/25 15:01:14] DEBUG    Hashing done in 5.626213 s.                                  hashing.py:364
+                    DEBUG    Hash generated :  1820953386_820045217_88405134              hashing.py:367
+                    INFO     Animation 22 : Using cached data (hash :               cairo_renderer.py:88
+                             1820953386_820045217_88405134)                                             
+                    DEBUG    List of the first few animation hashes of the scene:   cairo_renderer.py:97
+                             ['1983865578_2287711717_223132457',                                        
+                             '188947037_2481756711_3628589307',                                         
+                             '188947037_1677388162_2603560611',                                         
+                             '188947037_52260282_3255389517',                                           
+                             '188947037_1933206579_419851338']                                          
+Animation 22: _MethodAnimation(Prism of 6 submobjects), etc.:   0%|          | 0/1 [00:00<?, ?it/s]Animation 22: _MethodAnimation(Prism of 6 submobjects), etc.: 100%|██████████| 1/1 [00:00<00:00,  2.14it/s]                                                                                                           [02/23/25 15:01:15] DEBUG    Hashing ...                                                  hashing.py:352
+[02/23/25 15:01:21] DEBUG    Hashing done in 5.630514 s.                                  hashing.py:364
+                    DEBUG    Hash generated :  1820953386_230952324_2217533651            hashing.py:367
+                    INFO     Animation 23 : Using cached data (hash :               cairo_renderer.py:88
+                             1820953386_230952324_2217533651)                                           
+                    DEBUG    List of the first few animation hashes of the scene:   cairo_renderer.py:97
+                             ['1983865578_2287711717_223132457',                                        
+                             '188947037_2481756711_3628589307',                                         
+                             '188947037_1677388162_2603560611',                                         
+                             '188947037_52260282_3255389517',                                           
+                             '188947037_1933206579_419851338']                                          
+Animation 23: _MethodAnimation(Prism of 6 submobjects), etc.:   0%|          | 0/1 [00:00<?, ?it/s]Animation 23: _MethodAnimation(Prism of 6 submobjects), etc.: 100%|██████████| 1/1 [00:00<00:00,  2.55it/s]                                                                                                           [02/23/25 15:01:22] DEBUG    Hashing ...                                                  hashing.py:352
+[02/23/25 15:01:27] DEBUG    Hashing done in 5.647960 s.                                  hashing.py:364
+                    DEBUG    Hash generated :  1820953386_202742564_658944108             hashing.py:367
+                    INFO     Animation 24 : Using cached data (hash :               cairo_renderer.py:88
+                             1820953386_202742564_658944108)                                            
+                    DEBUG    List of the first few animation hashes of the scene:   cairo_renderer.py:97
+                             ['1983865578_2287711717_223132457',                                        
+                             '188947037_2481756711_3628589307',                                         
+                             '188947037_1677388162_2603560611',                                         
+                             '188947037_52260282_3255389517',                                           
+                             '188947037_1933206579_419851338']                                          
+Animation 24: _MethodAnimation(Prism of 6 submobjects), etc.:   0%|          | 0/1 [00:00<?, ?it/s]Animation 24: _MethodAnimation(Prism of 6 submobjects), etc.: 100%|██████████| 1/1 [00:00<00:00,  3.09it/s]                                                                                                           [02/23/25 15:01:28] DEBUG    Hashing ...                                                  hashing.py:352
+[02/23/25 15:01:34] DEBUG    Hashing done in 5.609762 s.                                  hashing.py:364
+                    DEBUG    Hash generated :  1820953386_2830103321_2294276540           hashing.py:367
+                    INFO     Animation 25 : Using cached data (hash :               cairo_renderer.py:88
+                             1820953386_2830103321_2294276540)                                          
+                    DEBUG    List of the first few animation hashes of the scene:   cairo_renderer.py:97
+                             ['1983865578_2287711717_223132457',                                        
+                             '188947037_2481756711_3628589307',                                         
+                             '188947037_1677388162_2603560611',                                         
+                             '188947037_52260282_3255389517',                                           
+                             '188947037_1933206579_419851338']                                          
+Animation 25: _MethodAnimation(Prism of 6 submobjects), etc.:   0%|          | 0/1 [00:00<?, ?it/s]Animation 25: _MethodAnimation(Prism of 6 submobjects), etc.: 100%|██████████| 1/1 [00:00<00:00,  4.16it/s]                                                                                                           [02/23/25 15:01:35] DEBUG    Hashing ...                                                  hashing.py:352
+[02/23/25 15:01:40] DEBUG    Hashing done in 5.592597 s.                                  hashing.py:364
+                    DEBUG    Hash generated :  1820953386_452329998_2207680261            hashing.py:367
+                    INFO     Animation 26 : Using cached data (hash :               cairo_renderer.py:88
+                             1820953386_452329998_2207680261)                                           
+                    DEBUG    List of the first few animation hashes of the scene:   cairo_renderer.py:97
+                             ['1983865578_2287711717_223132457',                                        
+                             '188947037_2481756711_3628589307',                                         
+                             '188947037_1677388162_2603560611',                                         
+                             '188947037_52260282_3255389517',                                           
+                             '188947037_1933206579_419851338']                                          
+Animation 26: _MethodAnimation(Prism of 6 submobjects), etc.:   0%|          | 0/1 [00:00<?, ?it/s]Animation 26: _MethodAnimation(Prism of 6 submobjects), etc.: 100%|██████████| 1/1 [00:00<00:00,  6.04it/s]                                                                                                           [02/23/25 15:01:41] DEBUG    Hashing ...                                                  hashing.py:352
+[02/23/25 15:01:47] DEBUG    Hashing done in 5.617462 s.                                  hashing.py:364
+                    DEBUG    Hash generated :  1820953386_2676329688_1668503228           hashing.py:367
+                    INFO     Animation 27 : Using cached data (hash :               cairo_renderer.py:88
+                             1820953386_2676329688_1668503228)                                          
+                    DEBUG    List of the first few animation hashes of the scene:   cairo_renderer.py:97
+                             ['1983865578_2287711717_223132457',                                        
+                             '188947037_2481756711_3628589307',                                         
+                             '188947037_1677388162_2603560611',                                         
+                             '188947037_52260282_3255389517',                                           
+                             '188947037_1933206579_419851338']                                          
+Animation 27: _MethodAnimation(Prism of 6 submobjects), etc.:   0%|          | 0/1 [00:00<?, ?it/s]                                                                                                                       DEBUG    Hashing ...                                                  hashing.py:352
+[02/23/25 15:01:53] DEBUG    Hashing done in 5.598550 s.                                  hashing.py:364
+                    DEBUG    Hash generated :  1820953386_3127481923_654670430            hashing.py:367
+                    INFO     Animation 28 : Using cached data (hash :               cairo_renderer.py:88
+                             1820953386_3127481923_654670430)                                           
+                    DEBUG    List of the first few animation hashes of the scene:   cairo_renderer.py:97
+                             ['1983865578_2287711717_223132457',                                        
+                             '188947037_2481756711_3628589307',                                         
+                             '188947037_1677388162_2603560611',                                         
+                             '188947037_52260282_3255389517',                                           
+                             '188947037_1933206579_419851338']                                          
+Animation 28: FadeIn(Arrow), etc.:   0%|          | 0/1 [00:00<?, ?it/s]                                                                        [02/23/25 15:01:54] DEBUG    Animation with empty mobject                               animation.py:175
+                    DEBUG    Hashing ...                                                  hashing.py:352
+[02/23/25 15:01:59] DEBUG    Hashing done in 5.624089 s.                                  hashing.py:364
+                    DEBUG    Hash generated :  1820953386_66111383_2068436939             hashing.py:367
+                    INFO     Animation 29 : Using cached data (hash :               cairo_renderer.py:88
+                             1820953386_66111383_2068436939)                                            
+                    DEBUG    List of the first few animation hashes of the scene:   cairo_renderer.py:97
+                             ['1983865578_2287711717_223132457',                                        
+                             '188947037_2481756711_3628589307',                                         
+                             '188947037_1677388162_2603560611',                                         
+                             '188947037_52260282_3255389517',                                           
+                             '188947037_1933206579_419851338']                                          
+[02/23/25 15:02:00] DEBUG    Hashing ...                                                  hashing.py:352
+[02/23/25 15:02:06] DEBUG    Hashing done in 5.595739 s.                                  hashing.py:364
+                    DEBUG    Hash generated :  1820953386_141490200_3818269223            hashing.py:367
+                    INFO     Animation 30 : Using cached data (hash :               cairo_renderer.py:88
+                             1820953386_141490200_3818269223)                                           
+                    DEBUG    List of the first few animation hashes of the scene:   cairo_renderer.py:97
+                             ['1983865578_2287711717_223132457',                                        
+                             '188947037_2481756711_3628589307',                                         
+                             '188947037_1677388162_2603560611',                                         
+                             '188947037_52260282_3255389517',                                           
+                             '188947037_1933206579_419851338']                                          
+Animation 30: FadeOut(Arrow), etc.:   0%|          | 0/1 [00:00<?, ?it/s]                                                                                             DEBUG    Hashing ...                                                  hashing.py:352
+[02/23/25 15:02:12] DEBUG    Hashing done in 5.662925 s.                                  hashing.py:364
+                    DEBUG    Hash generated :  1820953386_3089494636_3314756630           hashing.py:367
+                    INFO     Animation 31 : Using cached data (hash :               cairo_renderer.py:88
+                             1820953386_3089494636_3314756630)                                          
+                    DEBUG    List of the first few animation hashes of the scene:   cairo_renderer.py:97
+                             ['1983865578_2287711717_223132457',                                        
+                             '188947037_2481756711_3628589307',                                         
+                             '188947037_1677388162_2603560611',                                         
+                             '188947037_52260282_3255389517',                                           
+                             '188947037_1933206579_419851338']                                          
+Animation 31: _MethodAnimation(Prism of 6 submobjects), etc.:   0%|          | 0/1 [00:00<?, ?it/s]Animation 31: _MethodAnimation(Prism of 6 submobjects), etc.: 100%|██████████| 1/1 [00:00<00:00,  1.61it/s]                                                                                                           [02/23/25 15:02:13] DEBUG    Hashing ...                                                  hashing.py:352
+[02/23/25 15:02:19] DEBUG    Hashing done in 5.599615 s.                                  hashing.py:364
+                    DEBUG    Hash generated :  1820953386_2934318389_1717141434           hashing.py:367
+                    DEBUG    List of the first few animation hashes of the scene:   cairo_renderer.py:97
+                             ['1983865578_2287711717_223132457',                                        
+                             '188947037_2481756711_3628589307',                                         
+                             '188947037_1677388162_2603560611',                                         
+                             '188947037_52260282_3255389517',                                           
+                             '188947037_1933206579_419851338']                                          
+Animation 32: _MethodAnimation(Prism of 6 submobjects), etc.:   0%|          | 0/1 [00:00<?, ?it/s]Animation 32: _MethodAnimation(Prism of 6 submobjects), etc.: 100%|██████████| 1/1 [00:00<00:00,  1.86it/s]                                                                                                                               INFO     Animation 32 : Partial movie file written in       scene_file_writer.py:527
+                             '/home/vasilii/research/anim/5DChess/media/videos/                         
+                             presentation1/360p24/partial_movie_files/Presentat                         
+                             ionSlides_4/1820953386_2934318389_1717141434.mp4'                          
+                    DEBUG    Hashing ...                                                  hashing.py:352
+[02/23/25 15:02:25] DEBUG    Hashing done in 5.628762 s.                                  hashing.py:364
+                    DEBUG    Hash generated :  1820953386_3335498134_489306808            hashing.py:367
+                    DEBUG    List of the first few animation hashes of the scene:   cairo_renderer.py:97
+                             ['1983865578_2287711717_223132457',                                        
+                             '188947037_2481756711_3628589307',                                         
+                             '188947037_1677388162_2603560611',                                         
+                             '188947037_52260282_3255389517',                                           
+                             '188947037_1933206579_419851338']                                          
+Animation 33: _MethodAnimation(Prism of 6 submobjects), etc.:   0%|          | 0/1 [00:00<?, ?it/s]Animation 33: _MethodAnimation(Prism of 6 submobjects), etc.: 100%|██████████| 1/1 [00:00<00:00,  2.17it/s]                                                                                                           [02/23/25 15:02:26] INFO     Animation 33 : Partial movie file written in       scene_file_writer.py:527
+                             '/home/vasilii/research/anim/5DChess/media/videos/                         
+                             presentation1/360p24/partial_movie_files/Presentat                         
+                             ionSlides_4/1820953386_3335498134_489306808.mp4'                           
+                    DEBUG    Hashing ...                                                  hashing.py:352
+[02/23/25 15:02:32] DEBUG    Hashing done in 5.635172 s.                                  hashing.py:364
+                    DEBUG    Hash generated :  1820953386_4084468054_136025704            hashing.py:367
+                    DEBUG    List of the first few animation hashes of the scene:   cairo_renderer.py:97
+                             ['1983865578_2287711717_223132457',                                        
+                             '188947037_2481756711_3628589307',                                         
+                             '188947037_1677388162_2603560611',                                         
+                             '188947037_52260282_3255389517',                                           
+                             '188947037_1933206579_419851338']                                          
+Animation 34: _MethodAnimation(Prism of 6 submobjects), etc.:   0%|          | 0/1 [00:00<?, ?it/s]Animation 34: _MethodAnimation(Prism of 6 submobjects), etc.: 100%|██████████| 1/1 [00:00<00:00,  2.47it/s]                                                                                                                               INFO     Animation 34 : Partial movie file written in       scene_file_writer.py:527
+                             '/home/vasilii/research/anim/5DChess/media/videos/                         
+                             presentation1/360p24/partial_movie_files/Presentat                         
+                             ionSlides_4/1820953386_4084468054_136025704.mp4'                           
+                    DEBUG    Hashing ...                                                  hashing.py:352
+[02/23/25 15:02:38] DEBUG    Hashing done in 5.662798 s.                                  hashing.py:364
+                    DEBUG    Hash generated :  1820953386_2096693240_1826140818           hashing.py:367
+                    INFO     Animation 35 : Using cached data (hash :               cairo_renderer.py:88
+                             1820953386_2096693240_1826140818)                                          
+                    DEBUG    List of the first few animation hashes of the scene:   cairo_renderer.py:97
+                             ['1983865578_2287711717_223132457',                                        
+                             '188947037_2481756711_3628589307',                                         
+                             '188947037_1677388162_2603560611',                                         
+                             '188947037_52260282_3255389517',                                           
+                             '188947037_1933206579_419851338']                                          
+Animation 35: _MethodAnimation(Prism of 6 submobjects), etc.:   0%|          | 0/1 [00:00<?, ?it/s]Animation 35: _MethodAnimation(Prism of 6 submobjects), etc.: 100%|██████████| 1/1 [00:00<00:00,  3.10it/s]                                                                                                           [02/23/25 15:02:39] DEBUG    Hashing ...                                                  hashing.py:352
+[02/23/25 15:02:45] DEBUG    Hashing done in 5.718931 s.                                  hashing.py:364
+                    DEBUG    Hash generated :  1820953386_787674085_2377711210            hashing.py:367
+                    INFO     Animation 36 : Using cached data (hash :               cairo_renderer.py:88
+                             1820953386_787674085_2377711210)                                           
+                    DEBUG    List of the first few animation hashes of the scene:   cairo_renderer.py:97
+                             ['1983865578_2287711717_223132457',                                        
+                             '188947037_2481756711_3628589307',                                         
+                             '188947037_1677388162_2603560611',                                         
+                             '188947037_52260282_3255389517',                                           
+                             '188947037_1933206579_419851338']                                          
+Animation 36: _MethodAnimation(Prism of 6 submobjects), etc.:   0%|          | 0/1 [00:00<?, ?it/s]Animation 36: _MethodAnimation(Prism of 6 submobjects), etc.: 100%|██████████| 1/1 [00:00<00:00,  4.09it/s]                                                                                                                               DEBUG    Hashing ...                                                  hashing.py:352
+[02/23/25 15:02:51] DEBUG    Hashing done in 5.651653 s.                                  hashing.py:364
+                    DEBUG    Hash generated :  1820953386_2366364235_2563975085           hashing.py:367
+                    INFO     Animation 37 : Using cached data (hash :               cairo_renderer.py:88
+                             1820953386_2366364235_2563975085)                                          
+                    DEBUG    List of the first few animation hashes of the scene:   cairo_renderer.py:97
+                             ['1983865578_2287711717_223132457',                                        
+                             '188947037_2481756711_3628589307',                                         
+                             '188947037_1677388162_2603560611',                                         
+                             '188947037_52260282_3255389517',                                           
+                             '188947037_1933206579_419851338']                                          
+Animation 37: _MethodAnimation(Prism of 6 submobjects), etc.:   0%|          | 0/1 [00:00<?, ?it/s]Animation 37: _MethodAnimation(Prism of 6 submobjects), etc.: 100%|██████████| 1/1 [00:00<00:00,  6.03it/s]                                                                                                           [02/23/25 15:02:52] DEBUG    Hashing ...                                                  hashing.py:352
+[02/23/25 15:02:58] DEBUG    Hashing done in 5.607466 s.                                  hashing.py:364
+                    DEBUG    Hash generated :  1820953386_2471855751_4061447933           hashing.py:367
+                    DEBUG    List of the first few animation hashes of the scene:   cairo_renderer.py:97
+                             ['1983865578_2287711717_223132457',                                        
+                             '188947037_2481756711_3628589307',                                         
+                             '188947037_1677388162_2603560611',                                         
+                             '188947037_52260282_3255389517',                                           
+                             '188947037_1933206579_419851338']                                          
+Animation 38: _MethodAnimation(Prism of 6 submobjects), etc.:   0%|          | 0/1 [00:00<?, ?it/s]                                                                                                                       INFO     Animation 38 : Partial movie file written in       scene_file_writer.py:527
+                             '/home/vasilii/research/anim/5DChess/media/videos/                         
+                             presentation1/360p24/partial_movie_files/Presentat                         
+                             ionSlides_4/1820953386_2471855751_4061447933.mp4'                          
+                    DEBUG    Hashing ...                                                  hashing.py:352
+[02/23/25 15:03:04] DEBUG    Hashing done in 5.693961 s.                                  hashing.py:364
+                    DEBUG    Hash generated :  1820953386_807850114_2767575993            hashing.py:367
+                    INFO     Animation 39 : Using cached data (hash :               cairo_renderer.py:88
+                             1820953386_807850114_2767575993)                                           
+                    DEBUG    List of the first few animation hashes of the scene:   cairo_renderer.py:97
+                             ['1983865578_2287711717_223132457',                                        
+                             '188947037_2481756711_3628589307',                                         
+                             '188947037_1677388162_2603560611',                                         
+                             '188947037_52260282_3255389517',                                           
+                             '188947037_1933206579_419851338']                                          
+Animation 39: _MethodAnimation(SVGMobject):   0%|          | 0/1 [00:00<?, ?it/s]                                                                                 [02/23/25 15:03:05] DEBUG    Hashing ...                                                  hashing.py:352
+[02/23/25 15:03:10] DEBUG    Hashing done in 5.639311 s.                                  hashing.py:364
+                    DEBUG    Hash generated :  1820953386_2493211589_2767575993           hashing.py:367
+                    INFO     Animation 40 : Using cached data (hash :               cairo_renderer.py:88
+                             1820953386_2493211589_2767575993)                                          
+                    DEBUG    List of the first few animation hashes of the scene:   cairo_renderer.py:97
+                             ['1983865578_2287711717_223132457',                                        
+                             '188947037_2481756711_3628589307',                                         
+                             '188947037_1677388162_2603560611',                                         
+                             '188947037_52260282_3255389517',                                           
+                             '188947037_1933206579_419851338']                                          
+Animation 40: FadeOut(SVGMobject):   0%|          | 0/1 [00:00<?, ?it/s]                                                                        [02/23/25 15:03:11] INFO     Combining to Movie file.                           scene_file_writer.py:617
+                    DEBUG    Partial movie files to combine (41 files):         scene_file_writer.py:561
+                             ['/home/vasilii/research/anim/5DChess/media/videos                         
+                             /presentation1/360p24/partial_movie_files/Presenta                         
+                             tionSlides_4/1983865578_2287711717_223132457.mp4',                         
+                                                                                                        
+                             '/home/vasilii/research/anim/5DChess/media/videos/                         
+                             presentation1/360p24/partial_movie_files/Presentat                         
+                             ionSlides_4/188947037_2481756711_3628589307.mp4',                          
+                             '/home/vasilii/research/anim/5DChess/media/videos/                         
+                             presentation1/360p24/partial_movie_files/Presentat                         
+                             ionSlides_4/188947037_1677388162_2603560611.mp4',                          
+                             '/home/vasilii/research/anim/5DChess/media/videos/                         
+                             presentation1/360p24/partial_movie_files/Presentat                         
+                             ionSlides_4/188947037_52260282_3255389517.mp4',                            
+                             '/home/vasilii/research/anim/5DChess/media/videos/                         
+                             presentation1/360p24/partial_movie_files/Presentat                         
+                             ionSlides_4/188947037_1933206579_419851338.mp4']                           
+                    INFO                                                        scene_file_writer.py:737
+                             File ready at                                                              
+                             '/home/vasilii/research/anim/5DChess/media/videos/                         
+                             presentation1/360p24/PresentationSlides_4.mp4'                             
+                                                                                                        
+                    INFO     Rendered PresentationSlides_4                                  scene.py:247
+                             Played 41 animations                                                       
+Concatenating animation files to 'slides/files/PresentationSlides_4' and generating reversed animations:   0%|          | 0/1 [00:00<?, ?it/s][02/23/25 15:03:11] DEBUG    Generated a new basename for basenames:                         utils.py:81
+                             ['1983865578_2287711717_223132457',                                        
+                             '188947037_2481756711_3628589307',                                         
+                             '188947037_1677388162_2603560611',                                         
+                             '188947037_52260282_3255389517',                                           
+                             '188947037_1933206579_419851338',                                          
+                             '188947037_2417022478_986663883',                                          
+                             '188947037_1090741356_3742114048',                                         
+                             '188947037_3883748894_4014472638',                                         
+                             '188947037_801111343_1446138822',                                          
+                             '188947037_4190965103_1100856562',                                         
+                             '188947037_3388669621_4197898053',                                         
+                             '188947037_2609928357_3819198336',                                         
+                             '188947037_83880037_3507611790',                                           
+                             '188947037_1628103366_2088367695',                                         
+                             '188947037_3012912214_475332232',                                          
+                             '188947037_1091272439_2340845440',                                         
+                             '2238638401_3396949846_3143113720',                                        
+                             '1820953386_2957708804_3914700789',                                        
+                             '1820953386_3653233694_3851146156',                                        
+                             '1820953386_1397479370_3828986258',                                        
+                             '1820953386_832680000_3978221884',                                         
+                             '1820953386_682170648_3887553735',                                         
+                             '1820953386_820045217_88405134',                                           
+                             '1820953386_230952324_2217533651',                                         
+                             '1820953386_202742564_658944108',                                          
+                             '1820953386_2830103321_2294276540',                                        
+                             '1820953386_452329998_2207680261',                                         
+                             '1820953386_2676329688_1668503228',                                        
+                             '1820953386_3127481923_654670430',                                         
+                             '1820953386_66111383_2068436939',                                          
+                             '1820953386_141490200_3818269223',                                         
+                             '1820953386_3089494636_3314756630',                                        
+                             '1820953386_2934318389_1717141434',                                        
+                             '1820953386_3335498134_489306808',                                         
+                             '1820953386_4084468054_136025704',                                         
+                             '1820953386_2096693240_1826140818',                                        
+                             '1820953386_787674085_2377711210',                                         
+                             '1820953386_2366364235_2563975085',                                        
+                             '1820953386_2471855751_4061447933',                                        
+                             '1820953386_807850114_2767575993',                                         
+                             '1820953386_2493211589_2767575993'] ->                                     
+                             '55887dbe09c65bbf67de58a3f9e09d7947f8b7f72d51e4c9f79a0c3f4d0cdf            
+                             80'                                                                        
+                                                                                                                                              ╭─────────────────────────────── Traceback (most recent call last) ────────────────────────────────╮
+│ /nix/store/fdqig8w0q2dm8xvxqqncpfv7r73766ly-python3-3.12.8-env/lib/python3.12/site-packages/mani │
+│ m/cli/render/commands.py:120 in render                                                           │
+│                                                                                                  │
+│   117 │   │   │   try:                                                                           │
+│   118 │   │   │   │   with tempconfig({}):                                                       │
+│   119 │   │   │   │   │   scene = SceneClass()                                                   │
+│ ❱ 120 │   │   │   │   │   scene.render()                                                         │
+│   121 │   │   │   except Exception:                                                              │
+│   122 │   │   │   │   error_console.print_exception()                                            │
+│   123 │   │   │   │   sys.exit(1)                                                                │
+│                                                                                                  │
+│ /nix/store/fdqig8w0q2dm8xvxqqncpfv7r73766ly-python3-3.12.8-env/lib/python3.12/site-packages/mani │
+│ m_slides/slide/manim.py:136 in render                                                            │
+│                                                                                                  │
+│   133 │   │                                                                                      │
+│   134 │   │   config["max_files_cached"] = max_files_cached                                      │
+│   135 │   │                                                                                      │
+│ ❱ 136 │   │   self._save_slides(                                                                 │
+│   137 │   │   │   use_cache=not (config["disable_caching"] or self.disable_caching),             │
+│   138 │   │   │   flush_cache=(config["flush_cache"] or self.flush_cache),                       │
+│   139 │   │   │   skip_reversing=self.skip_reversing,                                            │
+│                                                                                                  │
+│ /nix/store/fdqig8w0q2dm8xvxqqncpfv7r73766ly-python3-3.12.8-env/lib/python3.12/site-packages/mani │
+│ m_slides/slide/base.py:532 in _save_slides                                                       │
+│                                                                                                  │
+│   529 │   │   │                                                                                  │
+│   530 │   │   │   # We only concat animations if it was not present                              │
+│   531 │   │   │   if not use_cache or not dst_file.exists():                                     │
+│ ❱ 532 │   │   │   │   concatenate_video_files(slide_files, dst_file)                             │
+│   533 │   │   │                                                                                  │
+│   534 │   │   │   # We only reverse video if it was not present                                  │
+│   535 │   │   │   if not use_cache or not rev_file.exists():                                     │
+│                                                                                                  │
+│ /nix/store/fdqig8w0q2dm8xvxqqncpfv7r73766ly-python3-3.12.8-env/lib/python3.12/site-packages/mani │
+│ m_slides/utils.py:60 in concatenate_video_files                                                  │
+│                                                                                                  │
+│    57 │   │   │   │   packet.stream = output_audio_stream                                        │
+│    58 │   │   │   else:                                                                          │
+│    59 │   │   │   │   continue  # We don't support subtitles                                     │
+│ ❱  60 │   │   │   output_container.mux(packet)                                                   │
+│    61 │                                                                                          │
+│    62 │   os.unlink(tmp_file)  # https://stackoverflow.com/a/54768241                            │
+│    63                                                                                            │
+│                                                                                                  │
+│ in av.container.output.OutputContainer.mux:257                                                   │
+│                                                                                                  │
+│ in av.container.output.OutputContainer.mux_one:278                                               │
+│                                                                                                  │
+│ in av.container.core.Container.err_check:286                                                     │
+│                                                                                                  │
+│ in av.error.err_check:326                                                                        │
+╰──────────────────────────────────────────────────────────────────────────────────────────────────╯
+ValueError: [Errno 22] Invalid argument: 
+'slides/files/PresentationSlides_4/55887dbe09c65bbf67de58a3f9e09d7947f8b7f72d51e4c9f79a0c3f4d0cdf80.mp4'
+You are using Manim Slides version v5.1.9, but version v5.4.2 is available.
+You should consider upgrading via pip install -U manim-slides
+Usage: manim-slides convert [OPTIONS] [SCENES]... DEST
+Try 'manim-slides convert --help' for help.
+
+Error: File slides/PresentationSlides_4.json does not exist, check the scene name and make sure to use Slide as your scene base class

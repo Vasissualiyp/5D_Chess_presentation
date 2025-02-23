@@ -586,8 +586,8 @@ class PresentationSlides_4(ThreeDSlide):
         self.play(board_5d.reorient_all_boards(2))
 
         show_4d_moves(self, 'rl', board_5d, wait=wait)
-        show_4d_moves(self, 'bl', board_5d, wait=wait)
-        show_4d_moves(self, 'nl', board_5d, wait=wait)
-        show_4d_moves(self, 'Pl', board_5d, wait=wait)
-        show_4d_moves(self, 'ql', board_5d, wait=wait)
-        show_4d_moves(self, 'kl', board_5d, wait=wait)
+        #show_4d_moves(self, 'bl', board_5d, wait=wait)
+        #show_4d_moves(self, 'nl', board_5d, wait=wait)
+        #show_4d_moves(self, 'Pl', board_5d, wait=wait)
+        #show_4d_moves(self, 'ql', board_5d, wait=wait)
+        #show_4d_moves(self, 'kl', board_5d, wait=wait)
