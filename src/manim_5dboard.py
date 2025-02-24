@@ -254,9 +254,13 @@ class Manim_Chessboard_5D(VGroup):
         self.scene.play(*animations1)
         self.scene.play(*animations2)
 
-    def disassemble_the_cube(self):
+    def disassemble_the_cube(self, orientation=None):
         """
         Disassembles the cube, using previously saved values for orientation and separation
+        Args:
+            orientation (int): orientation in which to disassemble the cube.
+                By default if nothing is set, it will default to orientation before 
+                the cube was assembled
         """
         animations1 = []
         animations2 = []
@@ -275,7 +279,10 @@ class Manim_Chessboard_5D(VGroup):
         self.scene.play(*animations1)
         self.scene.play(*animations2)
         self.scene.play(self.change_board_separation(self.old_board_separation))
-        self.scene.play(self.reorient_all_boards(self.old_board_orientation))
+        if orientation == None:
+            self.scene.play(self.reorient_all_boards(self.old_board_orientation))
+        else:
+            self.scene.play(self.reorient_all_boards(orientation))
 
     # Drawing vectors
 
