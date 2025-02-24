@@ -109,14 +109,17 @@ class Manim_Chessboard_2D(VGroup):
 
         # Matrix that gets ID of a sphere from its position on the board
         self.sphere_ids = np.zeros((self.board_size,self.board_size), dtype=int) 
-        self.create_prism_board()
+        self.creation_animations_list = self.create_prism_board()
         self.spheres = []  # Keep track of all spheres if you want to animate them later
 
     def create_prism_board(self):
         """
         Creates a square chessboard from rectangular prisms
+        Returns:
+            list: animations to perform with self.play(...) in Manim scene
         """
         appearance_anim = self.appearance_anim
+        animations_list = []
         scene = self.scene
         n = self.board_size
         # An array of positions of each chess grid square, 
@@ -144,11 +147,13 @@ class Manim_Chessboard_2D(VGroup):
 
                 self.board_tiles.append(square_prism)
         if scene is None:
-            self.add(*self.board_tiles)
+            self.scene.add(*self.board_tiles)
         else:
-            if appearance_anim == "FadeIn": scene.play(FadeIn(*self.board_tiles), run_time=self.animation_speed)
-            elif appearance_anim == "Scale": self.blowup_anim(self.board_tiles)
+            if appearance_anim == "FadeIn": animations_list = FadeIn(*self.board_tiles)
+            elif appearance_anim == "Scale": animations_list = self.blowup_anim(self.board_tiles)
             else: raise ValueError(f"Unknown appearance animation: {appearance_anim}")
+
+        return animations_list
 
     def change_prism_height(self, new_height):
         """
@@ -324,9 +329,14 @@ class Manim_Chessboard_2D(VGroup):
         self.sphere_ids[finish_matrix[1], finish_matrix[0]] = initial_id
 
     def add_spheres_to_squares(self, radius=0.2):
-        """Add spheres to the center of each square with a piece."""
+        """
+        Add spheres to the center of each square with a piece.
+        Returns:
+            list: animations to perform with self.play(...) in Manim scene
+        """
         n = self.board_size
         self.pieces = [] # deepseek
+        animations_list = []
 
         # If we're using column-majaor matrix:
         for row_idx in range(n):
@@ -347,7 +357,9 @@ class Manim_Chessboard_2D(VGroup):
             for sphere in self.spheres:
                 self.add(sphere)
         else:
-            self.blowup_anim(self.spheres)
+            animations_list = self.blowup_anim(self.spheres)
+
+        return animations_list
 
     def add_sphere_to_square(self, idx_1, idx_2, radius, piece, force_center=False):
             """
@@ -415,12 +427,16 @@ class Manim_Chessboard_2D(VGroup):
             radius (float): radius of the sphere to be added
             eat_pieces (bool): whether to throw an error when trying to move 
                 onto another piece. Default: False.
+
+        Returns:
+            list: animations to perform with self.play(...) in Manim scene
         """
         self.chessboard.add_piece(piece, pos, eat_pieces=eat_pieces)
         idx_1, idx_2 = self.chessutils.chessform_to_matrix(pos)
         id = self.add_sphere_to_square(idx_1, idx_2, radius, piece, force_center)
         if self.log: print(f"Sphere ids: {self.sphere_ids}")
-        self.blowup_anim(self.spheres[-1])
+        animations_list = self.blowup_anim(self.spheres[-1])
+        return animations_list
 
     def remove_piece(self, square, animation_speed=None):
         """
@@ -675,17 +691,31 @@ class Manim_Chessboard_2D(VGroup):
         Args:
             targets_list (list): list of objects, targets for animation
             anim_speed (float): speed of each animation in sec
+
+        Returns:
+            list: animations to perform with self.play(...) in Manim scene
         """
+        animations_list = []
         if anim_speed is None:
             anim_speed = self.animation_speed
         for tile in targets_list:
             tile.scale(0.01)
         if self.scene is not None:
-            self.scene.play(FadeIn(*targets_list), run_time=0.1)
-            self.scene.play(*(tile.animate.scale(100) for tile in targets_list),
-                       run_time=anim_speed)
+            # Returning list of anims
+            fade_in_anims = [FadeIn(tile) for tile in targets_list]
+            scale_anims = [tile.animate.scale(100) for tile in targets_list]
+            fade_in_group = AnimationGroup(*fade_in_anims, run_time=0.1, lag_ratio=0)
+            scale_group = AnimationGroup(*scale_anims, run_time=anim_speed, lag_ratio=0)
+            sequential_anim = AnimationGroup(fade_in_group, scale_group, lag_ratio=1)
+
+            # Performing anims
+            #self.scene.play(FadeIn(*targets_list), run_time=0.1)
+            #self.scene.play(*(tile.animate.scale(100) for tile in targets_list),
+            #           run_time=anim_speed)
         else:
             raise TypeError(f"Cannot deploy animation for scene of type None")
+
+        return [sequential_anim]
 
     def collapse_anim(self, targets_list, anim_speed=None):
         """

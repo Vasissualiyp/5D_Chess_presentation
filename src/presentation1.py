@@ -459,7 +459,7 @@ def show_4d_moves(self, piece, board_5d, wait=2):
     """
     board2d_id = board_5d.chess5.get_chessboard_by_tm([0,0])
     board_2d = board_5d.manim_chessboards[board2d_id]
-    board_2d.add_piece(piece, central_square, force_center=True)
+    self.play(board_2d.add_piece(piece, central_square, force_center=True))
     board_5d.show_moves(central_square_3vec)
     board_5d.draw_all_movement_vectors(central_square_3vec)
     self.wait(wait)
@@ -580,9 +580,12 @@ class PresentationSlides_4(ThreeDSlide):
                                        scene=self, log=log)
         # Make sure that quick-anim runtime is not too small, or manim-slides will fail!
         board_5d.set_animation_speed(run_time/1)
-        board_5d.add_empty_chessboard([0,0])
+
+        chessboard_locs = []
         for i in range(-3,5):
-            if i != 0: board_5d.add_empty_chessboard([0,i])
+            chessboard_locs.append([0, -i])
+
+        board_5d.add_several_empty_chessboards(chessboard_locs)
 
         self.move_camera(phi=60*DEGREES, theta=-60*DEGREES)
         self.play(board_5d.reorient_all_boards(2))

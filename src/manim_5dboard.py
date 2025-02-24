@@ -79,9 +79,15 @@ class Manim_Chessboard_5D(VGroup):
         self.manim_chessboards.append(manim_new_chessboard)
         self.add(manim_new_chessboard)
 
-    def add_empty_chessboard(self, chessboard_loc):
+    def add_empty_chessboard(self, chessboard_loc, no_anim=False):
         """
-        Adds an empty chessboard in specified time-multiverse locaiton
+        Adds an empty chessboard in specified time-multiverse locaiton.
+        Args:
+            chessboard_loc (2-list): location of chessboard in time-multiverse coordinates
+            no_anim (bool): set to True to only pass a list of animations, and not run animations automatically
+
+        Returns:
+            list: animations to perform with self.play(...) in Manim scene
         """
         self.chess5.add_empty_chessboard(chessboard_loc)
         target_chessboard = self.chess5.chessboards[-1]
@@ -95,7 +101,27 @@ class Manim_Chessboard_5D(VGroup):
                                                    non_const_color_parity=self.mode_3d,
                                                    animation_speed=self.animation_speed)
         self.manim_chessboards.append(manim_new_chessboard)
-        self.add(manim_new_chessboard)
+        animations_list = manim_new_chessboard.creation_animations_list
+        if no_anim:
+            return animations_list
+        else:
+            self.scene.play(animations_list)
+            return []
+
+        #self.add(manim_new_chessboard)
+
+    def add_several_empty_chessboards(self, chessboard_locs):
+        """
+        Adds a set of empty chessboards at provided locations, all at the same time
+        """
+        animations_list = []
+        for chessboard_loc in chessboard_locs:
+            chessboard_anim = self.add_empty_chessboard(chessboard_loc, no_anim=True)
+            animations_list.extend(chessboard_anim)
+            print(f"Animations list for position of {chessboard_loc}:")
+            print(animations_list)
+
+        self.scene.play(*animations_list, run_time = self.animation_speed)
 
     # Change board/camera positions/rotations
 
