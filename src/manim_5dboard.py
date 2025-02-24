@@ -34,6 +34,7 @@ class Manim_Chessboard_5D(VGroup):
         super().__init__(**kwargs)
 
         self.manim_chessboards = []
+        self.chessboards = []
         self.board_size = board_size
         self.board_separation = board_separation
         self.animation_speed = animation_speed

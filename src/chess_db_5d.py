@@ -53,6 +53,14 @@ class Chessboard_5D:
         else:
             print(f"Couldn't find chessboard at {chessboard_loc}")
 
+    def print_all_chessboards(self):
+        """
+        Prints all chessboards
+        """
+        for chessboard in self.chessboards:
+            chessboard_loc = chessboard.chessboard_tm_pos
+            self.print_chessboard(chessboard_loc)
+
     def get_chessboard_by_tm(self, chessboard_loc, log=False):
         """
         Get the chessboard id by its time-multiverse coordinate.

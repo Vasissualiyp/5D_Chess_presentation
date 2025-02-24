@@ -493,16 +493,17 @@ def cube_moves_3d_slide(self):
     Showes moves on a 3D cube
     """
     run_time = 0.5
-    log = False
+    log = True
     board_5d = Manim_Chessboard_5D(square_size=0.5, board_separation=[5,5],
                                    mode_3d=True,
                                    scene=self, log=log)
 
     # Setting up the cube
     piece_pos = [central_square, 0, 0]
-    board_5d.set_animation_speed(run_time/10)
+    # Make sure that quick-anim runtime is not too small, or manim-slides will fail!
+    board_5d.set_animation_speed(run_time/1)
     board_5d.add_empty_chessboard([0,0])
-    for i in range(-3,5):
+    for i in range(-1,2):
         if i != 0: board_5d.add_empty_chessboard([0,i])
     self.move_camera(phi=60*DEGREES, theta=-60*DEGREES)
     print("Assembling the cube...")
@@ -533,11 +534,11 @@ def cube_moves_3d_slide(self):
 
     self.begin_ambient_camera_rotation(rate=0.2)
     show_moves_3d(self, board_5d, 'rl', piece_pos, moveset_rl)
-    show_moves_3d(self, board_5d, 'bl', piece_pos, moveset_bl)
-    show_moves_3d(self, board_5d, 'nl', piece_pos, moveset_nl)
-    show_moves_3d(self, board_5d, 'Pl', piece_pos, moveset_Pl)
-    show_moves_3d(self, board_5d, 'ql', piece_pos, moveset_ql)
-    show_moves_3d(self, board_5d, 'kl', piece_pos, moveset_kl)
+    #show_moves_3d(self, board_5d, 'bl', piece_pos, moveset_bl)
+    #show_moves_3d(self, board_5d, 'nl', piece_pos, moveset_nl)
+    #show_moves_3d(self, board_5d, 'Pl', piece_pos, moveset_Pl)
+    #show_moves_3d(self, board_5d, 'ql', piece_pos, moveset_ql)
+    #show_moves_3d(self, board_5d, 'kl', piece_pos, moveset_kl)
     self.stop_ambient_camera_rotation()
     board_5d.disassemble_the_cube()
     self.move_camera(phi=0*DEGREES, theta=-90*DEGREES)
@@ -577,7 +578,8 @@ class PresentationSlides_4(ThreeDSlide):
         board_5d = Manim_Chessboard_5D(square_size=0.5, board_separation=[5,5],
                                        mode_3d=True,
                                        scene=self, log=log)
-        board_5d.set_animation_speed(run_time/10)
+        # Make sure that quick-anim runtime is not too small, or manim-slides will fail!
+        board_5d.set_animation_speed(run_time/1)
         board_5d.add_empty_chessboard([0,0])
         for i in range(-3,5):
             if i != 0: board_5d.add_empty_chessboard([0,i])
