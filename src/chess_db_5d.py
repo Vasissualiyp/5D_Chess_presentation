@@ -82,6 +82,7 @@ class Chessboard_5D:
         """
         id = -1
         timeline_times = []
+        old_chessboard_loc = chessboard_loc
         for i, element in enumerate(self.timemult_coords):
             if element[1] == chessboard_loc[1]:
                 timeline_times.append(element[0])
@@ -101,9 +102,11 @@ class Chessboard_5D:
             chessboard_loc = [ chessboard_loc[0] + 1, new_mult ]
 
         final_chessboard = copy.deepcopy(self.chessboards[id])
+        final_chessboard.chessboard_tm_pos = chessboard_loc
         final_chessboard.origin = id
         self.chessboards.append(final_chessboard)
         self.timemult_coords.append(chessboard_loc)
+        if self.log: print(f"evolving chessboard from {old_chessboard_loc} to {chessboard_loc}")
     
     # Adding/removing pieces
 

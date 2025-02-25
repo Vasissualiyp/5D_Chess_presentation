@@ -251,7 +251,7 @@ class Manim_Chessboard_2D(VGroup):
         delta_loc = new_loc - old_loc
         print(f"old_loc: {old_loc}")
         print(f"new_loc: {new_loc}")
-        board_group = Group(*self.board_tiles)
+        board_group = Group(*self.board_tiles, *self.spheres)
         return board_group.animate.shift(delta_loc)
 
     def change_camera_center(self, camera_center):

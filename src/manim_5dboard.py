@@ -19,7 +19,6 @@ class Manim_Chessboard_5D(VGroup):
         """
         A 5D chessboard instance
         Args:
-            tm_loc (array): a location of chessboard in time-multiverse coordinates
             square_size (float): size of individual squares
             board_separation (array): distance between the centers of the boards in 5D, 
                 has time and multiverse components
@@ -167,12 +166,13 @@ class Manim_Chessboard_5D(VGroup):
         # Return the group of animations
         return AnimationGroup(*animations)
 
-    def change_camera_center(self, camera_center):
+    def change_camera_center(self, camera_center, return_list=False):
         """
         Move all boards to new positions in 3D schene, based on camera center position
 
         Args:
             camera_center (array): a location of camera center in time-multiverse coordinates
+            return_list (bool): whether to return a list of animations (true) or a group of animations (False)
 
         Returns:
             list: 
@@ -189,7 +189,10 @@ class Manim_Chessboard_5D(VGroup):
             animations.extend(anim)
     
         # Animate them all together in parallel
-        return AnimationGroup(*animations)
+        if return_list:
+            return animations
+        else:
+            return AnimationGroup(*animations)
 
     def change_board_separation(self, board_separation):
         """
@@ -460,7 +463,7 @@ class Manim_Chessboard_5D(VGroup):
                                                    animation_speed=self.animation_speed)
         # Append to the list of manim boards
         self.manim_chessboards.append(manim_new_chessboard)
-        self.chess5.chessboards.append(manim_new_chessboard)
+        #self.chess5.chessboards.append(manim_new_chessboard)
 
         # Get creation animations list and return it
         board_creation_anims_list = manim_new_chessboard.creation_animations_list
@@ -487,11 +490,30 @@ class Manim_Chessboard_5D(VGroup):
         if original_tm != copy_tm:
             raise ValueError(f"tm-coordinates of copy board are not the same as original board!")
 
+        # More to be done...
+
+    def evolve_chessboard(self, tm_loc, no_anim=False):
+        """
+        Evolves chessboard at a certain tm_loc coordinate with animation
+        """
+
+        # This appends chessboard info to 5D chess db
+        self.chess5.evolve_chessboard(tm_loc)
+        id_of_destination_chessboard = len(self.chess5.chessboards) - 1
+
+        # This appends chessboard info to manim_chessboards
+        animations_list = self.copy_board(tm_loc, no_anim)
+        chessboard_copy_db = self.chess5.chessboards[id_of_destination_chessboard]
+        manim_chessboard_copy = self.manim_chessboards[id_of_destination_chessboard]
+        destination_tm = chessboard_copy_db.chessboard_tm_pos
+        manim_chessboard_copy.tm_loc = destination_tm
+        animations_list.extend(self.change_camera_center(destination_tm, return_list=True))
+        return AnimationGroup(*animations_list)
+
+
     def add_chessboard(self, chessboard_loc, origin_board):
         pass
     def add_piece(self, piece, pos, eat_pieces=False):
-        pass
-    def evolve_chessboard(self, chessboard_loc):
         pass
     def movie_piece(self, original_pos, final_pos):
         pass
