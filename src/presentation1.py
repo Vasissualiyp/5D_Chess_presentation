@@ -594,8 +594,6 @@ class PresentationSlides5(ThreeDSlide):
     def construct(self):
         run_time = 0.5
         log = True
-        wait=2
-        # When using in the total presentation, board_5d should be created in cube_moves_3d_slice
         board_5d = Manim_Chessboard_5D(square_size=0.5, board_separation=[5,5],
                                        mode_3d=False,
                                        scene=self, log=log)
@@ -622,7 +620,7 @@ class PresentationSlides5(ThreeDSlide):
         self.next_slide()
 
         # Currently there is a bug in removing the board...
-        #self.play(board_5d.reorient_all_boards(0))
+        self.play(board_5d.reorient_all_boards(0))
         #self.next_slide()
         #board_5d.remove_all_boards()
         #self.move_camera(phi=0*DEGREES, theta=-90*DEGREES)
