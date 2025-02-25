@@ -75,7 +75,8 @@ class Manim_Chessboard_5D(VGroup):
                                                    scene=self.scene,
                                                    non_const_color_parity=self.mode_3d,
                                                    animation_speed=self.animation_speed)
-        manim_new_chessboard.add_spheres_to_squares(radius=self.sphere_radius)
+        animations_list = manim_new_chessboard.add_spheres_to_squares(radius=self.sphere_radius)
+        self.scene.play(animations_list)
         self.manim_chessboards.append(manim_new_chessboard)
         self.add(manim_new_chessboard)
 
@@ -91,7 +92,7 @@ class Manim_Chessboard_5D(VGroup):
         """
         self.chess5.add_empty_chessboard(chessboard_loc)
         target_chessboard = self.chess5.chessboards[-1]
-        if self.log: print(f"List of chessboards: {self.chess5.chessboards}")
+        #if self.log: print(f"List of chessboards: {self.chess5.chessboards}")
         if self.log: print(f"Target_chessboard's location: {target_chessboard.chessboard_tm_pos}")
         manim_new_chessboard = Manim_Chessboard_2D(tm_loc=chessboard_loc, 
                                                    square_size=self.square_size, 
@@ -118,10 +119,19 @@ class Manim_Chessboard_5D(VGroup):
         for chessboard_loc in chessboard_locs:
             chessboard_anim = self.add_empty_chessboard(chessboard_loc, no_anim=True)
             animations_list.extend(chessboard_anim)
-            print(f"Animations list for position of {chessboard_loc}:")
             print(animations_list)
 
         self.scene.play(*animations_list, run_time = self.animation_speed)
+
+    def remove_all_boards(self):
+        """
+        Removes all boards from the scene
+        """
+        anims = []
+        for chessboard in self.manim_chessboards:
+            anims.extend(chessboard.delete_board())
+
+        self.scene.play(*anims)
 
     # Change board/camera positions/rotations
 
@@ -162,11 +172,20 @@ class Manim_Chessboard_5D(VGroup):
 
         Args:
             camera_center (array): a location of camera center in time-multiverse coordinates
+
+        Returns:
+            list: 
         """
         animations = []
+        if self.log: print(f"CHANGING CAMERA CENTER: from {self.camera_center} to {camera_center}")
         for chessboard in self.manim_chessboards:
+            if self.log: print(f"Recentering camera for chessboard at {chessboard.tm_loc}")
             anim = chessboard.change_camera_center(camera_center)
-            animations.append(anim)
+            # If we got a single animation, put it in a list
+            if not isinstance(anim, list):
+                anim = [anim]
+            # Extend our animations list
+            animations.extend(anim)
     
         # Animate them all together in parallel
         return AnimationGroup(*animations)

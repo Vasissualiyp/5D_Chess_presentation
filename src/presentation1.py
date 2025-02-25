@@ -447,7 +447,7 @@ def show_piece_moves_slide(self, board_5d, piece, pos=central_square, tm_loc=[0,
     board2d.add_piece(piece, pos)
     board_5d.show_moves([pos,tm_loc[0],tm_loc[1]])
 
-def show_4d_moves(self, piece, board_5d, wait=2):
+def show_4d_moves(self, piece, board_5d, arrows=True):
     """
     Shows moves of a piece on 4d board
 
@@ -455,15 +455,15 @@ def show_4d_moves(self, piece, board_5d, wait=2):
         self (ThreeDSlide): a scene where animation is happening
         piece (str): piece acronym
         board_5d (Manim_Chessboard_5D): a 5D board object
-        wait (int): number of seconds to wait
+        arrows (bool): whether show arrows. True by default
     """
     board2d_id = board_5d.chess5.get_chessboard_by_tm([0,0])
     board_2d = board_5d.manim_chessboards[board2d_id]
     self.play(board_2d.add_piece(piece, central_square, force_center=True))
     board_5d.show_moves(central_square_3vec)
-    board_5d.draw_all_movement_vectors(central_square_3vec)
-    self.wait(wait)
-    board_5d.remove_all_movement_vectors()
+    if arrows: board_5d.draw_all_movement_vectors(central_square_3vec)
+    self.next_slide()
+    if arrows: board_5d.remove_all_movement_vectors()
     board_5d.recolor_all_boards()
     board_2d.remove_all_pieces()
 
@@ -535,7 +535,11 @@ def cube_moves_3d_slide(self):
                          r"$\cup$",
                          r"$[1,1,0]^\infty_\delta$").set_color(accent_color)
 
-    moveset_kl = Tex("King: ", r"$[1,0]^1_\delta$", r"$\cup$", r"$[1,1]^1_\delta$").set_color(accent_color)
+    moveset_ql = Tex("King: ", r"$[1,0,0]^1_\delta$", 
+                         r"$\cup$",
+                         r"$[1,1,0]^1_\delta$", 
+                         r"$\cup$", 
+                         r"$[1,1,1]^1_\delta$").set_color(accent_color)
     moveset_pl = Tex("Pawn: ", r"$[0,1]^*$").set_color(accent_color)
 
     self.begin_ambient_camera_rotation(rate=0.2)
@@ -573,28 +577,52 @@ class PresentationSlides3_4(ThreeDSlide):
         ###### 3D MOVES ######
         ######################
         board_5d = cube_moves_3d_slide(self)
-        wait = 2
 
         # 3D Moves not on a cube
-        show_4d_moves(self, 'rl', board_5d, wait=wait)
-        show_4d_moves(self, 'bl', board_5d, wait=wait)
-        show_4d_moves(self, 'nl', board_5d, wait=wait)
-        show_4d_moves(self, 'Pl', board_5d, wait=wait)
-        show_4d_moves(self, 'ql', board_5d, wait=wait)
-        show_4d_moves(self, 'kl', board_5d, wait=wait)
+        show_4d_moves(self, 'rl', board_5d)
+        show_4d_moves(self, 'bl', board_5d)
+        show_4d_moves(self, 'nl', board_5d)
+        show_4d_moves(self, 'Pl', board_5d)
+        show_4d_moves(self, 'ql', board_5d)
+        show_4d_moves(self, 'kl', board_5d)
+        board_5d.reorient_all_boards(0)
+        for chessboard in board_5d.manim_chessboards:
+            chessboard.delete_board()
+        self.move_camera(phi=0*DEGREES, theta=-90*DEGREES)
 
-class PresentationSlides_4(ThreeDSlide):
+class PresentationSlides5(ThreeDSlide):
     def construct(self):
         run_time = 0.5
-        log = False
+        log = True
         wait=2
         # When using in the total presentation, board_5d should be created in cube_moves_3d_slice
         board_5d = Manim_Chessboard_5D(square_size=0.5, board_separation=[5,5],
-                                       mode_3d=True,
+                                       mode_3d=False,
                                        scene=self, log=log)
         chessboard_locs = []
-        for i in range(-3,5):
-            chessboard_locs.append([0, -i])
+        num_of_boards_per_dim = 1 # 2*n + 1 is the actual num_of_boards_per_dim
+        for i in range(-num_of_boards_per_dim, num_of_boards_per_dim + 1):
+            for j in range(0, 2 * num_of_boards_per_dim + 2):
+                chessboard_locs.append([j, i])
+
+        ######################
+        ###### 4D MOVES ######
+        ######################
         board_5d.add_several_empty_chessboards(chessboard_locs)
+        self.play(board_5d.change_camera_center([num_of_boards_per_dim,0]), run_time=run_time)
+        self.next_slide()
         self.move_camera(phi=60*DEGREES, theta=-60*DEGREES)
         self.play(board_5d.reorient_all_boards(2))
+        #show_4d_moves(self, 'rl', board_5d, False)
+        #show_4d_moves(self, 'bl', board_5d, False)
+        #show_4d_moves(self, 'nl', board_5d, False)
+        #show_4d_moves(self, 'Pl', board_5d, False)
+        #show_4d_moves(self, 'ql', board_5d, False)
+        #show_4d_moves(self, 'kl', board_5d, False)
+        self.next_slide()
+
+        # Currently there is a bug in removing the board...
+        #self.play(board_5d.reorient_all_boards(0))
+        #self.next_slide()
+        #board_5d.remove_all_boards()
+        #self.move_camera(phi=0*DEGREES, theta=-90*DEGREES)

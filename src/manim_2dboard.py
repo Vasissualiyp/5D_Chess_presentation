@@ -108,7 +108,8 @@ class Manim_Chessboard_2D(VGroup):
         self.pieces_z_index = self.board_z_index + 2
 
         # Matrix that gets ID of a sphere from its position on the board
-        self.sphere_ids = np.zeros((self.board_size,self.board_size), dtype=int) 
+        self.sphere_ids = np.ones((self.board_size,self.board_size), dtype=int) 
+        self.sphere_ids = -self.sphere_ids
         self.creation_animations_list = self.create_prism_board()
         self.spheres = []  # Keep track of all spheres if you want to animate them later
 
@@ -194,16 +195,19 @@ class Manim_Chessboard_2D(VGroup):
         """
         appearance_anim = self.appearance_anim
         scene = self.scene
-        self.remove_all_pieces()
+        animations_list = []
+        if self.remove_all_pieces():
+            print(f"No pieces to remove at the board {self.tm_loc}")
         if scene is None:
             self.remove(*self.board_tiles)
         else:
-            if appearance_anim == "FadeIn": scene.play(FadeOut(*self.board_tiles), run_time=self.animation_speed)
-            elif appearance_anim == "Scale": self.collapse_anim(self.board_tiles)
+            if appearance_anim == "FadeIn": animations_list = FadeOut(*self.board_tiles)
+            elif appearance_anim == "Scale": animations_list = self.collapse_anim(self.board_tiles)
             else: raise ValueError(f"Unknown appearance animation: {appearance_anim}")
 
         print(f"Keep in mind that the board for now is still present in memory, "+
               "even though it's not present in the scene!")
+        return animations_list
 
     # Board 3D scene manipulation: rotation
 
@@ -245,8 +249,8 @@ class Manim_Chessboard_2D(VGroup):
         old_loc = self.board_loc
         self.board_loc = new_loc
         delta_loc = new_loc - old_loc
-        if self.log: print(f"old_loc: {old_loc}")
-        if self.log: print(f"new_loc: {new_loc}")
+        print(f"old_loc: {old_loc}")
+        print(f"new_loc: {new_loc}")
         board_group = Group(*self.board_tiles)
         return board_group.animate.shift(delta_loc)
 
@@ -259,7 +263,9 @@ class Manim_Chessboard_2D(VGroup):
         Returns:
             self.animate: A Manim animation object
         """
+        print(f"camera_center before reassignment: {self.camera_center}")
         self.camera_center = camera_center
+        print(f"camera_center after reassignment: {self.camera_center}")
         new_board_loc=self.get_updated_board_pos()
         return self.move_board_to_new_loc(new_board_loc)
 
@@ -356,6 +362,7 @@ class Manim_Chessboard_2D(VGroup):
         if self.scene is None:
             for sphere in self.spheres:
                 self.add(sphere)
+            return []
         else:
             animations_list = self.blowup_anim(self.spheres)
 
@@ -456,7 +463,7 @@ class Manim_Chessboard_2D(VGroup):
         # 2) Animate removing the sphere if a scene is provided
         if self.scene is not None and animation_speed != 0:
             if self.disappearance_anim == "Scale":
-                self.collapse_anim([sphere], anim_speed=animation_speed)
+                self.scene.play(self.collapse_anim([sphere], anim_speed=animation_speed))
             elif self.disappearance_anim == "FadeIn":
                 self.scene.play(FadeOut(sphere), run_time=animation_speed)
             else: raise ValueError(f"Unknown appearance animation: {self.disappearance_anim}")
@@ -497,9 +504,12 @@ class Manim_Chessboard_2D(VGroup):
         """
         Removes all the pieces, empties the board
         """
+        if np.max(self.sphere_ids) == np.min(self.sphere_ids):
+            return 0 # Case when no spheres are present
         n = self.board_size
         spheres_to_remove = []
         piece_pos_to_remove = []
+        if self.log: print(f"Removing all pieces for board at {self.tm_loc}")
         for row_idx in range(n):
             for col_idx in range(n):
                 idx_1, idx_2 = self.get_matrix_indecies(row_idx, col_idx)
@@ -514,7 +524,7 @@ class Manim_Chessboard_2D(VGroup):
                     spheres_to_remove.append(sphere)
                     piece_pos_to_remove.append(chessform_pos)
 
-        self.collapse_anim(spheres_to_remove)
+        self.scene.play(self.collapse_anim(spheres_to_remove))
         for piece_pos in piece_pos_to_remove:
             self.remove_piece(piece_pos, animation_speed=0)
 
@@ -532,10 +542,17 @@ class Manim_Chessboard_2D(VGroup):
             sphere (Manim): Manim object, on which one can perform transformations.
                             If piece=="", it returns None.
         """
+        if self.log: print(f"Obtaining parameters for piece at square {square}")
         square_matrix = self.chessutils.chessform_to_matrix(square)
         if self.log: print(f"Matrix notation for square {square}: {square_matrix}")
         id = int(self.sphere_ids[square_matrix[0], square_matrix[1]])
-        sphere = self.spheres[id]
+        try:
+            sphere = self.spheres[id]
+        except:
+            print(f"Failed to retrieve sphere with id: {id}.")
+            print(f"sphere_ids: {self.sphere_ids}")
+            print(f"id: {id}")
+            exit(1)
         piece = self.chessboard.get_piece(square, self.log)
         if id == -1:
             print(f"No piece present at {square}")
@@ -728,11 +745,21 @@ class Manim_Chessboard_2D(VGroup):
         if anim_speed is None:
             anim_speed = self.animation_speed
         if self.scene is not None:
-            self.scene.play(*(tile.animate.scale(0.01) for tile in targets_list),
-                       run_time=anim_speed)
-            self.scene.play(FadeOut(*targets_list), run_time=0.1)
+            # Returning list of anims
+            scale_anims = [tile.animate.scale(0.01) for tile in targets_list]
+            fade_out_anims = [FadeOut(tile) for tile in targets_list]
+            scale_group = AnimationGroup(*scale_anims, run_time=anim_speed, lag_ratio=0)
+            fade_out_group = AnimationGroup(*fade_out_anims, run_time=0.1, lag_ratio=0)
+            sequential_anim = AnimationGroup(fade_out_group, scale_group, lag_ratio=1)
+
+            # Performing anims
+            #self.scene.play(*(tile.animate.scale(0.01) for tile in targets_list),
+            #           run_time=anim_speed)
+            #self.scene.play(FadeOut(*targets_list), run_time=0.1)
         else:
             raise TypeError(f"Cannot deploy animation for scene of type None")
+
+        return [sequential_anim]
 
     # Utility functions
 
