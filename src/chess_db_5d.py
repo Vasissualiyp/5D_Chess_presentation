@@ -24,6 +24,8 @@ class Chessboard_5D:
         # 0 for 1st turn to white, 1 for 1st turn to black. Important for multiverse creation directions
         self.first_turn_black = first_turn_black
 
+    # Adding new boards
+
     def default_chess_configuration_setup(self):
         """
         Sets up the default 8x8 chessboard.
@@ -40,38 +42,6 @@ class Chessboard_5D:
         base_chessboard = Chessboard_2D(chessboard_tm_pos=chessboard_loc)
         self.chessboards.append(base_chessboard)
         self.timemult_coords.append(chessboard_loc)
-    
-    def print_chessboard(self, chessboard_loc, style="regular"):
-        """
-        Outputs the board state into the terminal based on its time-multiverse position
-        """
-        id = self.get_chessboard_by_tm(chessboard_loc)
-        if id != -1:
-            print(f"Printing chessboard at {chessboard_loc}")
-            chessboard = self.chessboards[id]
-            chessboard.print_chessboard(style=style)
-        else:
-            print(f"Couldn't find chessboard at {chessboard_loc}")
-
-    def print_all_chessboards(self):
-        """
-        Prints all chessboards
-        """
-        for chessboard in self.chessboards:
-            chessboard_loc = chessboard.chessboard_tm_pos
-            self.print_chessboard(chessboard_loc)
-
-    def get_chessboard_by_tm(self, chessboard_loc, log=False):
-        """
-        Get the chessboard id by its time-multiverse coordinate.
-        Returns -1 if not present.
-        """
-        if log: print(chessboard_loc)
-        for i, element in enumerate(self.timemult_coords):
-            if log: print(element)
-            if (element == chessboard_loc):
-                return i
-        return -1
 
     def add_chessboard(self, chessboard_loc, origin_board):
         """
@@ -88,6 +58,54 @@ class Chessboard_5D:
             self.timemult_coords.append(chessboard_loc)
         else:
             raise ValueError(f"Could not add a chessboard at tm coordinate of {chessboard_loc}: the space is occupied")
+    
+    # Chessboard tm-manipulation
+
+    def get_chessboard_by_tm(self, chessboard_loc, log=False):
+        """
+        Get the chessboard id by its time-multiverse coordinate.
+        Returns -1 if not present.
+        """
+        if log: print(chessboard_loc)
+        for i, element in enumerate(self.timemult_coords):
+            if log: print(element)
+            if (element == chessboard_loc):
+                return i
+        return -1
+
+    def evolve_chessboard(self, chessboard_loc):
+        """
+        Makes a copy of chessboard forwards in time, and create a new multiverse if needed
+
+        Args:
+            chessboard_loc (array): location of chessboard in time-multiverse coordinates
+        """
+        id = -1
+        timeline_times = []
+        for i, element in enumerate(self.timemult_coords):
+            if element[1] == chessboard_loc[1]:
+                timeline_times.append(element[0])
+                if element[0] == chessboard_loc[0]:
+                    id = i
+        if id == -1:
+            raise ValueError(f"No chessboard was found at location {chessboard_loc}")
+
+        if max(timeline_times) == chessboard_loc[0]: # Time evolution only
+            chessboard_loc = [ chessboard_loc[0] + 1, chessboard_loc[1] ]
+        else: # Multiverse creation
+            is_white = (chessboard_loc[0] + chessboard_loc[1] + self.first_turn_black) % 2
+            if is_white: # 1st turn is white
+                new_mult = self.max_mult_white + 1
+            else: # 1st turn is black
+                new_mult = self.max_mult_black - 1
+            chessboard_loc = [ chessboard_loc[0] + 1, new_mult ]
+
+        final_chessboard = copy.deepcopy(self.chessboards[id])
+        final_chessboard.origin = id
+        self.chessboards.append(final_chessboard)
+        self.timemult_coords.append(chessboard_loc)
+    
+    # Adding/removing pieces
 
     def get_piece(self, pos):
         """
@@ -122,47 +140,29 @@ class Chessboard_5D:
         target_chessboard = self.chessboards[id]
         target_chessboard.add_piece(piece, square, eat_pieces=eat_pieces)
 
-    def evolve_chessboard(self, chessboard_loc):
-        """
-        Makes a copy of chessboard forwards in time, and create a new multiverse if needed
+    # Printing chessboards
 
-        Args:
-            chessboard_loc (array): location of chessboard in time-multiverse coordinates
+    def print_chessboard(self, chessboard_loc, style="regular"):
         """
-        id = -1
-        timeline_times = []
-        for i, element in enumerate(self.timemult_coords):
-            if element[1] == chessboard_loc[1]:
-                timeline_times.append(element[0])
-                if element[0] == chessboard_loc[0]:
-                    id = i
-        if id == -1:
-            raise ValueError(f"No chessboard was found at location {chessboard_loc}")
+        Outputs the board state into the terminal based on its time-multiverse position
+        """
+        id = self.get_chessboard_by_tm(chessboard_loc)
+        if id != -1:
+            print(f"Printing chessboard at {chessboard_loc}")
+            chessboard = self.chessboards[id]
+            chessboard.print_chessboard(style=style)
+        else:
+            print(f"Couldn't find chessboard at {chessboard_loc}")
 
-        if max(timeline_times) == chessboard_loc[0]: # Time evolution only
-            chessboard_loc = [ chessboard_loc[0] + 1, chessboard_loc[1] ]
-        else: # Multiverse creation
-            is_white = (chessboard_loc[0] + chessboard_loc[1] + self.first_turn_black) % 2
-            if is_white: # 1st turn is white
-                new_mult = self.max_mult_white + 1
-            else: # 1st turn is black
-                new_mult = self.max_mult_black - 1
-            chessboard_loc = [ chessboard_loc[0] + 1, new_mult ]
+    def print_all_chessboards(self):
+        """
+        Prints all chessboards
+        """
+        for chessboard in self.chessboards:
+            chessboard_loc = chessboard.chessboard_tm_pos
+            self.print_chessboard(chessboard_loc)
 
-        final_chessboard = copy.deepcopy(self.chessboards[id])
-        final_chessboard.origin = id
-        self.chessboards.append(final_chessboard)
-        self.timemult_coords.append(chessboard_loc)
-    
-    def get_max_time_from_multi(self, mult):
-        """
-        Get a maximum existing time coordinate for a certain timeline (multiverse id) value.
-        """
-        timeline_times = []
-        for element in self.timemult_coords:
-            if element[1] == mult:
-                timeline_times.append(element[0])
-        return max(timeline_times)
+    # Move pieces
 
     def movie_piece(self, original_pos, final_pos):
         """
@@ -245,22 +245,7 @@ class Chessboard_5D:
         target_chessboard.add_piece(piece, square2, eat_pieces=True)
         self.chessboards[-1] = target_chessboard
 
-    def movement_list_5d_err(self, list_5d, list_name="list_5d"):
-        """
-        Handles errors for lists of coordinates for 5D chess.
-
-        Args:
-            list_5d (list): list of values itself
-            list_name (str): name of the variable. Needed for better error messages
-        """
-        if len(list_5d) != 3:
-            raise ValueError(f"{list_name} should be a list_5d of 3 elements. You have: {list_5d}")
-        if type(list_5d[0]) != str:
-            raise ValueError(f"1st entry of {list_name} should be a string. You have: {type(list_5d[0])}")
-        if type(list_5d[1]) != int:
-            raise ValueError(f"2nd entry of {list_name} should be an integer. You have: {type(list_5d[1])}")
-        if type(list_5d[2]) != int:
-            raise ValueError(f"3rd entry of {list_name} should be an integer. You have: {type(list_5d[2])}")
+    # Possible moves 
 
     def check_if_move_possible(self, pos, kind):
         """
@@ -331,6 +316,36 @@ class Chessboard_5D:
             self_copy.add_piece(piece_to_add, move, eat_pieces=True)
         return self_copy
 
+    # Utility functions
+
+    def movement_list_5d_err(self, list_5d, list_name="list_5d"):
+        """
+        Handles errors for lists of coordinates for 5D chess.
+
+        Args:
+            list_5d (list): list of values itself
+            list_name (str): name of the variable. Needed for better error messages
+        """
+        if len(list_5d) != 3:
+            raise ValueError(f"{list_name} should be a list_5d of 3 elements. You have: {list_5d}")
+        if type(list_5d[0]) != str:
+            raise ValueError(f"1st entry of {list_name} should be a string. You have: {type(list_5d[0])}")
+        if type(list_5d[1]) != int:
+            raise ValueError(f"2nd entry of {list_name} should be an integer. You have: {type(list_5d[1])}")
+        if type(list_5d[2]) != int:
+            raise ValueError(f"3rd entry of {list_name} should be an integer. You have: {type(list_5d[2])}")
+
+    def get_max_time_from_multi(self, mult):
+        """
+        Get a maximum existing time coordinate for a certain timeline (multiverse id) value.
+        """
+        timeline_times = []
+        for element in self.timemult_coords:
+            if element[1] == mult:
+                timeline_times.append(element[0])
+        return max(timeline_times)
+
+
 
 class ChessTests():
     """Various tests for 2D/5D chessboard"""
@@ -393,6 +408,7 @@ class ChessTests():
         """
         self.chess2.default_chess_configuration_setup()
         self.chess2.print_chessboard()
+
 
 
 if __name__ == "__main__":

@@ -29,6 +29,7 @@ class Manim_Chessboard_2D(VGroup):
                  camera_center=[0,0],
                  scene: Optional[ThreeDSlide] = None,
                  non_const_color_parity = False,
+                 appearance_anim = "Scale",
                  log=False, **kwargs):
         """
         A single 2D chessboard instance
@@ -43,6 +44,7 @@ class Manim_Chessboard_2D(VGroup):
             camera_center (array): a location of camera center in time-multiverse coordinates
             scene (Scene): A scene in which the animations should be happening
             non_const_color_parity (bool): if set to True, will switch color parity based on tm_loc
+            appearance_anim (str): type of appearance animation. Options: Scale, FadeIn
             animation_speed (float): speed of each animation in sec
         """
         # Needed for animations?
@@ -93,7 +95,7 @@ class Manim_Chessboard_2D(VGroup):
         self.scene = scene
         self.camera_center = camera_center
         self.animation_speed = animation_speed
-        self.appearance_anim = "Scale" # Scale or FadeIn
+        self.appearance_anim = appearance_anim
         self.disappearance_anim = "Scale" # Scale or FadeOut
         self.recolor_animation_speed = self.animation_speed / 5
         self.board_opacity = 1
@@ -150,9 +152,7 @@ class Manim_Chessboard_2D(VGroup):
         if scene is None:
             self.scene.add(*self.board_tiles)
         else:
-            if appearance_anim == "FadeIn": animations_list = FadeIn(*self.board_tiles)
-            elif appearance_anim == "Scale": animations_list = self.blowup_anim(self.board_tiles)
-            else: raise ValueError(f"Unknown appearance animation: {appearance_anim}")
+            animations_list = self.creation_anim(self.board_tiles)
 
         return animations_list
 
@@ -364,9 +364,7 @@ class Manim_Chessboard_2D(VGroup):
                 self.add(sphere)
             return []
         else:
-            animations_list = self.blowup_anim(self.spheres)
-
-        return animations_list
+            return self.creation_anim(self.spheres)
 
     def add_sphere_to_square(self, idx_1, idx_2, radius, piece, force_center=False):
             """
@@ -712,7 +710,6 @@ class Manim_Chessboard_2D(VGroup):
         Returns:
             list: animations to perform with self.play(...) in Manim scene
         """
-        animations_list = []
         if anim_speed is None:
             anim_speed = self.animation_speed
         for tile in targets_list:
@@ -733,6 +730,38 @@ class Manim_Chessboard_2D(VGroup):
             raise TypeError(f"Cannot deploy animation for scene of type None")
 
         return [sequential_anim]
+
+    def fadein_anim(self, targets_list, anim_speed=None):
+        """
+        Performs blow-up animation for Mojbects in list
+
+        Args:
+            targets_list (list): list of objects, targets for animation
+            anim_speed (float): speed of each animation in sec
+
+        Returns:
+            list: animations to perform with self.play(...) in Manim scene
+        """
+        if anim_speed is None:
+            anim_speed = self.animation_speed
+
+        if self.scene is not None:
+            # Returning list of anims
+            fade_in_anims = [FadeIn(tile) for tile in targets_list]
+        else:
+            raise TypeError(f"Cannot deploy animation for scene of type None")
+
+        return [AnimationGroup(fade_in_anims)]
+
+    def creation_anim(self, target_list):
+        """
+        Returns list of creation animations, depending on type of creation animation set
+        """
+        appearance_anim = self.appearance_anim
+        if appearance_anim == "FadeIn": animations_list = self.fadein_anim(target_list)
+        elif appearance_anim == "Scale": animations_list = self.blowup_anim(target_list)
+        else: raise ValueError(f"Unknown appearance_anim value: {appearance_anim}")
+        return animations_list
 
     def collapse_anim(self, targets_list, anim_speed=None):
         """

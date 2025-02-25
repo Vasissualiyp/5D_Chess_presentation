@@ -75,7 +75,9 @@ class Manim_Chessboard_5D(VGroup):
                                                    scene=self.scene,
                                                    non_const_color_parity=self.mode_3d,
                                                    animation_speed=self.animation_speed)
+        board_creation_anims_list = manim_new_chessboard.creation_animations_list
         animations_list = manim_new_chessboard.add_spheres_to_squares(radius=self.sphere_radius)
+        animations_list.extend(board_creation_anims_list)
         self.scene.play(animations_list)
         self.manim_chessboards.append(manim_new_chessboard)
         self.add(manim_new_chessboard)
@@ -432,7 +434,41 @@ class Manim_Chessboard_5D(VGroup):
         for chessboard in self.manim_chessboards:
             chessboard.animation_speed = animation_speed
 
+    # Moving pieces
 
+    def copy_board(self, tm_loc, no_anim):
+        """
+        Creates a complete copy of the board at given time-multiverse location
+        Args: 
+            tm_loc (array): a location of chessboard in time-multiverse coordinates
+            no_anim (bool): set to True to only pass a list of animations, and not run animations automatically
+        """
+        chessboard_id = self.chess5.get_chessboard_by_tm(tm_loc)
+        if chessboard_id == -1:
+            print(f"Failed to copy board at {chessboard_id}: board doesn't exist")
+            exit(1)
+
+        target_chessboard_db = self.chess5.chessboards[chessboard_id]
+
+        #if self.log: print(f"List of chessboards: {self.chess5.chessboards}")
+        manim_new_chessboard = Manim_Chessboard_2D(tm_loc=tm_loc, 
+                                                   square_size=self.square_size, 
+                                                   board_separation=self.board_separation, 
+                                                   chessboard=target_chessboard_db, 
+                                                   scene=self.scene,
+                                                   non_const_color_parity=self.mode_3d,
+                                                   appearance_anim = "FadeIn", # Need to not create visual artifacts
+                                                   animation_speed=self.animation_speed)
+        self.manim_chessboards.append(manim_new_chessboard)
+        board_creation_anims_list = manim_new_chessboard.creation_animations_list
+        animations_list = manim_new_chessboard.add_spheres_to_squares(radius=self.sphere_radius)
+        animations_list.extend(board_creation_anims_list)
+        manim_new_chessboard.appearance_anim = "Scale"
+        if no_anim:
+            return animations_list
+        else:
+            self.scene.play(animations_list)
+            return []
     def add_chessboard(self, chessboard_loc, origin_board):
         pass
     def add_piece(self, piece, pos, eat_pieces=False):

@@ -75,7 +75,7 @@ def full_dr_explanation_slide(self, run_time):
     self.next_slide()
 
     dr_def = MathTex(r"\mathbf{[ x_1, x_2, ..., x_n ]^{m}_{\delta} ",
-                     r"= \left\{ \forall \Vec{v} \, | \,  \Vec{v} = ",
+                     r"= \left\{ \forall \Vec{v} \, | \,  \Vec{v} \in ",
                      r"\sigma \left( ",
                      r"[ \pm x_1, \pm x_2, ..., \pm x_n ]",
                      r"\right) ",
@@ -554,6 +554,17 @@ def cube_moves_3d_slide(self):
     self.move_camera(phi=60*DEGREES, theta=-60*DEGREES)
     return board_5d
 
+def noncube_moves_3d_slide(self, board_5d, arrows=True):
+    """
+    Moves of all pieces not in a cube
+    """
+    show_4d_moves(self, 'rl', board_5d, arrows)
+    show_4d_moves(self, 'bl', board_5d, arrows)
+    show_4d_moves(self, 'nl', board_5d, arrows)
+    show_4d_moves(self, 'Pl', board_5d, arrows)
+    show_4d_moves(self, 'ql', board_5d, arrows)
+    show_4d_moves(self, 'kl', board_5d, arrows)
+
 
 class PresentationSlides1_2(ThreeDSlide):
     def construct(self):
@@ -579,12 +590,7 @@ class PresentationSlides3_4(ThreeDSlide):
         board_5d = cube_moves_3d_slide(self)
 
         # 3D Moves not on a cube
-        show_4d_moves(self, 'rl', board_5d)
-        show_4d_moves(self, 'bl', board_5d)
-        show_4d_moves(self, 'nl', board_5d)
-        show_4d_moves(self, 'Pl', board_5d)
-        show_4d_moves(self, 'ql', board_5d)
-        show_4d_moves(self, 'kl', board_5d)
+        noncube_moves_3d_slide(self, board_5d)
         board_5d.reorient_all_boards(0)
         for chessboard in board_5d.manim_chessboards:
             chessboard.delete_board()
@@ -597,30 +603,44 @@ class PresentationSlides5(ThreeDSlide):
         board_5d = Manim_Chessboard_5D(square_size=0.5, board_separation=[5,5],
                                        mode_3d=False,
                                        scene=self, log=log)
+        self.add(board_5d)
         chessboard_locs = []
-        num_of_boards_per_dim = 1 # 2*n + 1 is the actual num_of_boards_per_dim
+        num_of_boards_per_dim = 2 # 2*n + 1 is the actual num_of_boards_per_dim
         for i in range(-num_of_boards_per_dim, num_of_boards_per_dim + 1):
             for j in range(0, 2 * num_of_boards_per_dim + 2):
                 chessboard_locs.append([j, i])
+        board_5d.add_several_empty_chessboards(chessboard_locs)
+        self.play(board_5d.change_camera_center([num_of_boards_per_dim,0]), run_time=run_time)
 
         ######################
         ###### 4D MOVES ######
         ######################
-        board_5d.add_several_empty_chessboards(chessboard_locs)
-        self.play(board_5d.change_camera_center([num_of_boards_per_dim,0]), run_time=run_time)
+
+        # TODO: the piece isn't being put in the central board!
+        # TODO: bug: piece doesn't move with the camera
         self.next_slide()
         self.move_camera(phi=60*DEGREES, theta=-60*DEGREES)
         self.play(board_5d.reorient_all_boards(2))
-        #show_4d_moves(self, 'rl', board_5d, False)
-        #show_4d_moves(self, 'bl', board_5d, False)
-        #show_4d_moves(self, 'nl', board_5d, False)
-        #show_4d_moves(self, 'Pl', board_5d, False)
-        #show_4d_moves(self, 'ql', board_5d, False)
-        #show_4d_moves(self, 'kl', board_5d, False)
+        noncube_moves_3d_slide(self, board_5d, arrows=False)
         self.next_slide()
 
         # Currently there is a bug in removing the board...
         self.play(board_5d.reorient_all_boards(0))
         #self.next_slide()
-        #board_5d.remove_all_boards()
+        board_5d.remove_all_boards()
         #self.move_camera(phi=0*DEGREES, theta=-90*DEGREES)
+
+class PresentationSlides6(ThreeDSlide):
+    def construct(self):
+        #########################
+        ###### TIME TRAVEL ######
+        #########################
+        log = True
+        self.next_slide()
+        board_5d = Manim_Chessboard_5D(square_size=0.5, board_separation=[5,5],
+                                       mode_3d=False,
+                                       scene=self, log=log)
+        self.add(board_5d)
+        board_5d.default_chess_configuration_setup()
+        self.next_slide()
+        self.play(board_5d.copy_board([0,0], no_anim=True))
