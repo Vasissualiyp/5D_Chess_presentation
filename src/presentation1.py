@@ -643,4 +643,6 @@ class PresentationSlides6(ThreeDSlide):
         self.add(board_5d)
         board_5d.default_chess_configuration_setup()
         self.next_slide()
-        self.play(board_5d.evolve_chessboard([0,0], no_anim=True))
+        self.play(*board_5d.move_piece(['e2',0,0], ['e4',0,0]))
+        self.play(*board_5d.move_piece(['e7',1,0], ['e5',0,0]))
+        #self.play(board_5d.evolve_chessboard([0,0], no_anim=True))

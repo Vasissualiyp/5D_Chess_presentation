@@ -476,23 +476,7 @@ class Manim_Chessboard_5D(VGroup):
             self.scene.play(animations_list)
             return []
 
-    def evolve_copied_board(self, id_original, id_copy):
-        """
-        Evolves copied board, based on id of the original board and copy board
-        """
-        manim_original_board = self.manim_chessboards[id_original]
-        manim_copy_board = self.manim_chessboards[id_copy]
-        original_board = self.chess5.chessboards[id_original]
-        copy_board = self.chess5.chessboards[id_copy]
-
-        original_tm = original_board.chessboard_tm_pos
-        copy_tm = copy_board.chessboard_tm_pos
-        if original_tm != copy_tm:
-            raise ValueError(f"tm-coordinates of copy board are not the same as original board!")
-
-        # More to be done...
-
-    def evolve_chessboard(self, tm_loc, no_anim=False):
+    def evolve_chessboard(self, tm_loc, no_anim=False, recenter_camera=True):
         """
         Evolves chessboard at a certain tm_loc coordinate with animation
         """
@@ -507,15 +491,88 @@ class Manim_Chessboard_5D(VGroup):
         manim_chessboard_copy = self.manim_chessboards[id_of_destination_chessboard]
         destination_tm = chessboard_copy_db.chessboard_tm_pos
         manim_chessboard_copy.tm_loc = destination_tm
-        animations_list.extend(self.change_camera_center(destination_tm, return_list=True))
-        return AnimationGroup(*animations_list)
 
+        if recenter_camera:
+            animations_list.extend(self.change_camera_center(destination_tm, return_list=True))
+
+        if no_anim:
+            return animations_list
+        else:
+            self.scene.play(AnimationGroup(*animations_list))
+            return []
+
+    def move_piece(self, start_pos, end_pos):
+        """
+        Moves piece from start_pos to end_pos (in 3-list notation), with board evolution
+        """
+        tm_start = [start_pos[1], start_pos[2]]
+        tm_end   = [end_pos[1],   end_pos[2]  ]
+
+        if tm_start != tm_end:
+            if self.log: print(f"Evolving both boards at {tm_start} and {tm_end}")
+            animations_list = self.evolve_chessboard(tm_start, no_anim=True, recenter_camera=False)
+            animations_list.extend(self.evolve_chessboard(tm_end, no_anim=True, recenter_camera=True))
+
+            start_manim_board = self.manim_chessboards[-2]
+            end_manim_board   = self.manim_chessboards[-1]
+            start_board_db    = self.chess5.chessboards[-2]
+            end_board_db      = self.chess5.chessboards[-1]
+        else:
+            if self.log: print(f"Evolving only the board at {tm_start}")
+            animations_list = self.evolve_chessboard(tm_start, no_anim=True, recenter_camera=True)
+
+            start_manim_board = self.manim_chessboards[-1]
+            end_manim_board   = self.manim_chessboards[-1]
+            start_board_db    = self.chess5.chessboards[-1]
+            end_board_db      = self.chess5.chessboards[-1]
+
+        # Get locations of actual boards to which the animations should be happening
+        tm_start_anim = start_board_db.chessboard_tm_pos
+        tm_end_anim = end_board_db.chessboard_tm_pos
+
+        forward, right, normal = start_manim_board.get_board_directions()
+
+        # Get positions of the board centers, as well as locations 
+        # of start/end positions on those boards
+        start_board_center_pos = start_manim_board.board_loc
+        end_board_center_pos   = end_manim_board.board_loc
+        start_matrix = np.array(self.chess2utils.chessform_to_matrix(start_pos[0]))
+        end_matrix = np.array(self.chess2utils.chessform_to_matrix(end_pos[0]))
+        start_displacement_vector = start_matrix[1] * forward + start_matrix[0] * right
+        end_displacement_vector = end_matrix[1] * forward + end_matrix[0] * right
+
+        # Calculate the actual displacement vector
+        start_pos_vector = start_board_center_pos + start_displacement_vector
+        end_pos_vector = end_board_center_pos + end_displacement_vector
+        delta_vector = end_pos_vector - start_pos_vector
+
+        # Move the piece
+        piece, sphere = start_manim_board.get_piece(start_pos[0])
+        movement_anim = [sphere.animate.shift(delta_vector)]
+
+        # Add/remove pieces from the boards (doing it in all dbs - one as 5D parent db, as well as individual ones)
+        start_manim_board.disappearance_anim = "FadeOut"
+        end_manim_board.appearance_anim = "FadeIn"
+        start_manim_board.remove_piece(start_pos[0])
+        end_manim_board.add_piece(piece, end_pos[0])
+        start_board_db.remove_piece(start_pos[0])
+        end_board_db.add_piece(piece, end_pos[0])
+        start_manim_board.disappearance_anim = "Scale"
+        end_manim_board.appearance_anim = "Scale"
+
+        animations_list.extend(movement_anim)
+        return animations_list
+
+    def move_piece_single_board(self, start_pos, end_pos, tm_loc):
+        """
+        Moves piece from starting square to final square in chess notation (i.e. a1)
+        on tm_loc board
+        """
+        board_id = self.chess5.get_chessboard_by_tm(tm_loc)
 
     def add_chessboard(self, chessboard_loc, origin_board):
         pass
     def add_piece(self, piece, pos, eat_pieces=False):
-        pass
-    def movie_piece(self, original_pos, final_pos):
         pass
     def move_with_evolution(self, original_pos, square2):
         pass

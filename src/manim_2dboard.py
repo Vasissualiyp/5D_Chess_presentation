@@ -462,9 +462,9 @@ class Manim_Chessboard_2D(VGroup):
         if self.scene is not None and animation_speed != 0:
             if self.disappearance_anim == "Scale":
                 self.scene.play(self.collapse_anim([sphere], anim_speed=animation_speed))
-            elif self.disappearance_anim == "FadeIn":
+            elif self.disappearance_anim == "FadeOut":
                 self.scene.play(FadeOut(sphere), run_time=animation_speed)
-            else: raise ValueError(f"Unknown appearance animation: {self.disappearance_anim}")
+            else: raise ValueError(f"Unknown disappearance animation: {self.disappearance_anim}")
         # If you don't want a fade-out animation, you could do:
         # scene.play(sphere.animate.scale(0.0).fade(1.0), ...)
         # or any other creative effect.
