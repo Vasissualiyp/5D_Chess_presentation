@@ -66,7 +66,7 @@ class Chessboard_5D:
         Get the chessboard id by its time-multiverse coordinate.
         Returns -1 if not present.
         """
-        if log: print(chessboard_loc)
+        if log: print(f"chessboard to retreive tm position from: {chessboard_loc}")
         for i, element in enumerate(self.timemult_coords):
             if log: print(element)
             if (element == chessboard_loc):

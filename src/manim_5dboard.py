@@ -34,7 +34,6 @@ class Manim_Chessboard_5D(VGroup):
         super().__init__(**kwargs)
 
         self.manim_chessboards = []
-        self.chessboards = []
         self.board_size = board_size
         self.board_separation = board_separation
         self.animation_speed = animation_speed
@@ -436,7 +435,7 @@ class Manim_Chessboard_5D(VGroup):
 
     # Moving pieces
 
-    def copy_board(self, tm_loc, no_anim):
+    def copy_board(self, tm_loc, no_anim=False):
         """
         Creates a complete copy of the board at given time-multiverse location
         Args: 
@@ -459,7 +458,11 @@ class Manim_Chessboard_5D(VGroup):
                                                    non_const_color_parity=self.mode_3d,
                                                    appearance_anim = "FadeIn", # Need to not create visual artifacts
                                                    animation_speed=self.animation_speed)
+        # Append to the list of manim boards
         self.manim_chessboards.append(manim_new_chessboard)
+        self.chess5.chessboards.append(manim_new_chessboard)
+
+        # Get creation animations list and return it
         board_creation_anims_list = manim_new_chessboard.creation_animations_list
         animations_list = manim_new_chessboard.add_spheres_to_squares(radius=self.sphere_radius)
         animations_list.extend(board_creation_anims_list)
@@ -469,6 +472,21 @@ class Manim_Chessboard_5D(VGroup):
         else:
             self.scene.play(animations_list)
             return []
+
+    def evolve_copied_board(self, id_original, id_copy):
+        """
+        Evolves copied board, based on id of the original board and copy board
+        """
+        manim_original_board = self.manim_chessboards[id_original]
+        manim_copy_board = self.manim_chessboards[id_copy]
+        original_board = self.chess5.chessboards[id_original]
+        copy_board = self.chess5.chessboards[id_copy]
+
+        original_tm = original_board.chessboard_tm_pos
+        copy_tm = copy_board.chessboard_tm_pos
+        if original_tm != copy_tm:
+            raise ValueError(f"tm-coordinates of copy board are not the same as original board!")
+
     def add_chessboard(self, chessboard_loc, origin_board):
         pass
     def add_piece(self, piece, pos, eat_pieces=False):
