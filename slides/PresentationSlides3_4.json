@@ -1,0 +1,49 @@
+{
+  "slides": [
+    {
+      "loop": false,
+      "auto_next": false,
+      "playback_rate": 1.0,
+      "reversed_playback_rate": 1.0,
+      "notes": "",
+      "dedent_notes": true,
+      "file": "slides/files/PresentationSlides3_4/bfbf7d4895f90d70264a22f92c166af69f54132ff4afe089afb87b9ad9254f2c.mp4",
+      "rev_file": "slides/files/PresentationSlides3_4/bfbf7d4895f90d70264a22f92c166af69f54132ff4afe089afb87b9ad9254f2c_reversed.mp4"
+    },
+    {
+      "loop": false,
+      "auto_next": false,
+      "playback_rate": 1.0,
+      "reversed_playback_rate": 1.0,
+      "notes": "",
+      "dedent_notes": true,
+      "file": "slides/files/PresentationSlides3_4/acaf21b69fca83a47d919a62ab8e47112f0b2eea501ad555afdd9b46d480be52.mp4",
+      "rev_file": "slides/files/PresentationSlides3_4/acaf21b69fca83a47d919a62ab8e47112f0b2eea501ad555afdd9b46d480be52_reversed.mp4"
+    },
+    {
+      "loop": false,
+      "auto_next": false,
+      "playback_rate": 1.0,
+      "reversed_playback_rate": 1.0,
+      "notes": "",
+      "dedent_notes": true,
+      "file": "slides/files/PresentationSlides3_4/2dde064e986885c035071d3a23e838523bf2c077e7b620917eff79f3764b74f9.mp4",
+      "rev_file": "slides/files/PresentationSlides3_4/2dde064e986885c035071d3a23e838523bf2c077e7b620917eff79f3764b74f9_reversed.mp4"
+    },
+    {
+      "loop": false,
+      "auto_next": false,
+      "playback_rate": 1.0,
+      "reversed_playback_rate": 1.0,
+      "notes": "",
+      "dedent_notes": true,
+      "file": "slides/files/PresentationSlides3_4/2b775bb82d7059faac508acbd4c779fe462532fb6cc3e18a81c5902e320b3e54.mp4",
+      "rev_file": "slides/files/PresentationSlides3_4/2b775bb82d7059faac508acbd4c779fe462532fb6cc3e18a81c5902e320b3e54_reversed.mp4"
+    }
+  ],
+  "resolution": [
+    480,
+    360
+  ],
+  "background_color": "black"
+}

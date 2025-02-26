@@ -1,0 +1,59 @@
+{
+  "slides": [
+    {
+      "loop": false,
+      "auto_next": false,
+      "playback_rate": 1.0,
+      "reversed_playback_rate": 1.0,
+      "notes": "",
+      "dedent_notes": true,
+      "file": "slides/files/PresentationSlides5/786b44dacbf73f08d6fe1a119a28c3beb6dd9f00b77bb5b077bc32749fc4cfd5.mp4",
+      "rev_file": "slides/files/PresentationSlides5/786b44dacbf73f08d6fe1a119a28c3beb6dd9f00b77bb5b077bc32749fc4cfd5_reversed.mp4"
+    },
+    {
+      "loop": false,
+      "auto_next": false,
+      "playback_rate": 1.0,
+      "reversed_playback_rate": 1.0,
+      "notes": "",
+      "dedent_notes": true,
+      "file": "slides/files/PresentationSlides5/8fe536c22609739c2b76098124aa77c6cc52e719a3ce829c5ea16d3450b71394.mp4",
+      "rev_file": "slides/files/PresentationSlides5/8fe536c22609739c2b76098124aa77c6cc52e719a3ce829c5ea16d3450b71394_reversed.mp4"
+    },
+    {
+      "loop": false,
+      "auto_next": false,
+      "playback_rate": 1.0,
+      "reversed_playback_rate": 1.0,
+      "notes": "",
+      "dedent_notes": true,
+      "file": "slides/files/PresentationSlides5/82704039691fce5c2c86041c9a6ac8adab4983855d12dfe58c1eff69b22cfe7f.mp4",
+      "rev_file": "slides/files/PresentationSlides5/82704039691fce5c2c86041c9a6ac8adab4983855d12dfe58c1eff69b22cfe7f_reversed.mp4"
+    },
+    {
+      "loop": false,
+      "auto_next": false,
+      "playback_rate": 1.0,
+      "reversed_playback_rate": 1.0,
+      "notes": "",
+      "dedent_notes": true,
+      "file": "slides/files/PresentationSlides5/9b716f44ff6651e440e67ada94ddd21592456b005aed399ab8cd53668df646b8.mp4",
+      "rev_file": "slides/files/PresentationSlides5/9b716f44ff6651e440e67ada94ddd21592456b005aed399ab8cd53668df646b8_reversed.mp4"
+    },
+    {
+      "loop": false,
+      "auto_next": false,
+      "playback_rate": 1.0,
+      "reversed_playback_rate": 1.0,
+      "notes": "",
+      "dedent_notes": true,
+      "file": "slides/files/PresentationSlides5/5d22443c353638684c74d7418e2a521182bb20f3a76cabd39986c4209cc398b5.mp4",
+      "rev_file": "slides/files/PresentationSlides5/5d22443c353638684c74d7418e2a521182bb20f3a76cabd39986c4209cc398b5_reversed.mp4"
+    }
+  ],
+  "resolution": [
+    480,
+    360
+  ],
+  "background_color": "black"
+}
