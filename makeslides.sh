@@ -1,10 +1,10 @@
 #!/usr/bin/env bash
 
 SLIDES_FILE="./src/presentation1.py"
-#PRESENTATION_NAME="PresentationSlides1_2"
+PRESENTATION_NAME="PresentationSlides1_2"
 #PRESENTATION_NAME="PresentationSlides3_4"
 #PRESENTATION_NAME="PresentationSlides5"
-PRESENTATION_NAME="PresentationSlides6"
+#PRESENTATION_NAME="PresentationSlides6"
 HTML_NAME="slides.html"
 
 #SLIDES_FILE="./src/mwe.py"

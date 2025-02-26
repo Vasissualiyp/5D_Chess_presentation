@@ -58,6 +58,7 @@ def show_queen_moves(self, run_time):
     t1_anim = []
     t1_anim.append(rm_axes_anim)
     self.play(*t1_anim, run_time = run_time/2)
+    board_5d.remove_all_boards()
     self.remove(board_5d, x_axis, y_axis)
 
 def full_dr_explanation_slide(self, run_time):
@@ -444,7 +445,7 @@ def show_piece_moves_slide(self, board_5d, piece, pos=central_square, tm_loc=[0,
     board2d = board_5d.manim_chessboards[board2d_id]
     board2d.recolor_board()
     board2d.remove_all_pieces()
-    board2d.add_piece(piece, pos)
+    self.play(board2d.add_piece(piece, pos))
     board_5d.show_moves([pos,tm_loc[0],tm_loc[1]])
 
 def show_4d_moves(self, piece, board_5d, arrows=True):
