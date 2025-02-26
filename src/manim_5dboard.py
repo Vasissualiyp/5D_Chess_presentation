@@ -5,9 +5,9 @@ from chess_db_5d import Chessboard_5D
 from manim_2dboard import Manim_Chessboard_2D, ChessboardColors
 from manim_slides import ThreeDSlide
 
-config.pixel_width = 480
-config.pixel_height = 360
-config.frame_rate = 24
+config.pixel_width = 1920
+config.pixel_height = 1080
+config.frame_rate = 60
 
 class Manim_Chessboard_5D(VGroup):
     def __init__(self, square_size=1.0, 
@@ -393,6 +393,7 @@ class Manim_Chessboard_5D(VGroup):
             force_single_moves (bool): whether to show only 1st move
                 (i.e. for queen, it will be king's moves)
         """
+        animations = []
         possible_moves = self.chess5.get_list_of_possible_moves(pos, force_single_moves)
         if self.log: print(f"Possible moves: {possible_moves}")
         if self.log: print(f"Manim chessboards: {self.chess5.chessboards}")
@@ -414,8 +415,11 @@ class Manim_Chessboard_5D(VGroup):
             else:
                 special_squares=[]
 
-            manim_chessboard.recolor_board(manim_chessboard.recolor_from_list, 
-                                           special_squares=special_squares)
+            recolor_anims = manim_chessboard.recolor_board(manim_chessboard.recolor_from_list, 
+                                                           return_anim=True,
+                                                           special_squares=special_squares)
+            animations.extend(recolor_anims)
+        return animations
 
     def recolor_all_boards(self):
         """

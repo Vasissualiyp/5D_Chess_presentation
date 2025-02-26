@@ -305,8 +305,8 @@ class ChessUtils_2D():
         Handle errors with piece names
         """
         example_string = f"Example: kd. Provided: {piece}"
-        if len(piece) > 2:
-            raise ValueError(f"Cannot have piece string being more than 2 characters. {example_string}")
+        if len(piece) != 2:
+            raise ValueError(f"Cannot have piece string being not 2 characters. {example_string}")
         if (piece[1] != "l") and (piece[1] != "d"):
             raise ValueError(f"Piece must be light or dark. {example_string}")
 
