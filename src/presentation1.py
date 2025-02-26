@@ -11,8 +11,58 @@ central_square_3vec = [central_square, 0, 0]
 
 # Slides
 
+accent_color = TEAL
+dict_3d_moveset = {
+    "rl" : Tex("Rook: ", r"$[1,0,0]^\infty_\delta$").set_color(accent_color),
+    "bl" : Tex("Bishop: ", r"$[1,1,0]^\infty_\delta$").set_color(accent_color),
+    "ul" : Tex("Bishop: ", r"$[1,1,1]^\infty_\delta$").set_color(accent_color),
+    "nl" : Tex("Knight: ", r"$[1,2,0]^1_\delta$").set_color(accent_color),
+
+    "ql" : Tex("Queen: ", r"$[1,0,0]^\infty_\delta$", 
+                         r"$\cup$",
+                         r"$[1,1,0]^\infty_\delta$", 
+                         r"$\cup$", 
+                         r"$[1,1,1]^\infty_\delta$").set_color(accent_color),
+
+    "Pl" : Tex("Princess: ", r"$[1,0,0]^\infty_\delta$", 
+                         r"$\cup$",
+                         r"$[1,1,0]^\infty_\delta$").set_color(accent_color),
+
+    "kl" : Tex("King: ", r"$[1,0,0]^1_\delta$", 
+                         r"$\cup$",
+                         r"$[1,1,0]^1_\delta$", 
+                         r"$\cup$", 
+                         r"$[1,1,1]^1_\delta$").set_color(accent_color),
+}
+dict_4d_moveset = {
+    "rl" : Tex("Rook: ", r"$[1,0,0,0]^\infty_\delta$").set_color(accent_color),
+    "bl" : Tex("Bishop: ", r"$[1,1,0,0]^\infty_\delta$").set_color(accent_color),
+    "ul" : Tex("Bishop: ", r"$[1,1,1,0]^\infty_\delta$").set_color(accent_color),
+    "dl" : Tex("Bishop: ", r"$[1,1,1,1]^\infty_\delta$").set_color(accent_color),
+    "nl" : Tex("Knight: ", r"$[1,2,0,0]^1_\delta$").set_color(accent_color),
+
+    "ql" : Tex("Queen: ", r"$[1,0,0,0]^\infty_\delta$", 
+                         r"$\cup$",
+                         r"$[1,1,0,0]^\infty_\delta$", 
+                         r"$\cup$", 
+                         r"$[1,1,1,0]^\infty_\delta$", 
+                         r"$\cup$", 
+                         r"$[1,1,1,1]^\infty_\delta$").set_color(accent_color),
+    "Pl" : Tex("Princess: ", r"$[1,0,0,0]^\infty_\delta$", 
+                         r"$\cup$",
+                         r"$[1,1,0,0]^\infty_\delta$").set_color(accent_color),
+
+    "kl" : Tex("King: ", r"$[1,0,0,0]^1_\delta$", 
+                         r"$\cup$",
+                         r"$[1,1,0,0]^1_\delta$", 
+                         r"$\cup$", 
+                         r"$[1,1,1,0]^1_\delta$", 
+                         r"$\cup$", 
+                         r"$[1,1,1,1]^1_\delta$").set_color(accent_color),
+    "pl" : Tex("Pawn: ", r"$[0,1,0,0]^*, [0,0,0,1]^*$").set_color(accent_color)
+}
 def intro_slide(self, run_time):
-    title = Text("5D Chess with Multivere Time Travel\nBlack Board Talk").scale(0.8)
+    title = Text("Chessmology:\n5D Chess with Multivere Time Travel Introduction\nBlack Board Talk").scale(0.8)
     author = Text("By Vasilii Pustovoit, CITA, 2025").scale(0.4)
     title.shift(0.5*UP)
     author.shift(0.5*DOWN)
@@ -458,6 +508,9 @@ def show_4d_moves(self, piece, board_5d, arrows=True):
         board_5d (Manim_Chessboard_5D): a 5D board object
         arrows (bool): whether show arrows. True by default
     """
+    moveset = dict_4d_moveset[piece]
+    self.add_fixed_in_frame_mobjects(moveset)
+    moveset.to_corner(UL)
     board2d_id = board_5d.chess5.get_chessboard_by_tm([0,0])
     board_2d = board_5d.manim_chessboards[board2d_id]
     self.play(board_2d.add_piece(piece, central_square, force_center=True))
@@ -467,8 +520,9 @@ def show_4d_moves(self, piece, board_5d, arrows=True):
     if arrows: board_5d.remove_all_movement_vectors()
     board_5d.recolor_all_boards()
     board_2d.remove_all_pieces()
+    self.remove(moveset)
 
-def show_moves_3d(self, board_5d, piece, piece_pos, moveset, time_of_rotation):
+def show_moves_3d(self, board_5d, piece, piece_pos, time_of_rotation):
     """
     Show moves of a piece on a 3D cube
 
@@ -477,11 +531,11 @@ def show_moves_3d(self, board_5d, piece, piece_pos, moveset, time_of_rotation):
         board_5d (Manim_Chessboard_5D): a 5D board object
         piece (str): the name of the piece
         piece_pos (list): 3-list of where to place the piece
-        moveset (list): list of moves to show
         time_of_rotation (float): time between the start and end of rotation of camera
     """
     run_time = 0.5
     print(f"{piece} has begun")
+    moveset = dict_3d_moveset[piece]
     self.add_fixed_in_frame_mobjects(moveset)
     moveset.to_corner(UR)
     board2d_id = board_5d.chess5.get_chessboard_by_tm([0,0])
@@ -494,7 +548,7 @@ def show_moves_3d(self, board_5d, piece, piece_pos, moveset, time_of_rotation):
     board_5d.recolor_all_boards()
     self.remove(moveset)
 
-def cube_moves_3d_slide(self):
+def cube_moves_3d_slide(self, queen_only=False):
     """
     Showes moves on a 3D cube
     """
@@ -522,34 +576,16 @@ def cube_moves_3d_slide(self):
 
     # Cycling through moves
     accent_color = GOLD
-    moveset_rl = Tex("Rook: ", r"$[1,0,0]^\infty_\delta$").set_color(accent_color)
-    moveset_bl = Tex("Bishop: ", r"$[1,1,0]^\infty_\delta$").set_color(accent_color)
-    moveset_nl = Tex("Knight: ", r"$[1,2,0]^1_\delta$").set_color(accent_color)
-
-    moveset_ql = Tex("Queen: ", r"$[1,0,0]^\infty_\delta$", 
-                         r"$\cup$",
-                         r"$[1,1,0]^\infty_\delta$", 
-                         r"$\cup$", 
-                         r"$[1,1,1]^\infty_\delta$").set_color(accent_color)
-
-    moveset_Pl = Tex("Princess: ", r"$[1,0,0]^\infty_\delta$", 
-                         r"$\cup$",
-                         r"$[1,1,0]^\infty_\delta$").set_color(accent_color)
-
-    moveset_ql = Tex("King: ", r"$[1,0,0]^1_\delta$", 
-                         r"$\cup$",
-                         r"$[1,1,0]^1_\delta$", 
-                         r"$\cup$", 
-                         r"$[1,1,1]^1_\delta$").set_color(accent_color)
-    moveset_pl = Tex("Pawn: ", r"$[0,1]^*$").set_color(accent_color)
-
     self.begin_ambient_camera_rotation(rate=0.2)
-    show_moves_3d(self, board_5d, 'rl', piece_pos, moveset_rl, 5)
-    show_moves_3d(self, board_5d, 'bl', piece_pos, moveset_bl, 5)
-    show_moves_3d(self, board_5d, 'nl', piece_pos, moveset_nl, 5)
-    show_moves_3d(self, board_5d, 'Pl', piece_pos, moveset_Pl, 5)
-    show_moves_3d(self, board_5d, 'ql', piece_pos, moveset_ql, 5)
-    show_moves_3d(self, board_5d, 'kl', piece_pos, moveset_kl, 5)
+    if not queen_only:
+        show_moves_3d(self, board_5d, 'rl', piece_pos, 10)
+        show_moves_3d(self, board_5d, 'bl', piece_pos, 10)
+        show_moves_3d(self, board_5d, 'nl', piece_pos, 10)
+        show_moves_3d(self, board_5d, 'ul', piece_pos, 10)
+        show_moves_3d(self, board_5d, 'Pl', piece_pos, 10)
+    show_moves_3d(self, board_5d, 'ql', piece_pos, 10)
+    if not queen_only:
+        show_moves_3d(self, board_5d, 'kl', piece_pos, 5)
     self.stop_ambient_camera_rotation()
     board_5d.disassemble_the_cube(orientation=2)
     self.move_camera(phi=60*DEGREES, theta=-60*DEGREES)
@@ -559,13 +595,46 @@ def noncube_moves_3d_slide(self, board_5d, arrows=True):
     """
     Moves of all pieces not in a cube
     """
-    show_4d_moves(self, 'rl', board_5d, arrows)
-    show_4d_moves(self, 'bl', board_5d, arrows)
-    show_4d_moves(self, 'nl', board_5d, arrows)
-    show_4d_moves(self, 'Pl', board_5d, arrows)
+    #show_4d_moves(self, 'rl', board_5d, arrows)
+    #show_4d_moves(self, 'bl', board_5d, arrows)
+    #show_4d_moves(self, 'nl', board_5d, arrows)
+    #show_4d_moves(self, 'Pl', board_5d, arrows)
     show_4d_moves(self, 'ql', board_5d, arrows)
-    show_4d_moves(self, 'kl', board_5d, arrows)
+    #show_4d_moves(self, 'kl', board_5d, arrows)
 
+def slide5(self, log, run_time):
+    """
+    5th slide - 4D moves
+    """
+    board_5d = Manim_Chessboard_5D(square_size=0.5, board_separation=[5,5],
+                                   mode_3d=False,
+                                   scene=self, log=log)
+    self.add(board_5d)
+    chessboard_locs = []
+    num_of_boards_per_dim = 2 # 2*n + 1 is the actual num_of_boards_per_dim
+    for i in range(-num_of_boards_per_dim, num_of_boards_per_dim + 1):
+        for j in range(0, 2 * num_of_boards_per_dim + 2):
+            chessboard_locs.append([j, i])
+    board_5d.add_several_empty_chessboards(chessboard_locs)
+    self.play(board_5d.change_camera_center([num_of_boards_per_dim,0]), run_time=run_time)
+
+    ######################
+    ###### 4D MOVES ######
+    ######################
+
+    # TODO: the piece isn't being put in the central board!
+    # TODO: bug: piece doesn't move with the camera
+    self.next_slide()
+    self.move_camera(phi=60*DEGREES, theta=-60*DEGREES)
+    self.play(board_5d.reorient_all_boards(2))
+    noncube_moves_3d_slide(self, board_5d, arrows=False)
+    self.next_slide()
+
+    # Currently there is a bug in removing the board...
+    self.play(board_5d.reorient_all_boards(0))
+    #self.next_slide()
+    board_5d.remove_all_boards()
+    #self.move_camera(phi=0*DEGREES, theta=-90*DEGREES)
 
 class PresentationSlides1_2(ThreeDSlide):
     def construct(self):
@@ -592,44 +661,15 @@ class PresentationSlides3_4(ThreeDSlide):
 
         # 3D Moves not on a cube
         noncube_moves_3d_slide(self, board_5d)
-        board_5d.reorient_all_boards(0)
-        for chessboard in board_5d.manim_chessboards:
-            chessboard.delete_board()
+        self.play(board_5d.reorient_all_boards(0))
+        board_5d.remove_all_boards()
         self.move_camera(phi=0*DEGREES, theta=-90*DEGREES)
 
 class PresentationSlides5(ThreeDSlide):
     def construct(self):
         run_time = 0.5
         log = True
-        board_5d = Manim_Chessboard_5D(square_size=0.5, board_separation=[5,5],
-                                       mode_3d=False,
-                                       scene=self, log=log)
-        self.add(board_5d)
-        chessboard_locs = []
-        num_of_boards_per_dim = 2 # 2*n + 1 is the actual num_of_boards_per_dim
-        for i in range(-num_of_boards_per_dim, num_of_boards_per_dim + 1):
-            for j in range(0, 2 * num_of_boards_per_dim + 2):
-                chessboard_locs.append([j, i])
-        board_5d.add_several_empty_chessboards(chessboard_locs)
-        self.play(board_5d.change_camera_center([num_of_boards_per_dim,0]), run_time=run_time)
-
-        ######################
-        ###### 4D MOVES ######
-        ######################
-
-        # TODO: the piece isn't being put in the central board!
-        # TODO: bug: piece doesn't move with the camera
-        self.next_slide()
-        self.move_camera(phi=60*DEGREES, theta=-60*DEGREES)
-        self.play(board_5d.reorient_all_boards(2))
-        noncube_moves_3d_slide(self, board_5d, arrows=False)
-        self.next_slide()
-
-        # Currently there is a bug in removing the board...
-        self.play(board_5d.reorient_all_boards(0))
-        #self.next_slide()
-        board_5d.remove_all_boards()
-        #self.move_camera(phi=0*DEGREES, theta=-90*DEGREES)
+        slide5(self, log, run_time)
 
 class PresentationSlides6(ThreeDSlide):
     def construct(self):
@@ -647,3 +687,35 @@ class PresentationSlides6(ThreeDSlide):
         self.play(*board_5d.move_piece(['e2',0,0], ['e4',0,0]))
         self.play(*board_5d.move_piece(['e7',1,0], ['e5',0,0]))
         #self.play(board_5d.evolve_chessboard([0,0], no_anim=True))
+
+class PresentationSlidesAll(ThreeDSlide):
+    def construct(self):
+        run_time = 0.5
+        log = False
+        ###################
+        ###### INTRO ######
+        ###################
+        intro_slide(self, run_time)
+        
+        ######################
+        ###### 2D MOVES ######
+        ######################
+        # Introduction to how to get delta r
+        show_queen_moves(self, run_time)
+        full_dr_explanation_slide(self, run_time)
+
+        ######################
+        ###### 3D MOVES ######
+        ######################
+        board_5d = cube_moves_3d_slide(self)
+
+        # 3D Moves not on a cube
+        noncube_moves_3d_slide(self, board_5d)
+        self.play(board_5d.reorient_all_boards(0))
+        board_5d.remove_all_boards()
+        self.move_camera(phi=0*DEGREES, theta=-90*DEGREES)
+
+        ######################
+        ###### 4D MOVES ######
+        ######################
+        slide5(self, log, run_time)
